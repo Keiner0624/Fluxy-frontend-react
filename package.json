@@ -1,0 +1,12 @@
+{
+  "scripts": {
+    "dev": "npm --prefix fluxy-store run dev",
+    "build": "npm --prefix fluxy-store run build",
+    "preview": "npm --prefix fluxy-store run preview",
+    "lint": "npm --prefix fluxy-store run lint"
+  },
+  "dependencies": {
+    "react-hot-toast": "^2.6.0",
+    "react-router-dom": "^7.14.2"
+  }
+}
