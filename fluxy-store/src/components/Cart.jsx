@@ -48,16 +48,31 @@ export default function Cart({ open, cart, total, onClose, onIncrease, onDecreas
               {cart.reduce((s, i) => s + i.quantity, 0)} producto(s)
             </div>
           </div>
-          <button
-            onClick={onClose}
-            style={{
-              width: 36, height: 36, borderRadius: 10,
-              background: 'rgba(255,255,255,0.05)',
-              border: '1px solid rgba(255,255,255,0.1)',
-              color: 'var(--text-muted)', fontSize: 16,
-              display: 'flex', alignItems: 'center', justifyContent: 'center',
-            }}
-          >✕</button>
+          <div style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
+            {cart.length > 0 && (
+              <button
+                onClick={() => { onClear(); onClose(); }}
+                style={{
+                  padding: '7px 14px', borderRadius: 10,
+                  background: 'rgba(248,113,113,0.08)',
+                  border: '1px solid rgba(248,113,113,0.2)',
+                  color: '#f87171', fontSize: 12, fontWeight: 600,
+                }}
+              >
+                🗑️ Vaciar
+              </button>
+            )}
+            <button
+              onClick={onClose}
+              style={{
+                width: 36, height: 36, borderRadius: 10,
+                background: 'rgba(255,255,255,0.05)',
+                border: '1px solid rgba(255,255,255,0.1)',
+                color: 'var(--text-muted)', fontSize: 16,
+                display: 'flex', alignItems: 'center', justifyContent: 'center',
+              }}
+            >✕</button>
+          </div>
         </div>
 
         {/* Items */}
@@ -151,20 +166,6 @@ export default function Cart({ open, cart, total, onClose, onIncrease, onDecreas
             ))
           )}
         </div>
-
-        {cart.length > 0 && (
-  <button
-    onClick={() => { onClear(); onClose(); }}
-    style={{
-      padding: '7px 14px', borderRadius: 10,
-      background: 'rgba(248,113,113,0.08)',
-      border: '1px solid rgba(248,113,113,0.2)',
-      color: '#f87171', fontSize: 12, fontWeight: 600,
-    }}
-  >
-    🗑️ Vaciar
-  </button>
-)}
 
         {/* Footer — solo si hay items */}
         {cart.length > 0 && (
