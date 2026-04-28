@@ -1,4 +1,4 @@
-export default function Cart({ open, cart, total, onClose, onIncrease, onDecrease, onCheckout }) {
+export default function Cart({ open, cart, total, onClose, onIncrease, onDecrease, onClear, onCheckout }) {
   return (
     <>
       {/* Overlay */}
@@ -151,6 +151,20 @@ export default function Cart({ open, cart, total, onClose, onIncrease, onDecreas
             ))
           )}
         </div>
+
+        {cart.length > 0 && (
+  <button
+    onClick={() => { onClear(); onClose(); }}
+    style={{
+      padding: '7px 14px', borderRadius: 10,
+      background: 'rgba(248,113,113,0.08)',
+      border: '1px solid rgba(248,113,113,0.2)',
+      color: '#f87171', fontSize: 12, fontWeight: 600,
+    }}
+  >
+    🗑️ Vaciar
+  </button>
+)}
 
         {/* Footer — solo si hay items */}
         {cart.length > 0 && (

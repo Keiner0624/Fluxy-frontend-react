@@ -112,6 +112,49 @@ export default function Header({ company, cartCount, onCartOpen }) {
               }}>{cartCount}</span>
             )}
           </button>
+          {/* Header */}
+<div style={{
+  padding: '20px 20px',
+  borderBottom: '1px solid rgba(255,255,255,0.06)',
+  display: 'flex', justifyContent: 'space-between', alignItems: 'center',
+  flexShrink: 0,
+}}>
+  <div>
+    <h3 style={{ fontFamily: "'Fraunces', serif", fontSize: 19, color: 'white' }}>
+      Tu pedido
+    </h3>
+    <div style={{ fontSize: 12, color: 'var(--text-muted)', marginTop: 2 }}>
+      {cart.reduce((s, i) => s + i.quantity, 0)} producto(s)
+    </div>
+  </div>
+  <div style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
+    {/* Botón cancelar/vaciar */}
+    {cart.length > 0 && (
+      <button
+        onClick={() => { cart.forEach(i => onDecrease && Array.from({length: i.quantity}).forEach(() => onDecrease(i.product.id))); onClose(); }}
+        style={{
+          padding: '7px 14px', borderRadius: 10,
+          background: 'rgba(248,113,113,0.08)',
+          border: '1px solid rgba(248,113,113,0.2)',
+          color: '#f87171', fontSize: 12, fontWeight: 600,
+        }}
+      >
+        Cancelar
+      </button>
+    )}
+    {/* Botón cerrar */}
+    <button
+      onClick={onClose}
+      style={{
+        width: 36, height: 36, borderRadius: 10,
+        background: 'rgba(255,255,255,0.05)',
+        border: '1px solid rgba(255,255,255,0.1)',
+        color: 'var(--text-muted)', fontSize: 16,
+        display: 'flex', alignItems: 'center', justifyContent: 'center',
+      }}
+    >✕</button>
+  </div>
+</div>
         </div>
       </div>
     </header>

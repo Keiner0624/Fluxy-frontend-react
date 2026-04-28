@@ -82,6 +82,7 @@ export default function App() {
         onClose={() => setCartOpen(false)}
         onIncrease={increaseQty}
         onDecrease={decreaseQty}
+        onClear={clearCart}
         onCheckout={() => { setCartOpen(false); setCheckoutOpen(true) }}
       />
 
