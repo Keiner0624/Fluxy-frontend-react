@@ -65,10 +65,10 @@ export default function Cart({ open, cart, total, onClose, onIncrease, onDecreas
             <button
               onClick={onClose}
               style={{
-                width: 36, height: 36, borderRadius: 10,
-                background: 'rgba(255,255,255,0.05)',
-                border: '1px solid rgba(255,255,255,0.1)',
-                color: 'var(--text-muted)', fontSize: 16,
+                width: 40, height: 40, borderRadius: 10,
+                background: 'rgba(255,255,255,0.1)',
+                border: '1px solid rgba(255,255,255,0.2)',
+                color: 'white', fontSize: 18, fontWeight: 700,
                 display: 'flex', alignItems: 'center', justifyContent: 'center',
               }}
             >✕</button>
@@ -173,7 +173,6 @@ export default function Cart({ open, cart, total, onClose, onIncrease, onDecreas
             padding: '16px 20px',
             borderTop: '1px solid rgba(255,255,255,0.06)',
             flexShrink: 0,
-            paddingBottom: 'max(16px, env(safe-area-inset-bottom))',
           }}>
             {/* Total */}
             <div style={{
@@ -225,11 +224,33 @@ export default function Cart({ open, cart, total, onClose, onIncrease, onDecreas
               </svg>
             </button>
 
-            <div style={{ textAlign: 'center', fontSize: 12, color: 'var(--text-muted)' }}>
+            <div style={{ textAlign: 'center', fontSize: 12, color: 'var(--text-muted)', marginBottom: 10 }}>
               También puedes consultar por WhatsApp 💬
             </div>
           </div>
         )}
+
+        {/* Botón cerrar siempre visible — importante en móvil */}
+        <div style={{
+          padding: '12px 20px',
+          paddingBottom: 'max(12px, env(safe-area-inset-bottom))',
+          borderTop: '1px solid rgba(255,255,255,0.06)',
+          flexShrink: 0,
+        }}>
+          <button
+            onClick={onClose}
+            style={{
+              width: '100%', padding: '13px',
+              background: 'rgba(255,255,255,0.05)',
+              border: '1px solid rgba(255,255,255,0.12)',
+              color: 'white', borderRadius: 14,
+              fontSize: 14, fontWeight: 600,
+              display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8,
+            }}
+          >
+            ← Seguir comprando
+          </button>
+        </div>
       </div>
     </>
   )
