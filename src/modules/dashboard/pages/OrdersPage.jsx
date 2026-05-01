@@ -254,17 +254,8 @@ export default function OrdersPage() {
                 </div>
 
                 {/* Productos */}
-                <div style={{ fontSize: 12, color: 'var(--text-muted)', minWidth: 160, flex: 1 }}>
-                  {order.items?.map((item, i) => (
-                    <div key={i} style={{ marginBottom: 2 }}>
-                      <span style={{ color: 'var(--text-soft)' }}>
-                        {item.prodcut?.name || item.productName || 'Producto'}
-                      </span>
-                      <span style={{ color: 'var(--text-muted)', marginLeft: 6 }}>
-                        × {item.quantity}
-                      </span>
-                    </div>
-                  ))}
+                <div style={{ fontSize: 12, color: 'var(--text-muted)', minWidth: 100 }}>
+                  {order.items?.length || 0} producto{(order.items?.length || 0) !== 1 ? 's' : ''}
                 </div>
 
                 {/* Total */}
