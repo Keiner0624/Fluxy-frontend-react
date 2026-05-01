@@ -3,18 +3,41 @@ import { useState, useEffect, useRef } from 'react'
 import DashboardLayout from '../components/DashboardLayout'
 import { API_URL } from '../../../app/config'
 
-const CLOUDINARY_CLOUD = 'dcolpwe9i'
-const CLOUDINARY_PRESET = 'fluxy_unsigned'
+const CLOUDINARY_CLOUD = import.meta.env.VITE_CLOUDINARY_CLOUD || 'dklhbrw7s'
+const CLOUDINARY_PRESET = import.meta.env.VITE_CLOUDINARY_PRESET || 'fluxy_unsigned'
+const MAX_IMAGE_SIZE = 5 * 1024 * 1024
+
+function getUploadErrorMessage(errorMessage) {
+  if (!errorMessage) return 'Error al subir imagen'
+
+  if (/Upload preset not found/i.test(errorMessage)) {
+    return `El preset de Cloudinary "${CLOUDINARY_PRESET}" no existe. Configura VITE_CLOUDINARY_PRESET con un preset unsigned valido o crea ese preset en Cloudinary. Mientras tanto, puedes usar una URL de imagen manual.`
+  }
+
+  if (/Upload preset must be specified/i.test(errorMessage)) {
+    return 'Falta configurar el preset de Cloudinary. Define VITE_CLOUDINARY_PRESET para habilitar la subida directa.'
+  }
+
+  return `Error al subir imagen: ${errorMessage}`
+}
 
 async function uploadToCloudinary(file) {
+  if (!CLOUDINARY_CLOUD || !CLOUDINARY_PRESET) {
+    throw new Error('Falta configurar Cloudinary para subir imagenes.')
+  }
+
   const formData = new FormData()
   formData.append('file', file)
   formData.append('upload_preset', CLOUDINARY_PRESET)
   const res = await fetch(`https://api.cloudinary.com/v1_1/${CLOUDINARY_CLOUD}/image/upload`, {
     method: 'POST', body: formData,
   })
-  if (!res.ok) throw new Error('Error al subir imagen')
   const data = await res.json()
+
+  if (!res.ok) {
+    throw new Error(getUploadErrorMessage(data?.error?.message))
+  }
+
   return data.secure_url
 }
 
@@ -86,6 +109,20 @@ export default function ProductsPage() {
   const handleImageChange = (e) => {
     const file = e.target.files[0]
     if (!file) return
+
+    if (!file.type.startsWith('image/')) {
+      setError('Selecciona un archivo de imagen valido.')
+      e.target.value = ''
+      return
+    }
+
+    if (file.size > MAX_IMAGE_SIZE) {
+      setError('La imagen supera los 5MB permitidos.')
+      e.target.value = ''
+      return
+    }
+
+    setError('')
     setImageFile(file)
     setImagePreview(URL.createObjectURL(file))
   }
@@ -96,11 +133,17 @@ export default function ProductsPage() {
       setError('Nombre, precio y stock son obligatorios.')
       return
     }
+
+    if (!imageFile && form.imageUrl && !/^https?:\/\//i.test(form.imageUrl.trim())) {
+      setError('La URL de la imagen debe empezar con http:// o https://')
+      return
+    }
+
     setSaving(true)
     setError('')
 
     try {
-      let imageUrl = form.imageUrl
+      let imageUrl = form.imageUrl.trim()
 
       // Subir imagen si hay una nueva
       if (imageFile) {
@@ -413,6 +456,37 @@ export default function ProductsPage() {
                 </div>
                 <input ref={fileRef} type="file" accept="image/*"
                   style={{ display: 'none' }} onChange={handleImageChange}/>
+                <div style={{
+                  marginTop: 10,
+                  fontSize: 11,
+                  color: 'var(--text-muted)',
+                  lineHeight: 1.5,
+                }}>
+                  Si la subida directa falla, puedes pegar una URL publica de imagen aqui abajo.
+                </div>
+              </div>
+
+              <div style={{ marginBottom: 20 }}>
+                <label style={{
+                  display: 'block', fontSize: 12, fontWeight: 600,
+                  color: 'var(--text-muted)', textTransform: 'uppercase',
+                  letterSpacing: '0.8px', marginBottom: 8,
+                }}>URL de imagen</label>
+                <input
+                  type="url"
+                  value={form.imageUrl}
+                  onChange={e => setForm({ ...form, imageUrl: e.target.value })}
+                  placeholder="https://ejemplo.com/mi-producto.jpg"
+                  style={{
+                    width: '100%', background: 'rgba(255,255,255,0.04)',
+                    border: '1px solid rgba(255,255,255,0.08)',
+                    borderRadius: 11, padding: '12px 14px',
+                    color: 'white', fontSize: 14, outline: 'none',
+                    fontFamily: 'DM Sans, sans-serif',
+                  }}
+                  onFocus={e => e.target.style.borderColor = 'rgba(124,131,253,0.5)'}
+                  onBlur={e => e.target.style.borderColor = 'rgba(255,255,255,0.08)'}
+                />
               </div>
 
               {/* Nombre */}
