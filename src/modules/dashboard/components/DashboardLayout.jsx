@@ -2,6 +2,7 @@
 import { useState } from 'react'
 import { Link, useNavigate, useLocation } from 'react-router-dom'
 import { getCompanyStoreUrl } from '../../../app/config'
+import BrandLogo from '../../../components/BrandLogo'
 
 const NAV_ITEMS = [
   { path: '/dashboard',          icon: '📊', label: 'Resumen' },
@@ -42,17 +43,7 @@ export default function DashboardLayout({ children }) {
         <Link to="/" style={{
           display: 'flex', alignItems: 'center', gap: 10,
         }}>
-          <div style={{
-            width: 32, height: 32,
-            background: 'linear-gradient(135deg, #7c83fd, #4f46e5)',
-            borderRadius: 8,
-            display: 'flex', alignItems: 'center', justifyContent: 'center',
-            fontSize: 15, fontWeight: 900, color: 'white',
-          }}>F</div>
-          <span style={{
-            fontFamily: "'Fraunces', serif",
-            fontSize: 17, fontWeight: 700, color: 'white',
-          }}>Fluxy</span>
+          <BrandLogo size={32} textSize={17} />
         </Link>
 
         {/* Nombre negocio */}
@@ -145,15 +136,7 @@ export default function DashboardLayout({ children }) {
         display: 'flex', alignItems: 'center', justifyContent: 'space-between',
       }}>
         <Link to="/" style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-          <div style={{
-            width: 28, height: 28,
-            background: 'linear-gradient(135deg, #7c83fd, #4f46e5)',
-            borderRadius: 7, display: 'flex', alignItems: 'center',
-            justifyContent: 'center', fontSize: 13, fontWeight: 900, color: 'white',
-          }}>F</div>
-          <span style={{ fontFamily: "'Fraunces', serif", fontSize: 15, fontWeight: 700, color: 'white' }}>
-            Fluxy
-          </span>
+          <BrandLogo size={28} textSize={15} gap={8} />
         </Link>
         <button onClick={() => setSidebarOpen(!sidebarOpen)} style={{
           background: 'rgba(255,255,255,0.06)',

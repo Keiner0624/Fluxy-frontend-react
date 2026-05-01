@@ -2,6 +2,7 @@
 import { useState } from 'react'
 import { useNavigate, Link } from 'react-router-dom'
 import { API_URL, buildStoreUrl } from '../../../app/config'
+import BrandLogo from '../../../components/BrandLogo'
 
 export default function LoginPage() {
   const navigate = useNavigate()
@@ -103,15 +104,16 @@ export default function LoginPage() {
 
         <div style={{ position: 'relative', zIndex: 1, textAlign: 'center', maxWidth: 340 }}>
           {/* Logo */}
-          <div style={{
-            width: 64, height: 64, margin: '0 auto 24px',
-            background: 'linear-gradient(135deg, #7c83fd, #4f46e5)',
-            borderRadius: 18,
-            display: 'flex', alignItems: 'center', justifyContent: 'center',
-            fontSize: 30, fontWeight: 900, color: 'white',
-            boxShadow: '0 8px 32px rgba(124,131,253,0.5)',
-            animation: 'float 6s ease infinite',
-          }}>F</div>
+          <BrandLogo
+            size={64}
+            showWordmark={false}
+            style={{ justifyContent: 'center' }}
+            imageStyle={{
+              margin: '0 auto 24px',
+              boxShadow: '0 8px 32px rgba(124,131,253,0.35)',
+              animation: 'float 6s ease infinite',
+            }}
+          />
 
           <h2 style={{
             fontFamily: "'Fraunces', serif",
@@ -157,17 +159,7 @@ export default function LoginPage() {
           {/* Logo mobile */}
           <div className="hide-desktop" style={{ textAlign: 'center', marginBottom: 32 }}>
             <Link to="/" style={{ display: 'inline-flex', alignItems: 'center', gap: 10 }}>
-              <div style={{
-                width: 38, height: 38,
-                background: 'linear-gradient(135deg, #7c83fd, #4f46e5)',
-                borderRadius: 10,
-                display: 'flex', alignItems: 'center', justifyContent: 'center',
-                fontSize: 18, fontWeight: 900, color: 'white',
-              }}>F</div>
-              <span style={{
-                fontFamily: "'Fraunces', serif",
-                fontSize: 20, fontWeight: 700, color: 'white',
-              }}>Fluxy</span>
+              <BrandLogo size={38} textSize={20} />
             </Link>
           </div>
 

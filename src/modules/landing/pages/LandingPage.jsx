@@ -1,6 +1,7 @@
 // src/modules/landing/pages/LandingPage.jsx
 import { useNavigate } from 'react-router-dom'
 import { useState } from 'react'
+import BrandLogo from '../../../components/BrandLogo'
 
 // ─── Navbar ───────────────────────────────────────────────────────────────────
 function Navbar() {
@@ -20,19 +21,11 @@ function Navbar() {
         justifyContent: 'space-between', height: 64,
       }}>
         {/* Logo */}
-        <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
-          <div style={{
-            width: 34, height: 34,
-            background: 'linear-gradient(135deg, #7c83fd, #4f46e5)',
-            borderRadius: 9, display: 'flex', alignItems: 'center',
-            justifyContent: 'center', fontSize: 16, fontWeight: 900, color: 'white',
-            boxShadow: '0 4px 16px rgba(124,131,253,0.4)',
-          }}>F</div>
-          <span style={{
-            fontFamily: "'Fraunces', serif",
-            fontSize: 20, fontWeight: 700, color: 'white', letterSpacing: '-0.3px',
-          }}>Fluxy</span>
-        </div>
+        <BrandLogo
+          size={34}
+          textSize={20}
+          imageStyle={{ boxShadow: '0 4px 16px rgba(124,131,253,0.35)' }}
+        />
 
         {/* Links desktop */}
         <div className="hide-mobile" style={{ display: 'flex', alignItems: 'center', gap: 32 }}>
@@ -855,17 +848,7 @@ function Footer() {
         display: 'flex', justifyContent: 'space-between', alignItems: 'center',
         flexWrap: 'wrap', gap: 16,
       }}>
-        <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
-          <div style={{
-            width: 28, height: 28,
-            background: 'linear-gradient(135deg, #7c83fd, #4f46e5)',
-            borderRadius: 7, display: 'flex', alignItems: 'center',
-            justifyContent: 'center', fontSize: 13, fontWeight: 900, color: 'white',
-          }}>F</div>
-          <span style={{ fontFamily: "'Fraunces', serif", fontSize: 16, fontWeight: 700, color: 'white' }}>
-            Fluxy
-          </span>
-        </div>
+        <BrandLogo size={28} textSize={16} />
 
         <div style={{ fontSize: 12, color: 'var(--text-muted)' }}>
           © {new Date().getFullYear()} Fluxy. Todos los derechos reservados.
