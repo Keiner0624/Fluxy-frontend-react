@@ -1,6 +1,7 @@
 // src/modules/dashboard/components/DashboardLayout.jsx
 import { useState } from 'react'
 import { Link, useNavigate, useLocation } from 'react-router-dom'
+import { getCompanyStoreUrl } from '../../../app/config'
 
 const NAV_ITEMS = [
   { path: '/dashboard',          icon: '📊', label: 'Resumen' },
@@ -12,7 +13,8 @@ const NAV_ITEMS = [
 export default function DashboardLayout({ children }) {
   const navigate = useNavigate()
   const location = useLocation()
-  const company = JSON.parse(localStorage.getItem('company') || '{}')
+  const company = JSON.parse(localStorage.getItem('company') || '{}') || {}
+  const storeUrl = getCompanyStoreUrl(company)
   const [sidebarOpen, setSidebarOpen] = useState(false)
 
   const handleLogout = () => {
@@ -96,8 +98,8 @@ export default function DashboardLayout({ children }) {
 
       {/* Ver tienda + Logout */}
       <div style={{ padding: '0 12px', display: 'flex', flexDirection: 'column', gap: 8 }}>
-        {company.storeUrl && (
-          <a href={company.storeUrl} target="_blank" rel="noreferrer" style={{
+        {storeUrl && (
+          <a href={storeUrl} target="_blank" rel="noreferrer" style={{
             display: 'flex', alignItems: 'center', gap: 8,
             padding: '9px 12px', borderRadius: 10,
             background: 'rgba(52,211,153,0.08)',

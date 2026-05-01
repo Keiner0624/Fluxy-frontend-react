@@ -1,7 +1,7 @@
 // src/modules/auth/pages/RegisterBusinessPage.jsx
 import { useState } from 'react'
 import { useNavigate, Link } from 'react-router-dom'
-import { API_URL } from '../.././../app/config'
+import { API_URL, buildStoreUrl } from '../.././../app/config'
 
 export default function RegisterBusinessPage() {
   const navigate = useNavigate()
@@ -48,10 +48,18 @@ export default function RegisterBusinessPage() {
       }
 
       const data = await res.json()
+      const company = data.company
+        ? {
+            ...data.company,
+            storeUrl: data.company.slug
+              ? buildStoreUrl(data.company.slug)
+              : data.company.storeUrl || '',
+          }
+        : {}
 
       // Guardar token y datos
       localStorage.setItem('token', data.token)
-      localStorage.setItem('company', JSON.stringify(data.company))
+      localStorage.setItem('company', JSON.stringify(company))
       localStorage.setItem('user', JSON.stringify(data.user))
 
       // Mostrar éxito y redirigir al dashboard

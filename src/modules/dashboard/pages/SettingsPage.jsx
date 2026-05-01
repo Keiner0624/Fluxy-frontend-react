@@ -1,7 +1,7 @@
 import DashboardLayout from '../components/DashboardLayout'
 
 export default function SettingsPage() {
-  const company = JSON.parse(localStorage.getItem('company') || '{}')
+  const company = JSON.parse(localStorage.getItem('company') || '{}') || {}
 
   return (
     <DashboardLayout>

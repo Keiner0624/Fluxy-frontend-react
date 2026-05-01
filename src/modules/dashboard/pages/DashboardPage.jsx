@@ -1,11 +1,13 @@
 // src/modules/dashboard/pages/DashboardPage.jsx
 import { useNavigate } from 'react-router-dom'
 import DashboardLayout from '../components/DashboardLayout'
+import { getCompanyStoreUrl } from '../../../app/config'
 
 export default function DashboardPage() {
   const navigate = useNavigate()
-  const company = JSON.parse(localStorage.getItem('company') || '{}')
-  const user = JSON.parse(localStorage.getItem('user') || '{}')
+  const company = JSON.parse(localStorage.getItem('company') || '{}') || {}
+  const storeUrl = getCompanyStoreUrl(company)
+  const user = JSON.parse(localStorage.getItem('user') || '{}') || {}
 
   return (
     <DashboardLayout>
@@ -76,7 +78,7 @@ export default function DashboardPage() {
       </div>
 
       {/* Link a la tienda */}
-      {company.storeUrl && (
+      {storeUrl && (
         <div style={{
           background: 'rgba(13,13,26,0.8)',
           border: '1px solid rgba(255,255,255,0.06)',
@@ -89,10 +91,10 @@ export default function DashboardPage() {
               🔗 Tu tienda pública
             </div>
             <div style={{ fontSize: 14, color: 'var(--primary)', fontWeight: 500 }}>
-              {company.storeUrl}
+              {storeUrl}
             </div>
           </div>
-          <a href={company.storeUrl} target="_blank" rel="noreferrer" style={{
+          <a href={storeUrl} target="_blank" rel="noreferrer" style={{
             display: 'flex', alignItems: 'center', gap: 6,
             background: 'rgba(52,211,153,0.08)',
             border: '1px solid rgba(52,211,153,0.2)',

@@ -1,3 +1,13 @@
+import { useParams, useSearchParams } from 'react-router-dom'
+
 export default function StorePage() {
-  return <div style={{color:'white', padding:40}}>Tienda — próximamente</div>
+  const params = useParams()
+  const [searchParams] = useSearchParams()
+  const slug = searchParams.get('store') || params.slug || ''
+
+  return (
+    <div style={{ color: 'white', padding: 40 }}>
+      {slug ? `Tienda ${slug} — próximamente` : 'Tienda — próximamente'}
+    </div>
+  )
 }

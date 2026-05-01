@@ -1,7 +1,7 @@
 // src/modules/auth/pages/LoginPage.jsx
 import { useState } from 'react'
 import { useNavigate, Link } from 'react-router-dom'
-import { API_URL } from '../../../app/config'
+import { API_URL, buildStoreUrl } from '../../../app/config'
 
 export default function LoginPage() {
   const navigate = useNavigate()
@@ -53,7 +53,7 @@ export default function LoginPage() {
           id: company.id,
           name: company.name,
           slug: company.slug,
-          storeUrl: `https://fluxy-frontend-react-xtsb.vercel.app/store/${company.slug}`,
+          storeUrl: buildStoreUrl(company.slug),
         }))
       }
 

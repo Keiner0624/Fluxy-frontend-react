@@ -255,7 +255,7 @@ function HowItWorksSection() {
       num: '03',
       icon: '🔗',
       title: 'Comparte tu tienda',
-      desc: 'Recibes un link único como fluxy.com/store/tu-negocio. Compártelo por WhatsApp, Instagram o donde quieras.',
+      desc: 'Recibes un link único como fluxy.com/?store=tu-negocio. Compártelo por WhatsApp, Instagram o donde quieras.',
     },
     {
       num: '04',
@@ -346,7 +346,7 @@ function BenefitsSection() {
     { icon: '⚡', title: 'Listo en minutos', desc: 'Sin tecnicismos. Sin código. Sin dolores de cabeza. Solo crea y vende.' },
     { icon: '💬', title: 'WhatsApp integrado', desc: 'Cada producto tiene un botón que conecta directo con tu WhatsApp. Cero fricción.' },
     { icon: '📱', title: 'Perfecto en celular', desc: 'Diseñado primero para móvil. Tus clientes compran desde su teléfono, sin problemas.' },
-    { icon: '🔗', title: 'Link único para tu tienda', desc: 'fluxy.com/store/tu-negocio. Fácil de recordar, fácil de compartir.' },
+    { icon: '🔗', title: 'Link único para tu tienda', desc: 'fluxy.com/?store=tu-negocio. Fácil de recordar, fácil de compartir.' },
     { icon: '📦', title: 'Gestión de productos', desc: 'Agrega, edita y elimina productos cuando quieras. Controla tu stock en tiempo real.' },
     { icon: '🔒', title: 'Seguro y confiable', desc: 'Tu tienda siempre disponible. Backend profesional en la nube.' },
   ]
@@ -445,7 +445,7 @@ function DemoSection() {
 
             <div style={{ display: 'flex', flexDirection: 'column', gap: 14, marginBottom: 36 }}>
               {[
-                'Link único: fluxy.com/store/tu-negocio',
+                'Link único: fluxy.com/?store=tu-negocio',
                 'Catálogo de productos con imágenes',
                 'Botón WhatsApp en cada producto',
                 'Información del negocio y contacto',
@@ -506,7 +506,7 @@ function DemoSection() {
                 borderRadius: 6, padding: '4px 12px',
                 fontSize: 11, color: 'var(--text-muted)',
               }}>
-                fluxy.com/store/cafeteria-luna
+                fluxy.com/?store=cafeteria-luna
               </div>
             </div>
 
