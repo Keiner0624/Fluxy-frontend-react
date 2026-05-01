@@ -5,6 +5,8 @@ import RegisterBusinessPage from '../modules/auth/pages/RegisterBusinessPage'
 import StorePage from '../modules/store/pages/StorePage'
 import DashboardPage from '../modules/dashboard/pages/DashboardPage'
 import ProductsPage from '../modules/dashboard/pages/ProductsPage'
+import OrdersPage from '../modules/dashboard/pages/OrdersPage'
+import SettingsPage from '../modules/dashboard/pages/SettingsPage'
 
 export const router = createBrowserRouter([
   { path: '/',                    element: <LandingPage /> },
@@ -13,4 +15,6 @@ export const router = createBrowserRouter([
   { path: '/store/:slug',         element: <StorePage /> },
   { path: '/dashboard',           element: <DashboardPage /> },
   { path: '/dashboard/products',  element: <ProductsPage /> },
+  { path: '/dashboard/orders',    element: <OrdersPage /> },
+  { path: '/dashboard/settings',  element: <SettingsPage /> },
 ])
