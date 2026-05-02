@@ -1,5 +1,5 @@
 // src/app/router.jsx
-import { createBrowserRouter, useSearchParams } from 'react-router-dom'
+import { Navigate, createBrowserRouter, useParams, useSearchParams } from 'react-router-dom'
 import ProtectedRoute from './ProtectedRoute'
 import LandingPage from '../modules/landing/pages/LandingPage'
 import LoginPage from '../modules/auth/pages/LoginPage'
@@ -17,6 +17,32 @@ function RootPage() {
   return searchParams.get('store') ? <StorePage /> : <LandingPage />
 }
 
+function PaymentReturnPage() {
+  const { status } = useParams()
+  const [searchParams] = useSearchParams()
+  const rawStatus = searchParams.get('payment')
+    || searchParams.get('status')
+    || searchParams.get('collection_status')
+    || status
+    || 'pending'
+  const normalizedStatuses = {
+    approved: 'success',
+    rejected: 'failure',
+    cancelled: 'failure',
+    in_process: 'pending',
+    in_mediation: 'pending',
+  }
+  const payment = normalizedStatuses[rawStatus] || rawStatus
+  const plan = searchParams.get('plan')
+  const params = new URLSearchParams({ payment })
+
+  if (plan) {
+    params.set('plan', plan)
+  }
+
+  return <Navigate to={`/dashboard?${params.toString()}`} replace />
+}
+
 const protect = (element) => <ProtectedRoute>{element}</ProtectedRoute>
 
 export const router = createBrowserRouter([
@@ -30,4 +56,6 @@ export const router = createBrowserRouter([
   { path: '/dashboard/orders',    element: protect(<OrdersPage />) },
   { path: '/dashboard/settings',  element: protect(<SettingsPage />) },
   { path: '/dashboard/style',     element: protect(<StylePage />) },
+  { path: '/payment/:status',     element: protect(<PaymentReturnPage />) },
+  { path: '/payments/:status',    element: protect(<PaymentReturnPage />) },
 ])

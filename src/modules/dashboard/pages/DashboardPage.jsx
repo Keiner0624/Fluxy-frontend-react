@@ -15,7 +15,17 @@ export default function DashboardPage() {
 
   // ─── Detectar retorno de Mercado Pago ────────────────────────────────────
   useEffect(() => {
-    const payment = searchParams.get('payment')
+    const rawPayment = searchParams.get('payment')
+      || searchParams.get('status')
+      || searchParams.get('collection_status')
+    const normalizedPayments = {
+      approved: 'success',
+      rejected: 'failure',
+      cancelled: 'failure',
+      in_process: 'pending',
+      in_mediation: 'pending',
+    }
+    const payment = normalizedPayments[rawPayment] || rawPayment
     const plan = searchParams.get('plan')
     if (payment) {
       setPaymentStatus({ status: payment, plan })
