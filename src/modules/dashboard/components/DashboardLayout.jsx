@@ -9,6 +9,7 @@ const NAV_ITEMS = [
   { path: '/dashboard/products', icon: '📦', label: 'Productos' },
   { path: '/dashboard/orders',   icon: '🛒', label: 'Pedidos' },
   { path: '/dashboard/settings', icon: '⚙️', label: 'Configuración' },
+  { path: '/dashboard/style',    icon: '🎨', label: 'Estilo' },
 ]
 
 export default function DashboardLayout({ children }) {
@@ -172,3 +173,4 @@ export default function DashboardLayout({ children }) {
     </div>
   )
 }
+

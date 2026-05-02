@@ -1,16 +1,17 @@
-import { useSearchParams } from 'react-router-dom'
-import { useStore } from './hooks/useStore'
-import { useCart } from './hooks/useCart'
+// src/modules/store/pages/StorePage.jsx
+import { useParams, useSearchParams } from 'react-router-dom'
 import { useState, useEffect } from 'react'
-import Header from './components/Header'
-import Hero from './components/Hero'
-import ProductGrid from './components/ProductGrid'
-import Cart from './components/Cart'
-import CheckoutModal from './components/CheckoutModal'
-import ProductDetailModal from './components/ProductDetailModal'
-import TrustSection from './components/TrustSection'
-import Footer from './components/Footer'
 import { Toaster } from 'react-hot-toast'
+import { useStore } from '../../../hooks/useStore'
+import { useCart } from '../../../hooks/useCart'
+import Header from '../../../components/Header'
+import Hero from '../../../components/Hero'
+import ProductGrid from '../../../components/ProductGrid'
+import Cart from '../../../components/Cart'
+import CheckoutModal from '../../../components/CheckoutModal'
+import ProductDetailModal from '../../../components/ProductDetailModal'
+import TrustSection from '../../../components/TrustSection'
+import Footer from '../../../components/Footer'
 
 const DEFAULT_STYLE = {
   primary: '#7c83fd',
@@ -31,25 +32,22 @@ function applyStoreStyle(storeStyle) {
 }
 
 function StoreBackground({ style }) {
-  console.log('[StoreBackground] Rendering with style:', style)
-  
   const bg = style.colors?.length > 1
     ? `linear-gradient(135deg, ${style.colors.join(', ')})`
     : style.colors?.[0] || '#06060f'
 
   const glowColor = style.primary || '#7c83fd'
 
-  console.log('[StoreBackground] Background:', bg)
-  console.log('[StoreBackground] Glow color:', glowColor)
-
   return (
     <>
+      {/* Fondo base */}
       <div style={{
         position: 'fixed', inset: 0, zIndex: -2,
         background: bg,
         transition: 'background 1s ease',
       }}/>
 
+      {/* Animación según tipo */}
       {style.animation === 'mesh' && (
         <div style={{
           position: 'fixed', inset: 0, zIndex: -1,
@@ -95,6 +93,7 @@ function StoreBackground({ style }) {
         </>
       )}
 
+      {/* Grid decorativo */}
       <div style={{
         position: 'fixed', inset: 0, zIndex: -1,
         backgroundImage: `
@@ -136,25 +135,12 @@ function StoreBackground({ style }) {
   )
 }
 
-export default function App(props) {
+export default function StorePage() {
+  const { slug } = useParams()
   const [searchParams] = useSearchParams()
-  const slugFromRoute = props.slugFromRoute
-  const slug = slugFromRoute || searchParams.get('store')
+  const storeSlug = slug || searchParams.get('store')
 
-  console.log('[App] slugFromRoute:', slugFromRoute)
-  console.log('[App] slug from URL params:', searchParams.get('store'))
-  console.log('[App] Final slug:', slug)
-  
-  // Debug: mostrar todas las claves de localStorage relacionadas
-  if (typeof window !== 'undefined') {
-    const allKeys = Object.keys(localStorage).filter(k => k.includes('storeStyle'))
-    console.log('[App] localStorage keys with "storeStyle":', allKeys)
-    allKeys.forEach(key => {
-      console.log(`  - ${key}:`, localStorage.getItem(key)?.substring(0, 100))
-    })
-  }
-
-  const { company, products, loading, error, reload } = useStore(slug)
+  const { company, products, loading, error, reload } = useStore(storeSlug)
   const { cart, addToCart, increaseQty, decreaseQty, clearCart, total, count } = useCart()
 
   const [cartOpen, setCartOpen] = useState(false)
@@ -162,61 +148,34 @@ export default function App(props) {
   const [selectedProduct, setSelectedProduct] = useState(null)
   const [storeStyle, setStoreStyle] = useState(DEFAULT_STYLE)
 
-  // Cargar estilo personalizado desde localStorage
-  useEffect(() => {
-    if (!slug) {
-      console.log('[App] No slug provided')
-      return
-    }
-    
-    console.log('[App] Loading style for slug:', slug)
-    
-    // Buscar primero el estilo específico de la tienda
-    const storeStyleKey = `storeStyle_${slug}`
-    let savedStyle = localStorage.getItem(storeStyleKey)
-    
-    console.log(`[App] Checking localStorage key: ${storeStyleKey}`, savedStyle ? 'FOUND' : 'NOT FOUND')
-    
-    // Si no existe, intentar la clave genérica
-    if (!savedStyle) {
-      savedStyle = localStorage.getItem('storeStyle')
-      console.log('[App] Checking generic key "storeStyle"', savedStyle ? 'FOUND' : 'NOT FOUND')
-    }
-    
-    if (savedStyle) {
-      const parsed = applyStoreStyle(savedStyle)
-      console.log('[App] Applying style:', parsed)
-      setStoreStyle(parsed)
-      // Aplicar variables CSS al documento
-      document.documentElement.style.setProperty('--primary', parsed.primary)
-    }
-  }, [slug])
-
-  // Aplicar estilo cuando se carga la empresa (si tiene storeStyle del backend)
-  useEffect(() => {
+  // Aplicar estilo cuando cargue la empresa
+useEffect(() => {
+    console.log('company cargada:', company)
+    console.log('storeStyle:', company?.storeStyle)
     if (company?.storeStyle) {
-      console.log('[App] Company has storeStyle from backend:', company.storeStyle)
-      const parsed = applyStoreStyle(company.storeStyle)
-      setStoreStyle(parsed)
-      document.documentElement.style.setProperty('--primary', parsed.primary)
+        const parsed = applyStoreStyle(company.storeStyle)
+        console.log('parsed:', parsed)
+        setStoreStyle(parsed)
+        document.documentElement.style.setProperty('--primary', parsed.primary)
     }
-  }, [company?.storeStyle])
+}, [company])
 
-  if (!slug) return (
+  if (!storeSlug) return (
     <div style={{
       display: 'flex', flexDirection: 'column',
       alignItems: 'center', justifyContent: 'center',
       height: '100vh', background: '#06060f',
-      color: 'var(--text-muted)', gap: 12,
+      color: '#5a5a7a', gap: 12,
     }}>
       <div style={{ fontSize: 48 }}>🏪</div>
       <div style={{ fontSize: 16 }}>No se especificó ninguna tienda</div>
-      <code style={{ color: 'var(--primary)', fontSize: 13 }}>?store=nombre-de-tienda</code>
+      <code style={{ color: 'var(--primary)', fontSize: 13 }}>/store/nombre-de-tienda</code>
     </div>
   )
 
   return (
     <>
+      {/* Fondo dinámico */}
       <StoreBackground style={storeStyle} />
 
       <Toaster
@@ -253,7 +212,6 @@ export default function App(props) {
       />
 
       <TrustSection />
-
       <Footer company={company} />
 
       <Cart
@@ -263,7 +221,6 @@ export default function App(props) {
         onClose={() => setCartOpen(false)}
         onIncrease={increaseQty}
         onDecrease={decreaseQty}
-        onClear={clearCart}
         onCheckout={() => { setCartOpen(false); setCheckoutOpen(true) }}
       />
 
