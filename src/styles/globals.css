@@ -116,3 +116,9 @@ img { max-width: 100%; display: block; }
 /* Ocultar/mostrar */
 @media (max-width: 640px) { .hide-mobile  { display: none !important; } }
 @media (min-width: 641px) { .hide-desktop { display: none !important; } }
+
+@media (min-width: 769px) {
+  .settings-grid {
+    grid-template-columns: minmax(0,1fr) 300px !important;
+  }
+}
