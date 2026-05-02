@@ -6,6 +6,7 @@ import toast from 'react-hot-toast'
 export default function CheckoutModal({ open, cart, total, company, onClose, onSuccess }) {
   const [name, setName]       = useState('')
   const [phone, setPhone]     = useState('')
+  const [address, setAddress] = useState('')
   const [loading, setLoading] = useState(false)
   const [orderId, setOrderId] = useState(null)
 
@@ -15,6 +16,8 @@ export default function CheckoutModal({ open, cart, total, company, onClose, onS
     try {
       const order = await createOrder(company.id, {
         customerName: name.trim(),
+        customerPhone: phone.trim(),
+        customerAddress: address.trim(),
         items: cart.map(i => ({ productId: i.product.id, quantity: i.quantity })),
       })
       setOrderId(order.id)
@@ -126,6 +129,7 @@ export default function CheckoutModal({ open, cart, total, company, onClose, onS
               {[
                 { label: 'Tu nombre completo *', value: name,  onChange: setName,  placeholder: 'Ej: Juan Pérez' },
                 { label: 'Tu teléfono',          value: phone, onChange: setPhone, placeholder: '+51 999 999 999' },
+                { label: 'Tu dirección de entrega', value: address, onChange: setAddress, placeholder: 'Ej: Av. Ejemplo 123, Lima' },
               ].map(field => (
                 <div key={field.label} style={{ marginBottom: 16 }}>
                   <label style={{

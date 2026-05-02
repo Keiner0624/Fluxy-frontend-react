@@ -8,6 +8,7 @@ import ProductsPage from '../modules/dashboard/pages/ProductsPage'
 import OrdersPage from '../modules/dashboard/pages/OrdersPage'
 import SettingsPage from '../modules/dashboard/pages/SettingsPage'
 import StylePage from '../modules/dashboard/pages/StylePage'
+import MetricsPage from '../modules/dashboard/pages/MetricsPage'
 
 function RootPage() {
   const [searchParams] = useSearchParams()
@@ -25,4 +26,5 @@ export const router = createBrowserRouter([
   { path: '/dashboard/orders',    element: <OrdersPage /> },
   { path: '/dashboard/settings',  element: <SettingsPage /> },
   { path: '/dashboard/style', element: <StylePage /> },
+  { path: '/dashboard/metrics', element: <MetricsPage /> },
 ])

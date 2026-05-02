@@ -366,54 +366,30 @@ export default function OrdersPage() {
                 )
               })()}
 
-              {/* Cliente */}
-              <div style={{
-                background: 'rgba(255,255,255,0.03)',
-                border: '1px solid rgba(255,255,255,0.06)',
-                borderRadius: 12, padding: '14px 16px', marginBottom: 16,
-              }}>
-                <div style={{ fontSize: 11, color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.8px', marginBottom: 8 }}>
-                  Cliente
-                </div>
-                <div style={{ fontSize: 15, fontWeight: 600, color: 'white' }}>
-                  👤 {selectedOrder.customerName || 'Sin nombre'}
-                </div>
-              </div>
-
-              {/* Productos */}
-              <div style={{ marginBottom: 16 }}>
-                <div style={{ fontSize: 11, color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.8px', marginBottom: 10 }}>
-                  Productos
-                </div>
-                <div style={{
-                  background: 'rgba(255,255,255,0.03)',
-                  border: '1px solid rgba(255,255,255,0.06)',
-                  borderRadius: 12, overflow: 'hidden',
-                }}>
-                  {selectedOrder.items?.map((item, i) => (
-                    <div key={i} style={{
-                      display: 'flex', justifyContent: 'space-between', alignItems: 'center',
-                      padding: '12px 16px',
-                      borderBottom: i < selectedOrder.items.length - 1 ? '1px solid rgba(255,255,255,0.04)' : 'none',
-                    }}>
-                      <div>
-                        <div style={{ fontSize: 12, color: 'white', fontWeight: 500 }}>
-                          {item.prodcut?.name || item.productName || 'Producto'}
-                        </div>
-                        <div style={{ fontSize: 12, color: 'var(--text-muted)', marginTop: 2 }}>
-                          S/ {item.unitPrice?.toFixed(2)} × {item.quantity}
-                        </div>
-                      </div>
-                      <div style={{
-                        fontFamily: "'Fraunces', serif",
-                        fontSize: 15, fontWeight: 700, color: 'var(--primary)',
-                      }}>
-                        S/ {(item.unitPrice * item.quantity).toFixed(2)}
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              </div>
+                {/* Cliente */}
+<div style={{
+  background: 'rgba(255,255,255,0.03)',
+  border: '1px solid rgba(255,255,255,0.06)',
+  borderRadius: 12, padding: '14px 16px', marginBottom: 16,
+}}>
+  <div style={{ fontSize: 11, color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.8px', marginBottom: 8 }}>
+    Cliente
+  </div>
+  <div style={{ fontSize: 15, fontWeight: 600, color: 'white' }}>
+    👤 {selectedOrder.customerName || 'Sin nombre'}
+  </div>
+  {/* Agrega aquí: */}
+  {selectedOrder.customerPhone && (
+    <div style={{ fontSize: 13, color: 'var(--text-soft)', marginTop: 6, display: 'flex', gap: 6 }}>
+      📞 {selectedOrder.customerPhone}
+    </div>
+  )}
+  {selectedOrder.customerAddress && (
+    <div style={{ fontSize: 13, color: 'var(--text-soft)', marginTop: 6, display: 'flex', gap: 6 }}>
+      📍 {selectedOrder.customerAddress}
+    </div>
+  )}
+</div>
 
               {/* Total */}
               <div style={{

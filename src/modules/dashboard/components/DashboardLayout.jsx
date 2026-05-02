@@ -6,6 +6,7 @@ import BrandLogo from '../../../components/BrandLogo'
 
 const NAV_ITEMS = [
   { path: '/dashboard',          icon: '📊', label: 'Resumen' },
+   { path: '/dashboard/metrics',  icon: '📈', label: 'Métricas' },
   { path: '/dashboard/products', icon: '📦', label: 'Productos' },
   { path: '/dashboard/orders',   icon: '🛒', label: 'Pedidos' },
   { path: '/dashboard/settings', icon: '⚙️', label: 'Configuración' },
