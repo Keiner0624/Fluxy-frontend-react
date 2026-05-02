@@ -59,3 +59,60 @@ img { max-width: 100%; display: block; }
 
 @media (max-width: 640px) { .hide-mobile { display: none !important; } }
 @media (min-width: 641px) { .hide-desktop { display: none !important; } }
+
+/* ═══ STORE RESPONSIVE ═══ */
+
+/* Hero - 1 columna en móvil */
+@media (max-width: 768px) {
+  .hero-grid {
+    grid-template-columns: 1fr !important;
+  }
+  .hero-info-card {
+    display: none !important;
+  }
+  .hero-title {
+    font-size: 36px !important;
+    letter-spacing: -1px !important;
+  }
+}
+
+/* Productos - 1 columna en móvil */
+@media (max-width: 480px) {
+  .products-grid {
+    grid-template-columns: 1fr !important;
+  }
+}
+
+/* Trust section - 2 columnas en móvil */
+@media (max-width: 640px) {
+  .trust-grid {
+    grid-template-columns: 1fr 1fr !important;
+  }
+}
+
+/* Footer - 1 columna en móvil */
+@media (max-width: 640px) {
+  .footer-grid {
+    grid-template-columns: 1fr !important;
+    gap: 24px !important;
+  }
+}
+
+/* Cart - ancho completo en móvil */
+@media (max-width: 480px) {
+  .cart-sidebar {
+    width: 100vw !important;
+  }
+}
+
+/* Dashboard sidebar en móvil */
+@media (max-width: 768px) {
+  .dashboard-main {
+    margin-left: 0 !important;
+    padding: 80px 16px 32px !important;
+  }
+}
+
+/* Ocultar/mostrar */
+@media (max-width: 640px) { .hide-mobile  { display: none !important; } }
+@media (min-width: 641px) { .hide-desktop { display: none !important; } }

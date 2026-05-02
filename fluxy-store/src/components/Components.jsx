@@ -239,9 +239,10 @@ export function Cart({ open, cart, total, onClose, onIncrease, onDecrease, onChe
                     animation: 'fadeIn 0.2s ease',
                 }}/>
             )}
-            <div style={{
-                position: 'fixed', top: 0, right: open ? 0 : -480,
-                width: 480, height: '100vh',
+        <div className="cart-sidebar" style={{
+            position: 'fixed', top: 0, 
+            right: open ? 0 : '-100%',
+            width: 'min(100vw, 440px)', height: '100vh',
                 background: '#090918',
                 borderLeft: '1px solid rgba(255,255,255,0.06)',
                 zIndex: 501, transition: 'right 0.4s cubic-bezier(0.23, 1, 0.32, 1)',

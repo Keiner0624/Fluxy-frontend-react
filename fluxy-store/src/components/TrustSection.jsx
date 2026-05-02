@@ -7,10 +7,10 @@ const items = [
 
 export default function TrustSection() {
     return (
-        <section style={{
+        <section className="trust-grid" style={{
             borderTop: '1px solid var(--border)', borderBottom: '1px solid var(--border)',
             padding: '48px 32px', display: 'grid',
-            gridTemplateColumns: 'repeat(auto-fit, minmax(160px, 1fr))', gap: 32
+            gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: 20
         }}>
             {items.map(({ icon, title, desc }) => (
                 <div key={title} style={{ textAlign: 'center' }}>

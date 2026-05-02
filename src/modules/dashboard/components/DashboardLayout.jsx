@@ -164,14 +164,13 @@ export default function DashboardLayout({ children }) {
       )}
 
       {/* Main content */}
-      <div style={{
+      <div className="dashboard-main" style={{
         marginLeft: 240,
         flex: 1, minWidth: 0,
         padding: '32px 32px',
-      }} className="dashboard-main">
+      }}>
         {children}
       </div>
     </div>
   )
 }
-
