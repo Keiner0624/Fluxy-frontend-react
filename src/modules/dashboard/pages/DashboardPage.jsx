@@ -6,10 +6,10 @@ import { API_URL, getCompanyStoreUrl } from '../../../app/config'
 
 const PLAN_NAMES = { PRO: 'Pro', BUSINESS: 'Business' }
 const PAYMENT_STATUS_MAP = {
-  approved: 'success',
-  rejected: 'failure',
-  cancelled: 'failure',
-  in_process: 'pending',
+  approved:     'success',
+  rejected:     'failure',
+  cancelled:    'failure',
+  in_process:   'pending',
   in_mediation: 'pending',
 }
 const PENDING_PLAN_KEY = 'fluxy_pending_plan_checkout'
@@ -24,32 +24,24 @@ function wait(ms) {
 
 async function refreshSellerAccount(expectedPlan) {
   for (let attempt = 0; attempt < 4; attempt += 1) {
-    if (attempt > 0) {
-      await wait(1200)
-    }
-
+    if (attempt > 0) await wait(1200)
     const res = await fetch(`${API_URL}/me`, {
       headers: { Authorization: `Bearer ${getToken()}` },
     })
-
     if (!res.ok) continue
-
     const data = await res.json()
-    const planName = data.planName || expectedPlan
+    const planName  = data.planName  || expectedPlan
     const planLimit = data.planLimit
-
     if (planName || planLimit) {
       const company = JSON.parse(localStorage.getItem('company') || '{}') || {}
-      const user = JSON.parse(localStorage.getItem('user') || '{}') || {}
+      const user    = JSON.parse(localStorage.getItem('user')    || '{}') || {}
       const planData = {
-        ...(planName ? { planName } : {}),
+        ...(planName  ? { planName }  : {}),
         ...(planLimit ? { planLimit } : {}),
       }
-
       localStorage.setItem('company', JSON.stringify({ ...company, ...planData }))
-      localStorage.setItem('user', JSON.stringify({ ...user, ...planData }))
+      localStorage.setItem('user',    JSON.stringify({ ...user,    ...planData }))
     }
-
     if (!expectedPlan || data.planName === expectedPlan) break
   }
 }
@@ -57,11 +49,11 @@ async function refreshSellerAccount(expectedPlan) {
 export default function DashboardPage() {
   const navigate = useNavigate()
   const [searchParams] = useSearchParams()
-  const [paymentStatus, setPaymentStatus] = useState(null) // 'success' | 'failure' | 'pending'
+  const [paymentStatus, setPaymentStatus] = useState(null)
 
-  const company = JSON.parse(localStorage.getItem('company') || '{}') || {}
+  const company  = JSON.parse(localStorage.getItem('company') || '{}') || {}
   const storeUrl = getCompanyStoreUrl(company)
-  const user = JSON.parse(localStorage.getItem('user') || '{}') || {}
+  const user     = JSON.parse(localStorage.getItem('user')    || '{}') || {}
 
   // ─── Detectar retorno de Mercado Pago ────────────────────────────────────
   useEffect(() => {
@@ -69,16 +61,13 @@ export default function DashboardPage() {
       || searchParams.get('status')
       || searchParams.get('collection_status')
     const payment = PAYMENT_STATUS_MAP[rawPayment] || rawPayment
-    const plan = searchParams.get('plan') || localStorage.getItem(PENDING_PLAN_KEY) || ''
+    const plan    = searchParams.get('plan') || localStorage.getItem(PENDING_PLAN_KEY) || ''
+
     if (payment) {
       setPaymentStatus({ status: payment, plan })
-      // Limpiar los params de la URL sin recargar
       window.history.replaceState({}, '', '/dashboard')
       localStorage.removeItem(PENDING_PLAN_KEY)
-      if (payment === 'success') {
-        refreshSellerAccount(plan).catch(() => {})
-      }
-      // Ocultar el banner después de 6 segundos
+      if (payment === 'success') refreshSellerAccount(plan).catch(() => {})
       const timer = setTimeout(() => setPaymentStatus(null), 6000)
       return () => clearTimeout(timer)
     }
@@ -86,17 +75,15 @@ export default function DashboardPage() {
 
   return (
     <DashboardLayout>
+      <style>{`@keyframes fadeIn { from { opacity:0; transform:translateY(-8px) } to { opacity:1; transform:translateY(0) } }`}</style>
 
-      {/* ── Banner de resultado de pago ───────────────────────────────────── */}
+      {/* ── Banner resultado de pago ── */}
       {paymentStatus?.status === 'success' && (
         <div style={{
-          background: 'rgba(52,211,153,0.1)',
-          border: '1px solid rgba(52,211,153,0.3)',
-          borderRadius: 14, padding: '16px 20px',
-          marginBottom: 24,
+          background: 'rgba(52,211,153,0.1)', border: '1px solid rgba(52,211,153,0.3)',
+          borderRadius: 14, padding: '16px 20px', marginBottom: 24,
           display: 'flex', alignItems: 'center', justifyContent: 'space-between',
-          gap: 12, flexWrap: 'wrap',
-          animation: 'fadeIn 0.4s ease',
+          gap: 12, flexWrap: 'wrap', animation: 'fadeIn 0.4s ease',
         }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
             <span style={{ fontSize: 28 }}>🎉</span>
@@ -109,93 +96,103 @@ export default function DashboardPage() {
               </div>
             </div>
           </div>
-          <button
-            onClick={() => navigate('/dashboard/products')}
-            style={{
-              background: 'linear-gradient(135deg, #34d399, #059669)',
-              color: 'white', border: 'none', borderRadius: 10,
-              padding: '9px 18px', fontSize: 13, fontWeight: 600, cursor: 'pointer',
-            }}
-          >
-            Ir a productos →
-          </button>
+          <button onClick={() => navigate('/dashboard/products')} style={{
+            background: 'linear-gradient(135deg, #34d399, #059669)',
+            color: 'white', border: 'none', borderRadius: 10,
+            padding: '9px 18px', fontSize: 13, fontWeight: 600, cursor: 'pointer',
+          }}>Ir a productos →</button>
         </div>
       )}
 
       {paymentStatus?.status === 'failure' && (
         <div style={{
-          background: 'rgba(248,113,113,0.08)',
-          border: '1px solid rgba(248,113,113,0.25)',
-          borderRadius: 14, padding: '16px 20px',
-          marginBottom: 24,
+          background: 'rgba(248,113,113,0.08)', border: '1px solid rgba(248,113,113,0.25)',
+          borderRadius: 14, padding: '16px 20px', marginBottom: 24,
           display: 'flex', alignItems: 'center', gap: 12,
         }}>
           <span style={{ fontSize: 24 }}>❌</span>
           <div>
-            <div style={{ fontSize: 14, fontWeight: 600, color: '#f87171' }}>
-              El pago no pudo procesarse
-            </div>
-            <div style={{ fontSize: 13, color: 'var(--text-muted)', marginTop: 2 }}>
-              Intenta de nuevo con otro método de pago.
-            </div>
+            <div style={{ fontSize: 14, fontWeight: 600, color: '#f87171' }}>El pago no pudo procesarse</div>
+            <div style={{ fontSize: 13, color: 'var(--text-muted)', marginTop: 2 }}>Intenta de nuevo con otro método de pago.</div>
           </div>
         </div>
       )}
 
       {paymentStatus?.status === 'pending' && (
         <div style={{
-          background: 'rgba(251,191,36,0.08)',
-          border: '1px solid rgba(251,191,36,0.25)',
-          borderRadius: 14, padding: '16px 20px',
-          marginBottom: 24,
+          background: 'rgba(251,191,36,0.08)', border: '1px solid rgba(251,191,36,0.25)',
+          borderRadius: 14, padding: '16px 20px', marginBottom: 24,
           display: 'flex', alignItems: 'center', gap: 12,
         }}>
           <span style={{ fontSize: 24 }}>⏳</span>
           <div>
-            <div style={{ fontSize: 14, fontWeight: 600, color: '#fbbf24' }}>
-              Pago pendiente de confirmación
-            </div>
-            <div style={{ fontSize: 13, color: 'var(--text-muted)', marginTop: 2 }}>
-              Tu plan se activará automáticamente cuando el pago sea confirmado.
-            </div>
+            <div style={{ fontSize: 14, fontWeight: 600, color: '#fbbf24' }}>Pago pendiente de confirmación</div>
+            <div style={{ fontSize: 13, color: 'var(--text-muted)', marginTop: 2 }}>Tu plan se activará automáticamente cuando el pago sea confirmado.</div>
           </div>
         </div>
       )}
 
-      {/* ── Bienvenida ────────────────────────────────────────────────────── */}
+      {/* ── Bienvenida ── */}
       <div style={{
         background: 'linear-gradient(135deg, rgba(124,131,253,0.1), rgba(79,70,229,0.05))',
         border: '1px solid rgba(124,131,253,0.2)',
-        borderRadius: 20, padding: '28px 32px',
-        marginBottom: 28, position: 'relative', overflow: 'hidden',
+        borderRadius: 20, padding: '28px 32px', marginBottom: 28,
+        position: 'relative', overflow: 'hidden',
       }}>
         <div style={{
           position: 'absolute', top: 0, left: 0, right: 0, height: 2,
           background: 'linear-gradient(to right, transparent, var(--primary), transparent)',
         }}/>
-        <div style={{ fontSize: 11, color: 'var(--primary)', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '1.5px', marginBottom: 8 }}>
-          Panel de control
+
+        {/* Header fila: texto + botón */}
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', flexWrap: 'wrap', gap: 16 }}>
+          <div>
+            <div style={{ fontSize: 11, color: 'var(--primary)', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '1.5px', marginBottom: 8 }}>
+              Panel de control
+            </div>
+            <h1 style={{ fontFamily: "'Fraunces', serif", fontSize: 28, fontWeight: 700, color: 'white', marginBottom: 6 }}>
+              ¡Bienvenido, {company.name || user.fullName}! 👋
+            </h1>
+            <p style={{ fontSize: 14, color: 'var(--text-soft)' }}>
+              Desde aquí gestionas todo tu negocio en Fluxy.
+            </p>
+          </div>
+
+          {/* ── Botón Mejorar plan ── */}
+          <button
+            onClick={() => navigate('/dashboard/plans')}
+            style={{
+              display: 'flex', alignItems: 'center', gap: 8,
+              background: 'linear-gradient(135deg, #7c83fd, #4f46e5)',
+              color: 'white', border: 'none', borderRadius: 12,
+              padding: '11px 20px', fontSize: 13, fontWeight: 600,
+              cursor: 'pointer', whiteSpace: 'nowrap',
+              boxShadow: '0 4px 16px rgba(124,131,253,0.3)',
+              transition: 'all 0.2s',
+            }}
+            onMouseEnter={e => e.currentTarget.style.transform = 'translateY(-1px)'}
+            onMouseLeave={e => e.currentTarget.style.transform = 'translateY(0)'}
+          >
+            ⚡ Mejorar plan
+          </button>
         </div>
-        <h1 style={{ fontFamily: "'Fraunces', serif", fontSize: 28, fontWeight: 700, color: 'white', marginBottom: 6 }}>
-          ¡Bienvenido, {company.name || user.fullName}! 👋
-        </h1>
-        <p style={{ fontSize: 14, color: 'var(--text-soft)' }}>
-          Desde aquí gestionas todo tu negocio en Fluxy.
-        </p>
       </div>
 
-      {/* ── Cards rápidas ─────────────────────────────────────────────────── */}
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: 16, marginBottom: 28 }}>
+      {/* ── Cards rápidas ── */}
+      <div style={{
+        display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))',
+        gap: 16, marginBottom: 28,
+      }}>
         {[
-          { icon: '📦', label: 'Productos', desc: 'Gestiona tu catálogo',  path: '/dashboard/products', color: '#7c83fd' },
-          { icon: '🛒', label: 'Pedidos',   desc: 'Ver pedidos recibidos', path: '/dashboard/orders',   color: '#34d399' },
-          { icon: '⚙️', label: 'Configuración', desc: 'Edita tu tienda',  path: '/dashboard/settings', color: '#fbbf24' },
+          { icon: '📦', label: 'Productos',     desc: 'Gestiona tu catálogo',   path: '/dashboard/products', color: '#7c83fd' },
+          { icon: '🛒', label: 'Pedidos',        desc: 'Ver pedidos recibidos',  path: '/dashboard/orders',   color: '#34d399' },
+          { icon: '⚙️', label: 'Configuración', desc: 'Edita tu tienda',        path: '/dashboard/settings', color: '#fbbf24' },
+          { icon: '⚡', label: 'Mejorar plan',  desc: 'Ver planes y precios',   path: '/dashboard/plans',    color: '#a78bfa' },
         ].map(card => (
           <button key={card.path} onClick={() => navigate(card.path)} style={{
-            background: 'rgba(13,13,26,0.9)',
-            border: '1px solid rgba(255,255,255,0.06)',
-            borderRadius: 16, padding: '20px',
-            textAlign: 'left', cursor: 'pointer', transition: 'all 0.2s',
+            background: 'rgba(13,13,26,0.9)', border: '1px solid rgba(255,255,255,0.06)',
+            borderRadius: 16, padding: '20px', textAlign: 'left',
+            cursor: 'pointer', transition: 'all 0.2s',
           }}
             onMouseEnter={e => { e.currentTarget.style.borderColor = `${card.color}40`; e.currentTarget.style.transform = 'translateY(-2px)' }}
             onMouseLeave={e => { e.currentTarget.style.borderColor = 'rgba(255,255,255,0.06)'; e.currentTarget.style.transform = 'translateY(0)' }}
@@ -212,7 +209,7 @@ export default function DashboardPage() {
         ))}
       </div>
 
-      {/* ── Link a la tienda ──────────────────────────────────────────────── */}
+      {/* ── Link a la tienda ── */}
       {storeUrl && (
         <div style={{
           background: 'rgba(13,13,26,0.8)', border: '1px solid rgba(255,255,255,0.06)',
@@ -238,8 +235,6 @@ export default function DashboardPage() {
           </a>
         </div>
       )}
-
-      <style>{`@keyframes fadeIn { from { opacity: 0; transform: translateY(-8px) } to { opacity: 1; transform: translateY(0) } }`}</style>
     </DashboardLayout>
   )
 }

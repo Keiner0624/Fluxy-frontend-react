@@ -11,6 +11,7 @@ import OrdersPage from '../modules/dashboard/pages/OrdersPage'
 import SettingsPage from '../modules/dashboard/pages/SettingsPage'
 import StylePage from '../modules/dashboard/pages/StylePage'
 import MetricsPage from '../modules/dashboard/pages/MetricsPage'
+import PlansPage from '../modules/dashboard/pages/PlansPage'
 
 const PAYMENT_STATUS_MAP = {
   approved: 'success',
@@ -71,4 +72,5 @@ export const router = createBrowserRouter([
   { path: '/dashboard/style',     element: protect(<StylePage />) },
   { path: '/payment/:status',     element: protect(<PaymentReturnPage />) },
   { path: '/payments/:status',    element: protect(<PaymentReturnPage />) },
+  { path: '/dashboard/plans', element: protect(<PlansPage />) },
 ])
