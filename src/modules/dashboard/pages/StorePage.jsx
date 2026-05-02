@@ -150,11 +150,12 @@ export default function StorePage() {
 
   // Aplicar estilo cuando cargue la empresa
 useEffect(() => {
-    console.log('company cargada:', company)
-    console.log('storeStyle:', company?.storeStyle)
+    console.log('=== COMPANY DATA ===')
+    console.log('logoUrl:', company?.logoUrl)
+    console.log('paymentMethods:', company?.paymentMethods)
+    console.log('===================')
     if (company?.storeStyle) {
         const parsed = applyStoreStyle(company.storeStyle)
-        console.log('parsed:', parsed)
         setStoreStyle(parsed)
         document.documentElement.style.setProperty('--primary', parsed.primary)
     }
