@@ -2,7 +2,7 @@
 import { useNavigate, useSearchParams } from 'react-router-dom'
 import { useEffect, useState } from 'react'
 import DashboardLayout from '../components/DashboardLayout'
-import { getCompanyStoreUrl } from '../../../app/config'
+import { API_URL, getCompanyStoreUrl } from '../../../app/config'
 
 const PLAN_NAMES = { PRO: 'Pro', BUSINESS: 'Business' }
 const PAYMENT_STATUS_MAP = {
@@ -13,6 +13,46 @@ const PAYMENT_STATUS_MAP = {
   in_mediation: 'pending',
 }
 const PENDING_PLAN_KEY = 'fluxy_pending_plan_checkout'
+
+function getToken() {
+  return localStorage.getItem('token') || ''
+}
+
+function wait(ms) {
+  return new Promise(resolve => setTimeout(resolve, ms))
+}
+
+async function refreshSellerAccount(expectedPlan) {
+  for (let attempt = 0; attempt < 4; attempt += 1) {
+    if (attempt > 0) {
+      await wait(1200)
+    }
+
+    const res = await fetch(`${API_URL}/me`, {
+      headers: { Authorization: `Bearer ${getToken()}` },
+    })
+
+    if (!res.ok) continue
+
+    const data = await res.json()
+    const planName = data.planName || expectedPlan
+    const planLimit = data.planLimit
+
+    if (planName || planLimit) {
+      const company = JSON.parse(localStorage.getItem('company') || '{}') || {}
+      const user = JSON.parse(localStorage.getItem('user') || '{}') || {}
+      const planData = {
+        ...(planName ? { planName } : {}),
+        ...(planLimit ? { planLimit } : {}),
+      }
+
+      localStorage.setItem('company', JSON.stringify({ ...company, ...planData }))
+      localStorage.setItem('user', JSON.stringify({ ...user, ...planData }))
+    }
+
+    if (!expectedPlan || data.planName === expectedPlan) break
+  }
+}
 
 export default function DashboardPage() {
   const navigate = useNavigate()
@@ -35,6 +75,9 @@ export default function DashboardPage() {
       // Limpiar los params de la URL sin recargar
       window.history.replaceState({}, '', '/dashboard')
       localStorage.removeItem(PENDING_PLAN_KEY)
+      if (payment === 'success') {
+        refreshSellerAccount(plan).catch(() => {})
+      }
       // Ocultar el banner después de 6 segundos
       const timer = setTimeout(() => setPaymentStatus(null), 6000)
       return () => clearTimeout(timer)

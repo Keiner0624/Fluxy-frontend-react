@@ -1,12 +1,24 @@
 // src/app/config.js
-const DEFAULT_APP_URL = 'https://fluxy-frontend-react-xtsb.vercel.app'
+const DEFAULT_STORE_APP_URL = 'https://fluxy-frontend-react-xtsb.vercel.app'
+const DEFAULT_SELLER_APP_URL = 'https://fluxyweb.vercel.app'
 
 export const API_URL = import.meta.env.VITE_API_URL || 'https://fluxy-backend-production.up.railway.app'
-export const APP_URL = (import.meta.env.VITE_APP_URL || DEFAULT_APP_URL).replace(/\/$/, '')
+export const APP_URL = (import.meta.env.VITE_STORE_APP_URL || DEFAULT_STORE_APP_URL).replace(/\/$/, '')
+export const SELLER_APP_URL = (import.meta.env.VITE_SELLER_APP_URL || DEFAULT_SELLER_APP_URL).replace(/\/$/, '')
 
 export function buildStoreUrl(slug) {
   if (!slug) return APP_URL
   return `${APP_URL}/?store=${encodeURIComponent(slug)}`
+}
+
+export function buildSellerPaymentReturnUrl(payment, plan) {
+  const params = new URLSearchParams({ payment })
+
+  if (plan) {
+    params.set('plan', plan)
+  }
+
+  return `${SELLER_APP_URL}/dashboard?${params.toString()}`
 }
 
 export function getCompanyStoreUrl(company) {

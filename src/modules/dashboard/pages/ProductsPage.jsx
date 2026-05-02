@@ -1,7 +1,7 @@
 // src/modules/dashboard/pages/ProductsPage.jsx
 import { useState, useEffect, useRef } from 'react'
 import DashboardLayout from '../components/DashboardLayout'
-import { API_URL } from '../../../app/config'
+import { API_URL, buildSellerPaymentReturnUrl } from '../../../app/config'
 
 const CLOUDINARY_CLOUD = import.meta.env.VITE_CLOUDINARY_CLOUD || 'dklhbrw7s'
 const CLOUDINARY_PRESET = import.meta.env.VITE_CLOUDINARY_PRESET || 'fluxy_unsigned'
@@ -106,11 +106,25 @@ export default function ProductsPage() {
     setLoadingPayment(true)
     setPaymentError('')
     localStorage.setItem(PENDING_PLAN_KEY, plan)
+    const returnUrls = {
+      success: buildSellerPaymentReturnUrl('success', plan),
+      failure: buildSellerPaymentReturnUrl('failure', plan),
+      pending: buildSellerPaymentReturnUrl('pending', plan),
+    }
     try {
       const res = await fetch(`${API_URL}/payments/create-preference`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${getToken()}` },
-        body: JSON.stringify({ plan, months: '1' }),
+        body: JSON.stringify({
+          plan,
+          months: '1',
+          returnUrl: returnUrls.success,
+          successUrl: returnUrls.success,
+          failureUrl: returnUrls.failure,
+          pendingUrl: returnUrls.pending,
+          backUrls: returnUrls,
+          back_urls: returnUrls,
+        }),
       })
       const data = await res.json()
       if (!res.ok) throw new Error(data.error || 'Error al crear preferencia')
