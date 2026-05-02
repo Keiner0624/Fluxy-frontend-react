@@ -1,4 +1,4 @@
-// src/modules/store/pages/StorePage.jsx
+// src/modules/dashboard/pages/StorePage.jsx
 import { useParams, useSearchParams } from 'react-router-dom'
 import { useState, useEffect } from 'react'
 import { Toaster } from 'react-hot-toast'

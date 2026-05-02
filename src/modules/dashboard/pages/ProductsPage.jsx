@@ -2,30 +2,30 @@
 import { useState, useEffect, useRef } from 'react'
 import DashboardLayout from '../components/DashboardLayout'
 import { API_URL } from '../../../app/config'
-
+ 
 const CLOUDINARY_CLOUD = import.meta.env.VITE_CLOUDINARY_CLOUD || 'dklhbrw7s'
 const CLOUDINARY_PRESET = import.meta.env.VITE_CLOUDINARY_PRESET || 'fluxy_unsigned'
 const MAX_IMAGE_SIZE = 5 * 1024 * 1024
-
+ 
+const PLAN_LABELS = { FREE: 'Free', PRO: 'Pro', BUSINESS: 'Business' }
+const PLAN_COLORS = {
+  FREE:     { bg: 'rgba(255,255,255,0.06)', border: 'rgba(255,255,255,0.12)', text: '#9ca3af' },
+  PRO:      { bg: 'rgba(124,131,253,0.10)', border: 'rgba(124,131,253,0.30)', text: '#7c83fd' },
+  BUSINESS: { bg: 'rgba(52,211,153,0.10)',  border: 'rgba(52,211,153,0.30)',  text: '#34d399' },
+}
+ 
 function getUploadErrorMessage(errorMessage) {
   if (!errorMessage) return 'Error al subir imagen'
-
-  if (/Upload preset not found/i.test(errorMessage)) {
-    return `El preset de Cloudinary "${CLOUDINARY_PRESET}" no existe. Configura VITE_CLOUDINARY_PRESET con un preset unsigned valido o crea ese preset en Cloudinary. Mientras tanto, puedes usar una URL de imagen manual.`
-  }
-
-  if (/Upload preset must be specified/i.test(errorMessage)) {
-    return 'Falta configurar el preset de Cloudinary. Define VITE_CLOUDINARY_PRESET para habilitar la subida directa.'
-  }
-
+  if (/Upload preset not found/i.test(errorMessage))
+    return `El preset de Cloudinary "${CLOUDINARY_PRESET}" no existe.`
+  if (/Upload preset must be specified/i.test(errorMessage))
+    return 'Falta configurar el preset de Cloudinary.'
   return `Error al subir imagen: ${errorMessage}`
 }
-
+ 
 async function uploadToCloudinary(file) {
-  if (!CLOUDINARY_CLOUD || !CLOUDINARY_PRESET) {
+  if (!CLOUDINARY_CLOUD || !CLOUDINARY_PRESET)
     throw new Error('Falta configurar Cloudinary para subir imagenes.')
-  }
-
   const formData = new FormData()
   formData.append('file', file)
   formData.append('upload_preset', CLOUDINARY_PRESET)
@@ -33,38 +33,62 @@ async function uploadToCloudinary(file) {
     method: 'POST', body: formData,
   })
   const data = await res.json()
-
-  if (!res.ok) {
-    throw new Error(getUploadErrorMessage(data?.error?.message))
-  }
-
+  if (!res.ok) throw new Error(getUploadErrorMessage(data?.error?.message))
   return data.secure_url
 }
-
+ 
 function getToken() {
   return localStorage.getItem('token') || ''
 }
-
+ 
 export default function ProductsPage() {
-  const [products, setProducts] = useState([])
-  const [loading, setLoading] = useState(true)
-  const [saving, setSaving] = useState(false)
-  const [showForm, setShowForm] = useState(false)
-  const [editProduct, setEditProduct] = useState(null)
-  const [imageFile, setImageFile] = useState(null)
-  const [imagePreview, setImagePreview] = useState(null)
+  const [products, setProducts]           = useState([])
+  const [loading, setLoading]             = useState(true)
+  const [saving, setSaving]               = useState(false)
+  const [showForm, setShowForm]           = useState(false)
+  const [editProduct, setEditProduct]     = useState(null)
+  const [imageFile, setImageFile]         = useState(null)
+  const [imagePreview, setImagePreview]   = useState(null)
   const [uploadingImage, setUploadingImage] = useState(false)
-  const [error, setError] = useState('')
-  const [success, setSuccess] = useState('')
-  const [deleteId, setDeleteId] = useState(null)
+  const [error, setError]                 = useState('')
+  const [success, setSuccess]             = useState('')
+  const [deleteId, setDeleteId]           = useState(null)
+  const [showUpgradeModal, setShowUpgradeModal] = useState(false)
+ 
+  // ─── Plan ────────────────────────────────────────────────────────────────
+  const [planName, setPlanName]   = useState('FREE')
+  const [planLimit, setPlanLimit] = useState(10)
+ 
   const fileRef = useRef()
-
   const [form, setForm] = useState({
     name: '', price: '', stock: '', description: '', imageUrl: '',
   })
-
-  useEffect(() => { loadProducts() }, [])
-
+ 
+  // Límite calculado
+  const isAtLimit = products.length >= planLimit
+  const planColor = PLAN_COLORS[planName] || PLAN_COLORS.FREE
+ 
+  useEffect(() => {
+    loadPlan()
+    loadProducts()
+  }, [])
+ 
+  // ─── Cargar plan desde /me ────────────────────────────────────────────────
+  const loadPlan = async () => {
+    try {
+      const res = await fetch(`${API_URL}/me`, {
+        headers: { Authorization: `Bearer ${getToken()}` },
+      })
+      if (!res.ok) return
+      const data = await res.json()
+      if (data.planName)  setPlanName(data.planName)
+      if (data.planLimit) setPlanLimit(data.planLimit)
+    } catch {
+      // silencioso, no crítico
+    }
+  }
+ 
+  // ─── Cargar productos ─────────────────────────────────────────────────────
   const loadProducts = async () => {
     setLoading(true)
     try {
@@ -79,8 +103,9 @@ export default function ProductsPage() {
       setLoading(false)
     }
   }
-
+ 
   const openCreate = () => {
+    if (isAtLimit) { setShowUpgradeModal(true); return }
     setEditProduct(null)
     setForm({ name: '', price: '', stock: '', description: '', imageUrl: '' })
     setImageFile(null)
@@ -89,7 +114,7 @@ export default function ProductsPage() {
     setSuccess('')
     setShowForm(true)
   }
-
+ 
   const openEdit = (product) => {
     setEditProduct(product)
     setForm({
@@ -105,53 +130,47 @@ export default function ProductsPage() {
     setSuccess('')
     setShowForm(true)
   }
-
+ 
   const handleImageChange = (e) => {
     const file = e.target.files[0]
     if (!file) return
-
     if (!file.type.startsWith('image/')) {
       setError('Selecciona un archivo de imagen valido.')
       e.target.value = ''
       return
     }
-
     if (file.size > MAX_IMAGE_SIZE) {
       setError('La imagen supera los 5MB permitidos.')
       e.target.value = ''
       return
     }
-
     setError('')
     setImageFile(file)
     setImagePreview(URL.createObjectURL(file))
   }
-
+ 
   const handleSubmit = async (e) => {
     e.preventDefault()
     if (!form.name || !form.price || !form.stock) {
       setError('Nombre, precio y stock son obligatorios.')
       return
     }
-
     if (!imageFile && form.imageUrl && !/^https?:\/\//i.test(form.imageUrl.trim())) {
       setError('La URL de la imagen debe empezar con http:// o https://')
       return
     }
-
+ 
     setSaving(true)
     setError('')
-
+ 
     try {
       let imageUrl = form.imageUrl.trim()
-
-      // Subir imagen si hay una nueva
       if (imageFile) {
         setUploadingImage(true)
         imageUrl = await uploadToCloudinary(imageFile)
         setUploadingImage(false)
       }
-
+ 
       const body = {
         name: form.name.trim(),
         price: parseFloat(form.price),
@@ -159,11 +178,11 @@ export default function ProductsPage() {
         description: form.description.trim(),
         imageUrl,
       }
-
+ 
       const url = editProduct
         ? `${API_URL}/products/${editProduct.id}`
         : `${API_URL}/products`
-
+ 
       const res = await fetch(url, {
         method: editProduct ? 'PUT' : 'POST',
         headers: {
@@ -172,12 +191,23 @@ export default function ProductsPage() {
         },
         body: JSON.stringify(body),
       })
-
+ 
+      // ── Manejo del límite 403 ──────────────────────────────────────────
+      if (res.status === 403) {
+        const data = await res.json()
+        if (data.upgradeRequired) {
+          setShowForm(false)
+          setShowUpgradeModal(true)
+          return
+        }
+        throw new Error(data.message || 'Error de permisos')
+      }
+ 
       if (!res.ok) throw new Error('Error al guardar producto')
-
+ 
       setSuccess(editProduct ? '✅ Producto actualizado.' : '✅ Producto creado.')
       setShowForm(false)
-      loadProducts()
+      await loadProducts()
     } catch (err) {
       setError(err.message)
     } finally {
@@ -185,7 +215,7 @@ export default function ProductsPage() {
       setUploadingImage(false)
     }
   }
-
+ 
   const handleDelete = async (id) => {
     try {
       await fetch(`${API_URL}/products/${id}`, {
@@ -198,13 +228,23 @@ export default function ProductsPage() {
       setError('Error al eliminar producto')
     }
   }
-
+ 
+  // ─── Barra de progreso del plan ──────────────────────────────────────────
+  const progressPct = planLimit >= 999999
+    ? 0
+    : Math.min((products.length / planLimit) * 100, 100)
+  const progressColor = progressPct >= 100
+    ? '#f87171'
+    : progressPct >= 80
+    ? '#fbbf24'
+    : 'var(--primary)'
+ 
   return (
     <DashboardLayout>
-      {/* Header */}
+      {/* ── Header ────────────────────────────────────────────────────────── */}
       <div style={{
         display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start',
-        marginBottom: 32, flexWrap: 'wrap', gap: 16,
+        marginBottom: 24, flexWrap: 'wrap', gap: 16,
       }}>
         <div>
           <div style={{ fontSize: 11, color: 'var(--primary)', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '1.5px', marginBottom: 6 }}>
@@ -217,24 +257,92 @@ export default function ProductsPage() {
             {products.length} producto{products.length !== 1 ? 's' : ''} registrado{products.length !== 1 ? 's' : ''}
           </p>
         </div>
-
-        <button onClick={openCreate} style={{
-          display: 'flex', alignItems: 'center', gap: 8,
-          background: 'linear-gradient(135deg, #7c83fd, #4f46e5)',
-          color: 'white', padding: '11px 20px',
-          borderRadius: 12, fontSize: 14, fontWeight: 600,
-          boxShadow: '0 4px 16px rgba(124,131,253,0.3)',
-          transition: 'all 0.2s', border: 'none', cursor: 'pointer',
-        }}
-          onMouseEnter={e => e.currentTarget.style.transform = 'translateY(-1px)'}
-          onMouseLeave={e => e.currentTarget.style.transform = 'translateY(0)'}
+ 
+        <button
+          onClick={openCreate}
+          disabled={isAtLimit}
+          style={{
+            display: 'flex', alignItems: 'center', gap: 8,
+            background: isAtLimit
+              ? 'rgba(255,255,255,0.06)'
+              : 'linear-gradient(135deg, #7c83fd, #4f46e5)',
+            color: isAtLimit ? '#6b7280' : 'white',
+            padding: '11px 20px', borderRadius: 12, fontSize: 14, fontWeight: 600,
+            boxShadow: isAtLimit ? 'none' : '0 4px 16px rgba(124,131,253,0.3)',
+            border: isAtLimit ? '1px solid rgba(255,255,255,0.08)' : 'none',
+            cursor: isAtLimit ? 'not-allowed' : 'pointer',
+            transition: 'all 0.2s',
+          }}
+          onMouseEnter={e => { if (!isAtLimit) e.currentTarget.style.transform = 'translateY(-1px)' }}
+          onMouseLeave={e => { e.currentTarget.style.transform = 'translateY(0)' }}
         >
           <span style={{ fontSize: 18 }}>+</span>
-          Agregar producto
+          {isAtLimit ? 'Límite alcanzado' : 'Agregar producto'}
         </button>
       </div>
-
-      {/* Mensajes */}
+ 
+      {/* ── Banner de plan ────────────────────────────────────────────────── */}
+      <div style={{
+        background: planColor.bg,
+        border: `1px solid ${planColor.border}`,
+        borderRadius: 14, padding: '14px 18px',
+        marginBottom: 24,
+        display: 'flex', alignItems: 'center', justifyContent: 'space-between',
+        flexWrap: 'wrap', gap: 12,
+      }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 12, flex: 1, minWidth: 200 }}>
+          {/* Badge plan */}
+          <div style={{
+            background: planColor.border,
+            borderRadius: 8, padding: '3px 10px',
+            fontSize: 11, fontWeight: 700, textTransform: 'uppercase',
+            letterSpacing: '1px', color: planColor.text, whiteSpace: 'nowrap',
+          }}>
+            {PLAN_LABELS[planName] || planName}
+          </div>
+ 
+          {/* Progreso */}
+          <div style={{ flex: 1, minWidth: 120 }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 5 }}>
+              <span style={{ fontSize: 12, color: 'var(--text-muted)' }}>Productos usados</span>
+              <span style={{ fontSize: 12, fontWeight: 600, color: progressColor }}>
+                {products.length} / {planLimit >= 999999 ? '∞' : planLimit}
+              </span>
+            </div>
+            {planLimit < 999999 && (
+              <div style={{
+                height: 4, borderRadius: 99,
+                background: 'rgba(255,255,255,0.08)',
+              }}>
+                <div style={{
+                  height: '100%', borderRadius: 99,
+                  width: `${progressPct}%`,
+                  background: progressColor,
+                  transition: 'width 0.5s ease',
+                }} />
+              </div>
+            )}
+          </div>
+        </div>
+ 
+        {/* CTA upgrade si está cerca o en el límite */}
+        {planName === 'FREE' && (
+          <button
+            onClick={() => setShowUpgradeModal(true)}
+            style={{
+              background: 'linear-gradient(135deg, #7c83fd, #4f46e5)',
+              color: 'white', border: 'none',
+              borderRadius: 10, padding: '8px 16px',
+              fontSize: 12, fontWeight: 600, cursor: 'pointer',
+              whiteSpace: 'nowrap',
+            }}
+          >
+            ⚡ Mejorar plan
+          </button>
+        )}
+      </div>
+ 
+      {/* ── Mensajes ──────────────────────────────────────────────────────── */}
       {success && (
         <div style={{
           background: 'rgba(52,211,153,0.08)', border: '1px solid rgba(52,211,153,0.2)',
@@ -249,15 +357,15 @@ export default function ProductsPage() {
           fontSize: 13, color: '#f87171',
         }}>{error}</div>
       )}
-
-      {/* Loading */}
+ 
+      {/* ── Loading ───────────────────────────────────────────────────────── */}
       {loading && (
         <div style={{ textAlign: 'center', padding: 60, color: 'var(--text-muted)' }}>
           Cargando productos...
         </div>
       )}
-
-      {/* Grid de productos */}
+ 
+      {/* ── Empty state ───────────────────────────────────────────────────── */}
       {!loading && products.length === 0 && (
         <div style={{
           textAlign: 'center', padding: '80px 24px',
@@ -280,7 +388,8 @@ export default function ProductsPage() {
           }}>+ Agregar mi primer producto</button>
         </div>
       )}
-
+ 
+      {/* ── Grid de productos ─────────────────────────────────────────────── */}
       <div style={{
         display: 'grid',
         gridTemplateColumns: 'repeat(auto-fill, minmax(260px, 1fr))',
@@ -314,7 +423,6 @@ export default function ProductsPage() {
                     style={{ width: '100%', height: '100%', objectFit: 'cover' }}/>
                 : '📦'
               }
-              {/* Stock badge */}
               <div style={{
                 position: 'absolute', top: 10, right: 10,
                 background: product.stock === 0
@@ -330,7 +438,7 @@ export default function ProductsPage() {
                 {product.stock === 0 ? 'Sin stock' : `Stock: ${product.stock}`}
               </div>
             </div>
-
+ 
             {/* Info */}
             <div style={{ padding: '16px' }}>
               <div style={{ fontSize: 15, fontWeight: 600, color: 'white', marginBottom: 4 }}>
@@ -350,16 +458,14 @@ export default function ProductsPage() {
               }}>
                 S/ {product.price?.toFixed(2)}
               </div>
-
-              {/* Acciones */}
+ 
               <div style={{ display: 'flex', gap: 8 }}>
                 <button onClick={() => openEdit(product)} style={{
                   flex: 1, padding: '9px',
                   background: 'rgba(124,131,253,0.08)',
                   border: '1px solid rgba(124,131,253,0.2)',
                   borderRadius: 10, fontSize: 13, fontWeight: 500,
-                  color: 'var(--primary)', cursor: 'pointer',
-                  transition: 'all 0.2s',
+                  color: 'var(--primary)', cursor: 'pointer', transition: 'all 0.2s',
                 }}
                   onMouseEnter={e => e.currentTarget.style.background = 'rgba(124,131,253,0.15)'}
                   onMouseLeave={e => e.currentTarget.style.background = 'rgba(124,131,253,0.08)'}
@@ -369,8 +475,7 @@ export default function ProductsPage() {
                   background: 'rgba(248,113,113,0.06)',
                   border: '1px solid rgba(248,113,113,0.15)',
                   borderRadius: 10, fontSize: 13,
-                  color: '#f87171', cursor: 'pointer',
-                  transition: 'all 0.2s',
+                  color: '#f87171', cursor: 'pointer', transition: 'all 0.2s',
                 }}
                   onMouseEnter={e => e.currentTarget.style.background = 'rgba(248,113,113,0.12)'}
                   onMouseLeave={e => e.currentTarget.style.background = 'rgba(248,113,113,0.06)'}
@@ -380,14 +485,13 @@ export default function ProductsPage() {
           </div>
         ))}
       </div>
-
-      {/* Modal Formulario */}
+ 
+      {/* ── Modal Formulario ──────────────────────────────────────────────── */}
       {showForm && (
         <div style={{
           position: 'fixed', inset: 0, zIndex: 500,
           background: 'rgba(0,0,0,0.8)', backdropFilter: 'blur(8px)',
-          display: 'flex', alignItems: 'center', justifyContent: 'center',
-          padding: 20,
+          display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 20,
         }}>
           <div style={{
             background: '#0a0a18',
@@ -396,7 +500,6 @@ export default function ProductsPage() {
             boxShadow: '0 40px 80px rgba(0,0,0,0.6)',
             maxHeight: '90vh', overflowY: 'auto',
           }}>
-            {/* Header modal */}
             <div style={{
               padding: '22px 26px',
               borderBottom: '1px solid rgba(255,255,255,0.06)',
@@ -413,7 +516,7 @@ export default function ProductsPage() {
                 display: 'flex', alignItems: 'center', justifyContent: 'center',
               }}>✕</button>
             </div>
-
+ 
             <form onSubmit={handleSubmit} style={{ padding: '24px 26px' }}>
               {/* Imagen */}
               <div style={{ marginBottom: 20 }}>
@@ -422,7 +525,6 @@ export default function ProductsPage() {
                   color: 'var(--text-muted)', textTransform: 'uppercase',
                   letterSpacing: '0.8px', marginBottom: 10,
                 }}>Imagen del producto</label>
-
                 <div
                   onClick={() => fileRef.current?.click()}
                   style={{
@@ -456,16 +558,11 @@ export default function ProductsPage() {
                 </div>
                 <input ref={fileRef} type="file" accept="image/*"
                   style={{ display: 'none' }} onChange={handleImageChange}/>
-                <div style={{
-                  marginTop: 10,
-                  fontSize: 11,
-                  color: 'var(--text-muted)',
-                  lineHeight: 1.5,
-                }}>
+                <div style={{ marginTop: 10, fontSize: 11, color: 'var(--text-muted)', lineHeight: 1.5 }}>
                   Si la subida directa falla, puedes pegar una URL publica de imagen aqui abajo.
                 </div>
               </div>
-
+ 
               <div style={{ marginBottom: 20 }}>
                 <label style={{
                   display: 'block', fontSize: 12, fontWeight: 600,
@@ -473,8 +570,7 @@ export default function ProductsPage() {
                   letterSpacing: '0.8px', marginBottom: 8,
                 }}>URL de imagen</label>
                 <input
-                  type="url"
-                  value={form.imageUrl}
+                  type="url" value={form.imageUrl}
                   onChange={e => setForm({ ...form, imageUrl: e.target.value })}
                   placeholder="https://ejemplo.com/mi-producto.jpg"
                   style={{
@@ -488,8 +584,7 @@ export default function ProductsPage() {
                   onBlur={e => e.target.style.borderColor = 'rgba(255,255,255,0.08)'}
                 />
               </div>
-
-              {/* Nombre */}
+ 
               <div style={{ marginBottom: 14 }}>
                 <label style={{
                   display: 'block', fontSize: 12, fontWeight: 600,
@@ -511,8 +606,7 @@ export default function ProductsPage() {
                   onBlur={e => e.target.style.borderColor = 'rgba(255,255,255,0.08)'}
                 />
               </div>
-
-              {/* Precio y Stock en fila */}
+ 
               <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12, marginBottom: 14 }}>
                 <div>
                   <label style={{
@@ -521,8 +615,7 @@ export default function ProductsPage() {
                     letterSpacing: '0.8px', marginBottom: 8,
                   }}>Precio (S/) *</label>
                   <input
-                    type="number" min="0" step="0.01"
-                    value={form.price}
+                    type="number" min="0" step="0.01" value={form.price}
                     onChange={e => setForm({ ...form, price: e.target.value })}
                     placeholder="0.00"
                     style={{
@@ -543,8 +636,7 @@ export default function ProductsPage() {
                     letterSpacing: '0.8px', marginBottom: 8,
                   }}>Stock *</label>
                   <input
-                    type="number" min="0"
-                    value={form.stock}
+                    type="number" min="0" value={form.stock}
                     onChange={e => setForm({ ...form, stock: e.target.value })}
                     placeholder="0"
                     style={{
@@ -559,8 +651,7 @@ export default function ProductsPage() {
                   />
                 </div>
               </div>
-
-              {/* Descripción */}
+ 
               <div style={{ marginBottom: 20 }}>
                 <label style={{
                   display: 'block', fontSize: 12, fontWeight: 600,
@@ -583,8 +674,7 @@ export default function ProductsPage() {
                   onBlur={e => e.target.style.borderColor = 'rgba(255,255,255,0.08)'}
                 />
               </div>
-
-              {/* Error */}
+ 
               {error && (
                 <div style={{
                   background: 'rgba(248,113,113,0.08)',
@@ -593,8 +683,7 @@ export default function ProductsPage() {
                   fontSize: 13, color: '#f87171', marginBottom: 16,
                 }}>⚠️ {error}</div>
               )}
-
-              {/* Botones */}
+ 
               <div style={{ display: 'flex', gap: 10 }}>
                 <button type="button" onClick={() => setShowForm(false)} style={{
                   flex: 1, padding: '13px',
@@ -623,14 +712,13 @@ export default function ProductsPage() {
           </div>
         </div>
       )}
-
-      {/* Modal Confirmar eliminación */}
+ 
+      {/* ── Modal Eliminar ────────────────────────────────────────────────── */}
       {deleteId && (
         <div style={{
           position: 'fixed', inset: 0, zIndex: 500,
           background: 'rgba(0,0,0,0.8)', backdropFilter: 'blur(8px)',
-          display: 'flex', alignItems: 'center', justifyContent: 'center',
-          padding: 20,
+          display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 20,
         }}>
           <div style={{
             background: '#0a0a18',
@@ -660,6 +748,118 @@ export default function ProductsPage() {
                 borderRadius: 11, color: '#f87171',
                 fontSize: 14, fontWeight: 600, cursor: 'pointer',
               }}>Eliminar</button>
+            </div>
+          </div>
+        </div>
+      )}
+ 
+      {/* ── Modal Upgrade de plan ─────────────────────────────────────────── */}
+      {showUpgradeModal && (
+        <div style={{
+          position: 'fixed', inset: 0, zIndex: 600,
+          background: 'rgba(0,0,0,0.85)', backdropFilter: 'blur(12px)',
+          display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 20,
+        }}>
+          <div style={{
+            background: '#0a0a18',
+            border: '1px solid rgba(124,131,253,0.2)',
+            borderRadius: 24, width: '100%', maxWidth: 460,
+            boxShadow: '0 40px 80px rgba(0,0,0,0.7)',
+            overflow: 'hidden',
+          }}>
+            {/* Header */}
+            <div style={{
+              background: 'linear-gradient(135deg, rgba(124,131,253,0.15), rgba(79,70,229,0.15))',
+              borderBottom: '1px solid rgba(124,131,253,0.15)',
+              padding: '28px 28px 24px', textAlign: 'center',
+            }}>
+              <div style={{ fontSize: 44, marginBottom: 12 }}>⚡</div>
+              <h3 style={{ fontFamily: "'Fraunces', serif", fontSize: 22, color: 'white', marginBottom: 6 }}>
+                Límite de productos alcanzado
+              </h3>
+              <p style={{ fontSize: 13, color: 'var(--text-muted)', lineHeight: 1.6 }}>
+                El plan <strong style={{ color: '#7c83fd' }}>FREE</strong> permite hasta{' '}
+                <strong style={{ color: 'white' }}>10 productos</strong>.
+                Mejora tu plan para seguir creciendo.
+              </p>
+            </div>
+ 
+            {/* Planes */}
+            <div style={{ padding: '24px 28px', display: 'flex', flexDirection: 'column', gap: 12 }}>
+              {/* PRO */}
+              <div style={{
+                background: 'rgba(124,131,253,0.08)',
+                border: '1px solid rgba(124,131,253,0.25)',
+                borderRadius: 14, padding: '16px 18px',
+                display: 'flex', justifyContent: 'space-between', alignItems: 'center',
+              }}>
+                <div>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 4 }}>
+                    <span style={{
+                      background: 'rgba(124,131,253,0.2)', color: '#7c83fd',
+                      borderRadius: 6, padding: '2px 8px', fontSize: 11, fontWeight: 700,
+                    }}>PRO</span>
+                    <span style={{ fontSize: 13, fontWeight: 600, color: 'white' }}>S/ 19 / mes</span>
+                  </div>
+                  <div style={{ fontSize: 12, color: 'var(--text-muted)' }}>
+                    Hasta 100 productos · WhatsApp automático
+                  </div>
+                </div>
+                <div style={{ fontSize: 18, color: '#7c83fd' }}>→</div>
+              </div>
+ 
+              {/* BUSINESS */}
+              <div style={{
+                background: 'rgba(52,211,153,0.06)',
+                border: '1px solid rgba(52,211,153,0.20)',
+                borderRadius: 14, padding: '16px 18px',
+                display: 'flex', justifyContent: 'space-between', alignItems: 'center',
+              }}>
+                <div>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 4 }}>
+                    <span style={{
+                      background: 'rgba(52,211,153,0.15)', color: '#34d399',
+                      borderRadius: 6, padding: '2px 8px', fontSize: 11, fontWeight: 700,
+                    }}>BUSINESS</span>
+                    <span style={{ fontSize: 13, fontWeight: 600, color: 'white' }}>S/ 39 / mes</span>
+                  </div>
+                  <div style={{ fontSize: 12, color: 'var(--text-muted)' }}>
+                    Productos ilimitados · Dominio propio · Sin branding
+                  </div>
+                </div>
+                <div style={{ fontSize: 18, color: '#34d399' }}>→</div>
+              </div>
+ 
+              <p style={{ fontSize: 12, color: 'var(--text-muted)', textAlign: 'center', margin: '4px 0 0' }}>
+                Escríbenos por WhatsApp para activar tu plan al instante 👇
+              </p>
+ 
+              <a
+                href="https://wa.me/51999999999?text=Hola,%20quiero%20mejorar%20mi%20plan%20en%20Fluxy"
+                target="_blank"
+                rel="noopener noreferrer"
+                style={{
+                  display: 'block', textAlign: 'center',
+                  background: 'linear-gradient(135deg, #25d366, #128c7e)',
+                  color: 'white', padding: '13px',
+                  borderRadius: 12, fontSize: 14, fontWeight: 600,
+                  textDecoration: 'none',
+                  boxShadow: '0 4px 16px rgba(37,211,102,0.25)',
+                }}
+              >
+                💬 Contactar por WhatsApp
+              </a>
+ 
+              <button
+                onClick={() => setShowUpgradeModal(false)}
+                style={{
+                  background: 'transparent', border: 'none',
+                  color: 'var(--text-muted)', fontSize: 13,
+                  cursor: 'pointer', padding: '8px',
+                }}
+              >
+                Ahora no
+              </button>
             </div>
           </div>
         </div>
