@@ -1,4 +1,5 @@
-import { createBrowserRouter } from 'react-router-dom'
+// src/app/router.jsx
+import { createBrowserRouter, useSearchParams } from 'react-router-dom'
 import ProtectedRoute from './ProtectedRoute'
 import LandingPage from '../modules/landing/pages/LandingPage'
 import LoginPage from '../modules/auth/pages/LoginPage'
