@@ -3,27 +3,32 @@ import { useState, useEffect, useRef } from 'react'
 import DashboardLayout from '../components/DashboardLayout'
 import { API_URL } from '../../../app/config'
 
-const CLOUDINARY_CLOUD = import.meta.env.VITE_CLOUDINARY_CLOUD || 'dklhbrw7s'
+const CLOUDINARY_CLOUD = 'dklhbrw7s'
 const CLOUDINARY_PRESET = 'fluxy_unsigned'
 
 function getToken() { return localStorage.getItem('token') || '' }
 
 const PAYMENT_METHODS = [
-  { key: 'efectivo', label: 'Efectivo', emoji: '💵' },
-  { key: 'yape',     label: 'Yape',     emoji: '📱' },
-  { key: 'plin',     label: 'Plin',     emoji: '🏦' },
-  { key: 'tarjeta',  label: 'Tarjeta',  emoji: '💳' },
-  { key: 'transferencia', label: 'Transferencia', emoji: '🏧' },
+  { key: 'efectivo',      label: 'Efectivo',       emoji: '💵' },
+  { key: 'yape',          label: 'Yape',            emoji: '📱' },
+  { key: 'plin',          label: 'Plin',            emoji: '🏦' },
+  { key: 'tarjeta',       label: 'Tarjeta',         emoji: '💳' },
+  { key: 'transferencia', label: 'Transferencia',   emoji: '🏧' },
 ]
 
 async function uploadToCloudinary(file) {
   const formData = new FormData()
   formData.append('file', file)
   formData.append('upload_preset', CLOUDINARY_PRESET)
-  const res = await fetch(`https://api.cloudinary.com/v1_1/${CLOUDINARY_CLOUD}/image/upload`, {
-    method: 'POST', body: formData,
-  })
-  if (!res.ok) throw new Error('Error al subir imagen')
+  const res = await fetch(
+    `https://api.cloudinary.com/v1_1/${CLOUDINARY_CLOUD}/image/upload`,
+    { method: 'POST', body: formData }
+  )
+  if (!res.ok) {
+    const err = await res.json().catch(() => ({}))
+    console.error('Cloudinary error:', err)
+    throw new Error('Error al subir imagen')
+  }
   return (await res.json()).secure_url
 }
 
@@ -32,12 +37,12 @@ export default function SettingsPage() {
     name: '', description: '', phone: '', address: '', email: '',
     logoUrl: '', paymentMethods: [],
   })
-  const [loading, setLoading] = useState(true)
-  const [saving, setSaving] = useState(false)
+  const [loading, setLoading]         = useState(true)
+  const [saving, setSaving]           = useState(false)
   const [uploadingLogo, setUploadingLogo] = useState(false)
   const [logoPreview, setLogoPreview] = useState(null)
-  const [success, setSuccess] = useState('')
-  const [error, setError] = useState('')
+  const [success, setSuccess]         = useState('')
+  const [error, setError]             = useState('')
   const logoRef = useRef()
 
   useEffect(() => { loadCompany() }, [])
@@ -50,6 +55,7 @@ export default function SettingsPage() {
       })
       if (!res.ok) throw new Error()
       const data = await res.json()
+      console.log('Company data from backend:', data)
       setForm({
         name:           data.name           || '',
         description:    data.description    || '',
@@ -57,10 +63,13 @@ export default function SettingsPage() {
         address:        data.address        || '',
         email:          data.email          || '',
         logoUrl:        data.logoUrl        || '',
-        paymentMethods: data.paymentMethods ? JSON.parse(data.paymentMethods) : [],
+        paymentMethods: data.paymentMethods
+          ? JSON.parse(data.paymentMethods)
+          : [],
       })
       setLogoPreview(data.logoUrl || null)
-    } catch {
+    } catch (e) {
+      console.error('Error loading company:', e)
       setError('Error al cargar la configuración')
     } finally {
       setLoading(false)
@@ -72,11 +81,14 @@ export default function SettingsPage() {
     if (!file) return
     setLogoPreview(URL.createObjectURL(file))
     setUploadingLogo(true)
+    setError('')
     try {
+      console.log('Uploading to Cloudinary cloud:', CLOUDINARY_CLOUD)
       const url = await uploadToCloudinary(file)
+      console.log('Logo URL:', url)
       setForm(f => ({ ...f, logoUrl: url }))
-    } catch {
-      setError('Error al subir el logo')
+    } catch (err) {
+      setError('Error al subir el logo: ' + err.message)
     } finally {
       setUploadingLogo(false)
     }
@@ -95,23 +107,51 @@ export default function SettingsPage() {
     e.preventDefault()
     if (!form.name.trim()) { setError('El nombre es obligatorio.'); return }
     setSaving(true); setError(''); setSuccess('')
+
+    const payload = {
+      name:           form.name,
+      description:    form.description,
+      phone:          form.phone,
+      address:        form.address,
+      email:          form.email,
+      logoUrl:        form.logoUrl,
+      paymentMethods: JSON.stringify(form.paymentMethods),
+    }
+    console.log('Enviando payload:', JSON.stringify(payload, null, 2))
+
     try {
       const res = await fetch(`${API_URL}/companies/config`, {
         method: 'PUT',
-        headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${getToken()}` },
-        body: JSON.stringify({
-          ...from, paymentMethods: JSON.stringify(form.paymentMethods),
-        }),
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${getToken()}`,
+        },
+        body: JSON.stringify(payload),
       })
-      if (!res.ok) throw new Error('Error al guardar')
+
+      console.log('Response status:', res.status)
+
+      if (!res.ok) {
+        const errBody = await res.text()
+        console.error('Backend error response:', errBody)
+        throw new Error(`Error al guardar (${res.status}): ${errBody}`)
+      }
+
       const updated = await res.json()
+      console.log('Updated company:', updated)
+
       const company = JSON.parse(localStorage.getItem('company') || '{}')
       localStorage.setItem('company', JSON.stringify({
-        ...company, name: updated.name, slug: updated.slug, logoUrl: updated.logoUrl,
+        ...company,
+        name:    updated.name,
+        slug:    updated.slug,
+        logoUrl: updated.logoUrl,
       }))
+
       setSuccess('✅ Configuración guardada.')
       setTimeout(() => setSuccess(''), 3000)
     } catch (err) {
+      console.error('Submit error:', err)
       setError(err.message)
     } finally {
       setSaving(false)
@@ -183,7 +223,6 @@ export default function SettingsPage() {
                   Logo de tu negocio
                 </div>
                 <div style={{ display: 'flex', alignItems: 'center', gap: 20 }}>
-                  {/* Preview logo */}
                   <div
                     onClick={() => logoRef.current?.click()}
                     style={{
@@ -203,8 +242,7 @@ export default function SettingsPage() {
                     }
                     {uploadingLogo && (
                       <div style={{
-                        position: 'absolute', inset: 0,
-                        background: 'rgba(0,0,0,0.6)',
+                        position: 'absolute', inset: 0, background: 'rgba(0,0,0,0.6)',
                         display: 'flex', alignItems: 'center', justifyContent: 'center',
                         fontSize: 12, color: 'white',
                       }}>⬆️</div>
@@ -230,7 +268,7 @@ export default function SettingsPage() {
                   style={{ display: 'none' }} onChange={handleLogoChange}/>
               </div>
 
-              {/* Info */}
+              {/* Info negocio */}
               <div style={{
                 background: 'rgba(13,13,26,0.9)', border: '1px solid rgba(255,255,255,0.06)',
                 borderRadius: 20, padding: '24px',
@@ -335,7 +373,6 @@ export default function SettingsPage() {
                 Vista previa
               </div>
               <div style={{ background: '#06060f', border: '1px solid rgba(255,255,255,0.08)', borderRadius: 14, overflow: 'hidden' }}>
-                {/* Header */}
                 <div style={{ background: 'rgba(8,8,15,0.9)', borderBottom: '1px solid rgba(255,255,255,0.06)', padding: '10px 14px', display: 'flex', alignItems: 'center', gap: 8 }}>
                   {logoPreview ? (
                     <img src={logoPreview} alt="logo" style={{ width: 26, height: 26, borderRadius: 7, objectFit: 'cover', flexShrink: 0 }}/>
@@ -349,7 +386,6 @@ export default function SettingsPage() {
                     <div style={{ fontSize: 9, color: 'var(--text-muted)' }}>via Fluxy</div>
                   </div>
                 </div>
-                {/* Body */}
                 <div style={{ padding: '14px' }}>
                   <div style={{ fontSize: 13, fontWeight: 700, color: 'white', marginBottom: 4, fontFamily: "'Fraunces', serif" }}>
                     Bienvenido a <span style={{ color: 'var(--primary)' }}>{form.name || 'tu tienda'}</span>
