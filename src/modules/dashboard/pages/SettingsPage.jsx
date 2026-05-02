@@ -3,7 +3,7 @@ import { useState, useEffect, useRef } from 'react'
 import DashboardLayout from '../components/DashboardLayout'
 import { API_URL } from '../../../app/config'
 
-const CLOUDINARY_CLOUD = import.meta.env.VITE_CLOUDINARY_CLOUD || 'dcolpwe9i'
+const CLOUDINARY_CLOUD = import.meta.env.VITE_CLOUDINARY_CLOUD || 'dklhbrw7s'
 const CLOUDINARY_PRESET = 'fluxy_unsigned'
 
 function getToken() { return localStorage.getItem('token') || '' }
@@ -57,7 +57,7 @@ export default function SettingsPage() {
         address:        data.address        || '',
         email:          data.email          || '',
         logoUrl:        data.logoUrl        || '',
-        paymentMethods: data.paymentMethods || [],
+        paymentMethods: data.paymentMethods ? JSON.parse(data.paymentMethods) : [],
       })
       setLogoPreview(data.logoUrl || null)
     } catch {
@@ -99,7 +99,9 @@ export default function SettingsPage() {
       const res = await fetch(`${API_URL}/companies/config`, {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${getToken()}` },
-        body: JSON.stringify(form),
+        body: JSON.stringify({
+          ...from, paymentMethods: JSON.stringify(form.paymentMethods),
+        }),
       })
       if (!res.ok) throw new Error('Error al guardar')
       const updated = await res.json()
