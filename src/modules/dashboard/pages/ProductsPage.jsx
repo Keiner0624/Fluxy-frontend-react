@@ -13,6 +13,7 @@ const PLAN_COLORS = {
   PRO:      { bg: 'rgba(124,131,253,0.10)', border: 'rgba(124,131,253,0.30)', text: '#7c83fd' },
   BUSINESS: { bg: 'rgba(52,211,153,0.10)',  border: 'rgba(52,211,153,0.30)',  text: '#34d399' },
 }
+const PENDING_PLAN_KEY = 'fluxy_pending_plan_checkout'
 
 function getUploadErrorMessage(errorMessage) {
   if (!errorMessage) return 'Error al subir imagen'
@@ -104,6 +105,7 @@ export default function ProductsPage() {
   const handleUpgrade = async (plan) => {
     setLoadingPayment(true)
     setPaymentError('')
+    localStorage.setItem(PENDING_PLAN_KEY, plan)
     try {
       const res = await fetch(`${API_URL}/payments/create-preference`, {
         method: 'POST',
@@ -112,8 +114,10 @@ export default function ProductsPage() {
       })
       const data = await res.json()
       if (!res.ok) throw new Error(data.error || 'Error al crear preferencia')
-      if (data.initPoint) window.location.href = data.initPoint
+      if (!data.initPoint) throw new Error('No se recibió URL de pago.')
+      window.location.href = data.initPoint
     } catch (err) {
+      localStorage.removeItem(PENDING_PLAN_KEY)
       setPaymentError(err.message || 'Error al iniciar el pago. Intenta de nuevo.')
     } finally {
       setLoadingPayment(false)

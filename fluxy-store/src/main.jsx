@@ -8,29 +8,11 @@ import {
 } from 'react-router-dom'
 import App from './App'
 import './index.css'
+const PENDING_PLAN_KEY = 'fluxy_pending_plan_checkout'
 
 function StoreRoute() {
   const { slug } = useParams()
   return <App slugFromRoute={slug} />
-}
-
-function buildFallbackStoreParam(searchParams) {
-  const directStore = searchParams.get('store')
-  if (directStore) return directStore
-
-  const externalReference = searchParams.get('external_reference')
-  if (externalReference) return externalReference
-
-  if (typeof window !== 'undefined') {
-    try {
-      const company = JSON.parse(localStorage.getItem('company') || '{}') || {}
-      if (company.slug) return company.slug
-    } catch {
-      return ''
-    }
-  }
-
-  return ''
 }
 
 function PaymentReturnRoute() {
@@ -51,12 +33,12 @@ function PaymentReturnRoute() {
     in_mediation: 'pending',
   }[rawStatus] || rawStatus
 
-  const store = buildFallbackStoreParam(searchParams)
+  const plan = searchParams.get('plan') || localStorage.getItem(PENDING_PLAN_KEY) || ''
   const targetParams = new URLSearchParams({ payment: normalizedStatus })
 
-  if (store) targetParams.set('store', store)
+  if (plan) targetParams.set('plan', plan)
 
-  return <Navigate to={`/?${targetParams.toString()}`} replace />
+  return <Navigate to={`/dashboard?${targetParams.toString()}`} replace />
 }
 
 const router = createBrowserRouter([

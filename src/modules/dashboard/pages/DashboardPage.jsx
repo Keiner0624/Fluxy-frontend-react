@@ -4,6 +4,16 @@ import { useEffect, useState } from 'react'
 import DashboardLayout from '../components/DashboardLayout'
 import { getCompanyStoreUrl } from '../../../app/config'
 
+const PLAN_NAMES = { PRO: 'Pro', BUSINESS: 'Business' }
+const PAYMENT_STATUS_MAP = {
+  approved: 'success',
+  rejected: 'failure',
+  cancelled: 'failure',
+  in_process: 'pending',
+  in_mediation: 'pending',
+}
+const PENDING_PLAN_KEY = 'fluxy_pending_plan_checkout'
+
 export default function DashboardPage() {
   const navigate = useNavigate()
   const [searchParams] = useSearchParams()
@@ -18,25 +28,18 @@ export default function DashboardPage() {
     const rawPayment = searchParams.get('payment')
       || searchParams.get('status')
       || searchParams.get('collection_status')
-    const normalizedPayments = {
-      approved: 'success',
-      rejected: 'failure',
-      cancelled: 'failure',
-      in_process: 'pending',
-      in_mediation: 'pending',
-    }
-    const payment = normalizedPayments[rawPayment] || rawPayment
-    const plan = searchParams.get('plan')
+    const payment = PAYMENT_STATUS_MAP[rawPayment] || rawPayment
+    const plan = searchParams.get('plan') || localStorage.getItem(PENDING_PLAN_KEY) || ''
     if (payment) {
       setPaymentStatus({ status: payment, plan })
       // Limpiar los params de la URL sin recargar
       window.history.replaceState({}, '', '/dashboard')
+      localStorage.removeItem(PENDING_PLAN_KEY)
       // Ocultar el banner después de 6 segundos
-      setTimeout(() => setPaymentStatus(null), 6000)
+      const timer = setTimeout(() => setPaymentStatus(null), 6000)
+      return () => clearTimeout(timer)
     }
   }, [])
-
-  const PLAN_NAMES = { PRO: 'Pro', BUSINESS: 'Business' }
 
   return (
     <DashboardLayout>
@@ -56,10 +59,10 @@ export default function DashboardPage() {
             <span style={{ fontSize: 28 }}>🎉</span>
             <div>
               <div style={{ fontSize: 15, fontWeight: 700, color: '#34d399' }}>
-                ¡Pago exitoso! Plan {PLAN_NAMES[paymentStatus.plan] || paymentStatus.plan} activado
+                Pago confirmado. Ya tienes acceso al plan {PLAN_NAMES[paymentStatus.plan] || paymentStatus.plan || 'seleccionado'}.
               </div>
               <div style={{ fontSize: 13, color: 'var(--text-muted)', marginTop: 2 }}>
-                Tu plan ya está activo. Ahora puedes agregar más productos.
+                Tu cuenta de vendedor fue actualizada correctamente.
               </div>
             </div>
           </div>
