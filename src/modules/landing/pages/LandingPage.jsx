@@ -244,7 +244,7 @@ function Hero() {
           <strong style={{ color: 'white' }}>Fluxy está creciendo</strong> junto a negocios peruanos
         </div>
         <div style={{ display: 'flex', gap: 2 }}>
-          {['Nuevo', 'Simple', 'Rápido'].map(i => <span key={i} style={{ color: '#fbbf24', fontSize: 12, fontWeight: 700 }}>{i}</span>)}
+          <span style={{ color: '#fbbf24', fontSize: 12, fontWeight: 700 }}>Nuevo • Simple • Rápido</span>
         </div>
       </div>
 
