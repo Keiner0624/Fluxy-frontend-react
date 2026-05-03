@@ -51,16 +51,25 @@ export default function DashboardPage() {
   const [searchParams] = useSearchParams()
   const [paymentStatus, setPaymentStatus] = useState(null)
   const [plan, setPlan] = useState('FREE')
+  const [daysLeft, setDaysLeft] = useState(null)
 
   const company  = JSON.parse(localStorage.getItem('company') || '{}') || {}
   const storeUrl = getCompanyStoreUrl(company)
   const user     = JSON.parse(localStorage.getItem('user')    || '{}') || {}
 
   useEffect(() => {
-    // Cargar plan
+    // Cargar plan y fecha de expiración
     fetch(`${API_URL}/me`, { headers: { Authorization: `Bearer ${getToken()}` } })
       .then(r => r.json())
-      .then(d => { if (d.planName) setPlan(d.planName) })
+      .then(d => {
+        if (d.planName) setPlan(d.planName)
+        if (d.planExpiresAt && d.planName !== 'FREE') {
+          const expires = new Date(d.planExpiresAt)
+          const now     = new Date()
+          const diff    = Math.ceil((expires - now) / (1000 * 60 * 60 * 24))
+          if (diff <= 7 && diff > 0) setDaysLeft(diff)
+        }
+      })
       .catch(() => {})
 
     // Detectar retorno de Mercado Pago
@@ -138,6 +147,37 @@ export default function DashboardPage() {
   return (
     <DashboardLayout>
       <style>{`@keyframes fadeIn { from { opacity:0; transform:translateY(-8px) } to { opacity:1; transform:translateY(0) } }`}</style>
+
+      {/* ── Banner vencimiento próximo ── */}
+      {daysLeft !== null && (
+        <div style={{
+          background: daysLeft <= 3 ? 'rgba(248,113,113,0.08)' : 'rgba(251,191,36,0.08)',
+          border: `1px solid ${daysLeft <= 3 ? 'rgba(248,113,113,0.3)' : 'rgba(251,191,36,0.3)'}`,
+          borderRadius: 14, padding: '14px 20px', marginBottom: 20,
+          display: 'flex', alignItems: 'center', justifyContent: 'space-between',
+          gap: 12, flexWrap: 'wrap', animation: 'fadeIn 0.4s ease',
+        }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+            <span style={{ fontSize: 24 }}>{daysLeft <= 3 ? '🚨' : '⏰'}</span>
+            <div>
+              <div style={{ fontSize: 14, fontWeight: 700, color: daysLeft <= 3 ? '#f87171' : '#fbbf24' }}>
+                Tu plan vence en {daysLeft} día{daysLeft !== 1 ? 's' : ''}
+              </div>
+              <div style={{ fontSize: 12, color: 'var(--text-muted)', marginTop: 2 }}>
+                Renueva tu plan para no perder acceso a tus funciones.
+              </div>
+            </div>
+          </div>
+          <button onClick={() => navigate('/dashboard/plans')} style={{
+            background: daysLeft <= 3
+              ? 'linear-gradient(135deg, #f87171, #ef4444)'
+              : 'linear-gradient(135deg, #fbbf24, #d97706)',
+            color: 'white', border: 'none', borderRadius: 10,
+            padding: '9px 18px', fontSize: 13, fontWeight: 600, cursor: 'pointer',
+            whiteSpace: 'nowrap',
+          }}>Renovar ahora →</button>
+        </div>
+      )}
 
       {/* ── Banner resultado de pago ── */}
       {paymentStatus?.status === 'success' && (
