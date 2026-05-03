@@ -1,6 +1,16 @@
 // src/components/Cart.jsx
 
+import {userEffect} from 'react'
+
 export default function Cart({ open, cart, total, onClose, onIncrease, onDecrease, onCheckout }) {
+  useEffect(() => {
+    if (open) {
+      document.body.style.overflow = 'hidden'
+    } else {
+      document.body.style.overflow = ''
+    }
+    return () => { document.body.style.overflow = '' }
+  }, [open])
   return (
     <>
       {open && (
