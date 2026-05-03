@@ -58,11 +58,29 @@ function StoreBackground({ style }) {
   return (
     <>
       {/* Fondo base */}
+ <div style={{
+  position: 'fixed', inset: 0, zIndex: -2,
+  background: style.bgImage ? 'transparent' : bg,
+  transition: 'background 1s ease',
+}}>
+  {style.bgImage && (
+    <>
       <div style={{
-        position: 'fixed', inset: 0, zIndex: -2,
-        background: bg,
-        transition: 'background 1s ease',
+        position: 'absolute', inset: 0,
+        backgroundImage: `url(${style.bgImage})`,
+        backgroundSize: 'cover',
+        backgroundPosition: 'center',
+        backgroundRepeat: 'no-repeat',
+        backgroundAttachment: 'fixed',
       }}/>
+      <div style={{
+        position: 'absolute', inset: 0,
+        background: bg,
+        opacity: style.bgOverlay ?? 0.5,
+      }}/>
+    </>
+  )}
+</div>
 
       {/* Animación según tipo */}
       {style.animation === 'mesh' && (
