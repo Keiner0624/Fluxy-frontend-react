@@ -1,6 +1,9 @@
 // src/components/Footer.jsx
 
 export default function Footer({ company }) {
+  // ✅ Ocultar branding si el plan es BUSINESS
+  const showBranding = company?.plan !== 'BUSINESS'
+
   return (
     <footer style={{ padding: '48px 16px 32px', borderTop: '1px solid rgba(255,255,255,0.04)' }}>
       <div style={{ maxWidth: 1200, margin: '0 auto' }}>
@@ -28,7 +31,10 @@ export default function Footer({ company }) {
                 <div style={{ fontFamily: "'Fraunces', serif", fontSize: 16, fontWeight: 600, color: 'white' }}>
                   {company?.name || 'Tienda'}
                 </div>
-                <div style={{ fontSize: 11, color: 'var(--text-muted, #4a4a6a)' }}>via Fluxy</div>
+                {/* ✅ Solo muestra "via Fluxy" si NO es BUSINESS */}
+                {showBranding && (
+                  <div style={{ fontSize: 11, color: 'var(--text-muted, #4a4a6a)' }}>via Fluxy</div>
+                )}
               </div>
             </div>
             <p style={{ fontSize: 13, color: 'var(--text-muted, #4a4a6a)', lineHeight: 1.7 }}>
@@ -62,9 +68,12 @@ export default function Footer({ company }) {
           <div style={{ fontSize: 12, color: 'var(--text-muted, #4a4a6a)' }}>
             © {new Date().getFullYear()} {company?.name}. Todos los derechos reservados.
           </div>
-          <div style={{ fontSize: 12, color: 'var(--text-muted, #4a4a6a)' }}>
-            Powered by <strong style={{ color: 'var(--primary, #7c83fd)' }}>Fluxy</strong>
-          </div>
+          {/* ✅ Solo muestra "Powered by Fluxy" si NO es BUSINESS */}
+          {showBranding && (
+            <div style={{ fontSize: 12, color: 'var(--text-muted, #4a4a6a)' }}>
+              Powered by <strong style={{ color: 'var(--primary, #7c83fd)' }}>Fluxy</strong>
+            </div>
+          )}
         </div>
       </div>
     </footer>

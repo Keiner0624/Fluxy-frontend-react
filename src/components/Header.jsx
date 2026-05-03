@@ -12,8 +12,11 @@ export default function Header({ company, cartCount, onCartOpen }) {
 
   const phone = company?.phone?.replace(/[^0-9]/g, '')
   const waMsg = encodeURIComponent(
-    `¡Hola! 👋 Vi tu tienda *${company?.name}* en Fluxy y quiero hacer un pedido.`
+    `¡Hola! 👋 Vi tu tienda *${company?.name}* y quiero hacer un pedido.`
   )
+
+  // ✅ Ocultar branding si el plan es BUSINESS
+  const showBranding = company?.plan !== 'BUSINESS'
 
   return (
     <header style={{
@@ -61,20 +64,26 @@ export default function Header({ company, cartCount, onCartOpen }) {
             }}>
               {company?.name || 'Tienda'}
             </div>
-            <div style={{ fontSize: 10, color: 'var(--text-muted, #4a4a6a)' }}>via Fluxy</div>
+            {/* ✅ Solo muestra "via Fluxy" si NO es BUSINESS */}
+            {showBranding && (
+              <div style={{ fontSize: 10, color: 'var(--text-muted, #4a4a6a)' }}>via Fluxy</div>
+            )}
           </div>
         </div>
 
         {/* Acciones */}
         <div style={{ display: 'flex', alignItems: 'center', gap: 8, flexShrink: 0 }}>
-          <div className="hide-mobile" style={{
-            display: 'flex', alignItems: 'center', gap: 6,
-            background: 'rgba(52,211,153,0.08)', border: '1px solid rgba(52,211,153,0.2)',
-            borderRadius: 50, padding: '5px 12px', fontSize: 11, color: '#34d399', fontWeight: 600,
-          }}>
-            <div style={{ width: 6, height: 6, borderRadius: '50%', background: '#34d399' }}/>
-            Verificado
-          </div>
+          {/* ✅ Badge "Verificado" solo si NO es BUSINESS */}
+          {showBranding && (
+            <div className="hide-mobile" style={{
+              display: 'flex', alignItems: 'center', gap: 6,
+              background: 'rgba(52,211,153,0.08)', border: '1px solid rgba(52,211,153,0.2)',
+              borderRadius: 50, padding: '5px 12px', fontSize: 11, color: '#34d399', fontWeight: 600,
+            }}>
+              <div style={{ width: 6, height: 6, borderRadius: '50%', background: '#34d399' }}/>
+              Verificado
+            </div>
+          )}
 
           {phone && (
             <a href={`https://wa.me/${phone}?text=${waMsg}`} target="_blank" rel="noreferrer"
