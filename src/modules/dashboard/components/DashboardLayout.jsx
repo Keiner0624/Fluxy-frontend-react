@@ -33,6 +33,15 @@ export default function DashboardLayout({ children }) {
   const [plan, setPlan] = useState('FREE')
 
   useEffect(() => {
+    if (sidebarOpen) {
+      document.body.style.overflow = 'hidden'
+    } else {
+      document.body.style.overflow = ''
+    }
+    return () => { document.body.style.overflow = '' }
+  }, [sidebarOpen])
+
+  useEffect(() => {
     const load = async () => {
       try {
         const res = await fetch(`${API_URL}/me`, {
@@ -210,9 +219,9 @@ export default function DashboardLayout({ children }) {
       )}
       {sidebarOpen && (
         <div style={{
-          position: 'fixed', top: 0, left: 0, bottom: 0, zIndex: 295,
-          width: 260, overflow: 'auto',
-        }}>
+  position: 'fixed', top: 0, right: 0, bottom: 0, zIndex: 295,
+  width: 260, overflow: 'auto',
+}}>
           <Sidebar mobile />
         </div>
       )}
@@ -226,4 +235,4 @@ export default function DashboardLayout({ children }) {
       </div>
     </div>
   )
-}
+} 
