@@ -1,7 +1,7 @@
 // src/components/PlanGate.jsx
 import { useNavigate } from 'react-router-dom'
 
-export default function PlanGate({ feature, currentPlan, requiredPlan = 'PRO', children }) {
+export default function PlanGate({ currentPlan, requiredPlan = 'PRO', children }) {
   const navigate = useNavigate()
 
   const PLAN_ORDER = { FREE: 0, PRO: 1, BUSINESS: 2 }

@@ -1,7 +1,7 @@
 // src/modules/dashboard/pages/SettingsPage.jsx
 import { useState, useEffect, useRef } from 'react'
 import DashboardLayout from '../components/DashboardLayout'
-import { API_URL } from '../../../app/config'
+import { API_URL, getCompanyStoreUrl } from '../../../app/config'
 
 const CLOUDINARY_CLOUD = 'dklhbrw7s'
 const CLOUDINARY_PRESET = 'fluxy_unsigned'
@@ -141,11 +141,15 @@ export default function SettingsPage() {
       console.log('Updated company:', updated)
 
       const company = JSON.parse(localStorage.getItem('company') || '{}')
-      localStorage.setItem('company', JSON.stringify({
+      const mergedCompany = {
         ...company,
         name:    updated.name,
         slug:    updated.slug,
         logoUrl: updated.logoUrl,
+      }
+      localStorage.setItem('company', JSON.stringify({
+        ...mergedCompany,
+        storeUrl: getCompanyStoreUrl(mergedCompany),
       }))
 
       setSuccess('✅ Configuración guardada.')
@@ -159,6 +163,7 @@ export default function SettingsPage() {
   }
 
   const company = JSON.parse(localStorage.getItem('company') || '{}')
+  const storeUrl = getCompanyStoreUrl(company)
 
   const inputStyle = {
     width: '100%', background: 'rgba(255,255,255,0.04)',
@@ -187,7 +192,7 @@ export default function SettingsPage() {
       </div>
 
       {/* Link tienda */}
-      {company.storeUrl && (
+      {storeUrl && (
         <div style={{
           background: 'rgba(52,211,153,0.06)', border: '1px solid rgba(52,211,153,0.2)',
           borderRadius: 14, padding: '14px 18px', marginBottom: 24,
@@ -195,9 +200,9 @@ export default function SettingsPage() {
         }}>
           <div>
             <div style={{ fontSize: 11, color: '#34d399', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.8px', marginBottom: 3 }}>🔗 Tu tienda pública</div>
-            <div style={{ fontSize: 14, color: 'var(--text-soft)' }}>{company.storeUrl}</div>
+            <div style={{ fontSize: 14, color: 'var(--text-soft)' }}>{storeUrl}</div>
           </div>
-          <a href={company.storeUrl} target="_blank" rel="noreferrer" style={{
+          <a href={storeUrl} target="_blank" rel="noreferrer" style={{
             display: 'flex', alignItems: 'center', gap: 6,
             background: 'rgba(52,211,153,0.1)', border: '1px solid rgba(52,211,153,0.25)',
             borderRadius: 9, padding: '7px 14px', fontSize: 13, fontWeight: 600, color: '#34d399',

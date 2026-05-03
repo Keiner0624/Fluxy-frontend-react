@@ -71,7 +71,7 @@ export default function DashboardPage() {
       const timer = setTimeout(() => setPaymentStatus(null), 6000)
       return () => clearTimeout(timer)
     }
-  }, [])
+  }, [searchParams])
 
   return (
     <DashboardLayout>

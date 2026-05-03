@@ -1,4 +1,4 @@
-const API_URL = 'https://fluxy-backend-production.up.railway.app'
+import { API_URL } from '../app/config'
 
 export async function getCompanyInfo(slug) {
   const res = await fetch(`${API_URL}/store/slug/${slug}/info`)

@@ -23,6 +23,8 @@ export default function Header({ company, cartCount, onCartOpen }) {
       backdropFilter: 'blur(20px)',
       WebkitBackdropFilter: 'blur(20px)',
       borderBottom: '1px solid rgba(255,255,255,0.06)',
+      boxShadow: scrolled ? '0 12px 36px rgba(0,0,0,0.28)' : 'none',
+      transition: 'box-shadow 0.2s ease',
     }}>
       <div style={{
         maxWidth: 1200, margin: '0 auto',

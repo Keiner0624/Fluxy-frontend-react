@@ -1,6 +1,6 @@
 // src/modules/dashboard/pages/StorePage.jsx
 import { useParams, useSearchParams } from 'react-router-dom'
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useMemo } from 'react'
 import { Toaster } from 'react-hot-toast'
 import { useStore } from '../../../hooks/useStore'
 import { useCart } from '../../../hooks/useCart'
@@ -29,6 +29,23 @@ function applyStoreStyle(storeStyle) {
   } catch {
     return DEFAULT_STYLE
   }
+}
+
+function getSavedStoreStyle(slug) {
+  if (typeof window === 'undefined') return null
+
+  const keys = slug ? [`storeStyle_${slug}`, 'storeStyle'] : ['storeStyle']
+  for (const key of keys) {
+    const saved = localStorage.getItem(key)
+    if (saved) return applyStoreStyle(saved)
+  }
+
+  return null
+}
+
+function applyPrimaryColor(style) {
+  if (typeof document === 'undefined') return
+  document.documentElement.style.setProperty('--primary', style.primary || DEFAULT_STYLE.primary)
 }
 
 function StoreBackground({ style }) {
@@ -146,20 +163,25 @@ export default function StorePage() {
   const [cartOpen, setCartOpen] = useState(false)
   const [checkoutOpen, setCheckoutOpen] = useState(false)
   const [selectedProduct, setSelectedProduct] = useState(null)
-  const [storeStyle, setStoreStyle] = useState(DEFAULT_STYLE)
+  const companyStoreStyle = company?.storeStyle
 
-  // Aplicar estilo cuando cargue la empresa
-useEffect(() => {
-    console.log('=== COMPANY DATA ===')
-    console.log('logoUrl:', company?.logoUrl)
-    console.log('paymentMethods:', company?.paymentMethods)
-    console.log('===================')
-    if (company?.storeStyle) {
-        const parsed = applyStoreStyle(company.storeStyle)
-        setStoreStyle(parsed)
-        document.documentElement.style.setProperty('--primary', parsed.primary)
-    }
-}, [company])
+  const storeStyle = useMemo(() => {
+    if (companyStoreStyle) return applyStoreStyle(companyStoreStyle)
+    return getSavedStoreStyle(storeSlug) || DEFAULT_STYLE
+  }, [companyStoreStyle, storeSlug])
+
+  useEffect(() => {
+    applyPrimaryColor(storeStyle)
+  }, [storeStyle])
+
+  useEffect(() => {
+    if (!companyStoreStyle) return
+    try {
+      const payload = JSON.stringify(storeStyle)
+      if (storeSlug) localStorage.setItem(`storeStyle_${storeSlug}`, payload)
+      localStorage.setItem('storeStyle', payload)
+    } catch { /* localStorage puede estar bloqueado */ }
+  }, [companyStoreStyle, storeSlug, storeStyle])
 
   if (!storeSlug) return (
     <div style={{

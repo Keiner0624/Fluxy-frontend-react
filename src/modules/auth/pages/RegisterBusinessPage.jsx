@@ -1,7 +1,7 @@
 // src/modules/auth/pages/RegisterBusinessPage.jsx
 import { useState } from 'react'
 import { useNavigate, Link } from 'react-router-dom'
-import { API_URL, buildStoreUrl } from '../.././../app/config'
+import { API_URL, buildStoreUrl } from '../../../app/config'
 import BrandLogo from '../../../components/BrandLogo'
 
 export default function RegisterBusinessPage() {

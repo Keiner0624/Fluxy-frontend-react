@@ -177,7 +177,6 @@ export default function PlansPage() {
         {PLANS.map(plan => {
           const isCurrent  = currentPlan === plan.key
           const isLoading  = loadingPayment === plan.key
-          const canUpgrade = !isCurrent && plan.key !== 'FREE'
 
           return (
             <div key={plan.key} style={{

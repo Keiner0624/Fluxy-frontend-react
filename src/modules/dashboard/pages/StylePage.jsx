@@ -3,7 +3,7 @@ import { useState, useEffect } from 'react'
 import DashboardLayout from '../components/DashboardLayout'
 import PlanGate from '../../../components/PlanGate'
 import usePlan from '../../../hooks/usePlan'
-import { API_URL } from '../../../app/config'
+import { API_URL, getCompanyStoreUrl } from '../../../app/config'
 
 function getToken() { return localStorage.getItem('token') || '' }
 
@@ -31,30 +31,71 @@ const ANIMATIONS = [
   { key: 'flow',  label: 'Flujo de colores', icon: '🎨' },
 ]
 
+const DEFAULT_EDITOR_STYLE = {
+  preset: 'cosmic',
+  primary: '#7c83fd',
+  bgType: 'animated-gradient',
+  colors: ['#06060f', '#1a0a2e', '#0d1a3e'],
+  animation: 'mesh',
+}
+
+function getDefaultEditorStyle() {
+  return { ...DEFAULT_EDITOR_STYLE, colors: [...DEFAULT_EDITOR_STYLE.colors] }
+}
+
+function getSavedEditorStyle(slug) {
+  const saved = localStorage.getItem(`storeStyle_${slug}`) || localStorage.getItem('storeStyle')
+  if (!saved) return null
+
+  try {
+    return JSON.parse(saved)
+  } catch {
+    return null
+  }
+}
+
 function StyleContent() {
-  const [style, setStyle] = useState({ preset: 'cosmic', primary: '#7c83fd', bgType: 'animated-gradient', colors: ['#06060f', '#1a0a2e', '#0d1a3e'], animation: 'mesh' })
+  const company = JSON.parse(localStorage.getItem('company') || '{}') || {}
+  const slug = company.slug || 'default'
+  const [style, setStyle] = useState(() => getSavedEditorStyle(slug) || getDefaultEditorStyle())
   const [saving, setSaving]   = useState(false)
   const [success, setSuccess] = useState('')
 
   useEffect(() => {
-    const saved = localStorage.getItem('storeStyle')
-    if (saved) setStyle(JSON.parse(saved))
-  }, [])
+    document.documentElement.style.setProperty('--primary', style.primary || '#7c83fd')
+  }, [style.primary])
 
   const applyPreset = (preset) => setStyle({ preset: preset.id, ...preset.config })
 
   const handleSave = async () => {
     setSaving(true)
-    const company = JSON.parse(localStorage.getItem('company') || '{}') || {}
-    const slug = company.slug || 'default'
-    localStorage.setItem(`storeStyle_${slug}`, JSON.stringify(style))
-    localStorage.setItem('storeStyle', JSON.stringify(style))
+    const stylePayload = JSON.stringify(style)
+    const nextCompany = {
+      ...company,
+      storeStyle: stylePayload,
+      storeUrl: getCompanyStoreUrl(company),
+    }
+
+    localStorage.setItem(`storeStyle_${slug}`, stylePayload)
+    localStorage.setItem('storeStyle', stylePayload)
+    localStorage.setItem('company', JSON.stringify(nextCompany))
+    document.documentElement.style.setProperty('--primary', style.primary || '#7c83fd')
+
     try {
-      await fetch(`${API_URL}/companies/config`, {
+      const res = await fetch(`${API_URL}/companies/config`, {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${getToken()}` },
-        body: JSON.stringify({ storeStyle: JSON.stringify(style) }),
+        body: JSON.stringify({ storeStyle: stylePayload }),
       })
+      if (res.ok) {
+        const updated = await res.json().catch(() => ({}))
+        const mergedCompany = { ...nextCompany, ...updated }
+        localStorage.setItem('company', JSON.stringify({
+          ...mergedCompany,
+          storeStyle: stylePayload,
+          storeUrl: getCompanyStoreUrl(mergedCompany),
+        }))
+      }
     } catch { /* no crítico */ }
     setSuccess('✅ Estilo guardado.')
     setTimeout(() => setSuccess(''), 3000)
