@@ -1,6 +1,6 @@
 // src/components/Cart.jsx
 
-import {userEffect} from 'react'
+import { useEffect } from 'react'
 
 export default function Cart({ open, cart, total, onClose, onIncrease, onDecrease, onCheckout }) {
   useEffect(() => {
