@@ -1,7 +1,7 @@
 // src/modules/dashboard/pages/StylePage.jsx
 import { useState, useEffect } from 'react'
 import DashboardLayout from '../components/DashboardLayout'
-import PlanGate from '../../../components/PlanGate'
+import PlanGate from '../../auth/components/PlanGate'
 import usePlan from '../../../hooks/usePlan'
 import { API_URL } from '../../../app/config'
 
