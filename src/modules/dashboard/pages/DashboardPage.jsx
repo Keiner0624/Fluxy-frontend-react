@@ -63,11 +63,21 @@ export default function DashboardPage() {
     const payment = PAYMENT_STATUS_MAP[rawPayment] || rawPayment
     const plan    = searchParams.get('plan') || localStorage.getItem(PENDING_PLAN_KEY) || ''
 
-    if (payment) {
-      setPaymentStatus({ status: payment, plan })
+    if (payment === 'success' || payment === 'approved') {
+      if(plan){
+        fetch('${API_URL}/companies/plan',  {
+          method: 'PUT',
+          headers: {
+            'Content-Type': 'application/json',
+            Authorization: `Bearer ${getToken()}`,
+          },
+          body, JSON.stringify({ plan: plan.toLocaleLowerCase(), method: '1' }),
+        }).catch(() => {})
+      }
+      setPaymentStatus({ status:'success', plan })
       window.history.replaceState({}, '', '/dashboard')
       localStorage.removeItem(PENDING_PLAN_KEY)
-      if (payment === 'success') refreshSellerAccount(plan).catch(() => {})
+      refreshSellerAccount(plan).catch(() => {})
       const timer = setTimeout(() => setPaymentStatus(null), 6000)
       return () => clearTimeout(timer)
     }
