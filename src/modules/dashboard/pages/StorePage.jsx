@@ -33,14 +33,10 @@ function applyStoreStyle(storeStyle) {
 
 function getSavedStoreStyle(slug) {
   if (typeof window === 'undefined') return null
+  if (!slug) return null
 
-  const keys = slug ? [`storeStyle_${slug}`, 'storeStyle'] : ['storeStyle']
-  for (const key of keys) {
-    const saved = localStorage.getItem(key)
-    if (saved) return applyStoreStyle(saved)
-  }
-
-  return null
+  const saved = localStorage.getItem(`storeStyle_${slug}`)
+  return saved ? applyStoreStyle(saved) : null
 }
 
 function applyPrimaryColor(style) {
@@ -197,7 +193,7 @@ export default function StorePage() {
     try {
       const payload = JSON.stringify(storeStyle)
       if (storeSlug) localStorage.setItem(`storeStyle_${storeSlug}`, payload)
-      localStorage.setItem('storeStyle', payload)
+      localStorage.removeItem('storeStyle')
     } catch { /* localStorage puede estar bloqueado */ }
   }, [companyStoreStyle, storeSlug, storeStyle])
 

@@ -40,6 +40,18 @@ const DEFAULT_STYLE = {
   bgImage: '', bgOverlay: 0.5,
 }
 
+function applyStoreStyle(storeStyle) {
+  try {
+    const style = typeof storeStyle === 'string'
+      ? JSON.parse(storeStyle)
+      : storeStyle
+    if (!style) return null
+    return { ...DEFAULT_STYLE, ...style }
+  } catch {
+    return null
+  }
+}
+
 async function uploadToCloudinary(file) {
   const formData = new FormData()
   formData.append('file', file)
@@ -148,13 +160,17 @@ function StorePreview({ style, company }) {
 // ─── StyleContent ─────────────────────────────────────────────────────────────
 function StyleContent() {
   const company  = JSON.parse(localStorage.getItem('company') || '{}') || {}
-  const slug     = company.slug || 'default'
+  const styleOwnerKey = company.slug || company.id
+  const styleStorageKey = styleOwnerKey ? `storeStyle_${styleOwnerKey}` : ''
   const bgImgRef = useRef()
 
   const getSaved = () => {
+    const companyStyle = applyStoreStyle(company.storeStyle)
+    if (companyStyle) return companyStyle
+    if (!styleStorageKey) return null
+
     try {
-      const s = localStorage.getItem(`storeStyle_${slug}`) || localStorage.getItem('storeStyle')
-      return s ? { ...DEFAULT_STYLE, ...JSON.parse(s) } : null
+      return applyStoreStyle(localStorage.getItem(styleStorageKey))
     } catch { return null }
   }
 
@@ -184,8 +200,8 @@ function StyleContent() {
   const handleSave = async () => {
     setSaving(true)
     const payload = JSON.stringify(style)
-    localStorage.setItem(`storeStyle_${slug}`, payload)
-    localStorage.setItem('storeStyle', payload)
+    if (styleStorageKey) localStorage.setItem(styleStorageKey, payload)
+    localStorage.removeItem('storeStyle')
     localStorage.setItem('company', JSON.stringify({ ...company, storeStyle: payload, storeUrl: getCompanyStoreUrl(company) }))
     document.documentElement.style.setProperty('--primary', style.primary || '#7c83fd')
     try {

@@ -54,9 +54,12 @@ export default function LoginPage() {
           id: company.id,
           name: company.name,
           slug: company.slug,
+          storeStyle: company.storeStyle,
           storeUrl: buildStoreUrl(company.slug),
         }))
       }
+
+      localStorage.removeItem('storeStyle')
 
       navigate('/dashboard')
 

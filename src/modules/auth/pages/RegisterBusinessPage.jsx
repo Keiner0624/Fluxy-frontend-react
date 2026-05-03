@@ -62,6 +62,7 @@ export default function RegisterBusinessPage() {
       localStorage.setItem('token', data.token)
       localStorage.setItem('company', JSON.stringify(company))
       localStorage.setItem('user', JSON.stringify(data.user))
+      localStorage.removeItem('storeStyle')
 
       // Mostrar éxito y redirigir al dashboard
       navigate('/dashboard')
