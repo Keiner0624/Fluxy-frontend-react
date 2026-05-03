@@ -93,7 +93,7 @@ function Navbar() {
           }}
             onMouseEnter={e => e.currentTarget.style.transform = 'translateY(-1px)'}
             onMouseLeave={e => e.currentTarget.style.transform = 'translateY(0)'}
-          >Empezar gratis →</Link>
+          >Crear mi tienda gratis →</Link>
         </div>
 
         {/* Mobile menu button */}
@@ -126,7 +126,7 @@ function Navbar() {
             fontSize: 15, fontWeight: 600, color: 'white', textDecoration: 'none',
             padding: '13px', borderRadius: 12, textAlign: 'center',
             background: 'linear-gradient(135deg, #7c83fd, #4f46e5)',
-          }}>Empezar gratis →</Link>
+          }}>Crear mi tienda gratis →</Link>
         </div>
       )}
     </nav>
@@ -155,7 +155,7 @@ function Hero() {
         transition: 'all 0.6s ease 0.1s',
       }}>
         <div style={{ width: 6, height: 6, borderRadius: '50%', background: '#34d399', animation: 'pulse 2s infinite' }}/>
-        <span style={{ fontSize: 13, color: '#7c83fd', fontWeight: 600 }}>Plataforma de tiendas online para negocios peruanos</span>
+        <span style={{ fontSize: 13, color: '#7c83fd', fontWeight: 600 }}>Plataforma nueva en crecimiento para negocios peruanos</span>
       </div>
 
       {/* Título */}
@@ -184,7 +184,7 @@ function Hero() {
         opacity: mounted ? 1 : 0, transform: mounted ? 'translateY(0)' : 'translateY(30px)',
         transition: 'all 0.7s ease 0.35s',
       }}>
-        Crea tu catálogo, recibe pedidos por WhatsApp y gestiona tu negocio desde un solo lugar. Sin complicaciones, sin código.
+        Crea tu catálogo, recibe pedidos por WhatsApp y empieza a vender hoy sin conocimientos técnicos.
       </p>
 
       {/* CTAs */}
@@ -205,7 +205,7 @@ function Hero() {
           onMouseEnter={e => { e.currentTarget.style.transform = 'translateY(-2px)'; e.currentTarget.style.boxShadow = '0 12px 40px rgba(124,131,253,0.5)' }}
           onMouseLeave={e => { e.currentTarget.style.transform = 'translateY(0)'; e.currentTarget.style.boxShadow = '0 8px 32px rgba(124,131,253,0.4)' }}
         >
-          🚀 Crear mi tienda gratis
+          Crear mi tienda gratis
         </Link>
         <a href="#how" style={{
           display: 'inline-flex', alignItems: 'center', gap: 8,
@@ -218,7 +218,7 @@ function Hero() {
           onMouseEnter={e => { e.currentTarget.style.color = 'white'; e.currentTarget.style.borderColor = 'rgba(255,255,255,0.25)' }}
           onMouseLeave={e => { e.currentTarget.style.color = 'var(--text-soft)'; e.currentTarget.style.borderColor = 'rgba(255,255,255,0.1)' }}
         >
-          Ver cómo funciona ↓
+          Ver ejemplo real de tienda ↓
         </a>
       </div>
 
@@ -241,10 +241,10 @@ function Hero() {
           ))}
         </div>
         <div style={{ fontSize: 14, color: 'var(--text-muted)' }}>
-          <strong style={{ color: 'white' }}>+500 negocios</strong> ya venden con Fluxy
+          <strong style={{ color: 'white' }}>Fluxy está creciendo</strong> junto a negocios peruanos
         </div>
         <div style={{ display: 'flex', gap: 2 }}>
-          {[1,2,3,4,5].map(i => <span key={i} style={{ color: '#fbbf24', fontSize: 16 }}>★</span>)}
+          {['Nuevo', 'Simple', 'Rápido'].map(i => <span key={i} style={{ color: '#fbbf24', fontSize: 12, fontWeight: 700 }}>{i}</span>)}
         </div>
       </div>
 
@@ -345,9 +345,7 @@ function Hero() {
 // ─── Stats ────────────────────────────────────────────────────────────────────
 function Stats() {
   const [ref, inView] = useInView()
-  const s1 = useCounter(500, 2000, inView)
-  const s2 = useCounter(98, 1500, inView)
-  const s3 = useCounter(3, 1000, inView)
+  const minutes = useCounter(5, 1200, inView)
 
   return (
     <section ref={ref} style={{
@@ -357,9 +355,9 @@ function Stats() {
     }}>
       <div style={{ maxWidth: 1000, margin: '0 auto', display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: 40 }}>
         {[
-          { value: `+${s1}`, label: 'Negocios activos', sub: 'y creciendo cada día' },
-          { value: `${s2}%`, label: 'Satisfacción', sub: 'de nuestros vendedores' },
-          { value: `${s3} min`, label: 'Para crear tu tienda', sub: 'sin conocimientos técnicos' },
+          { value: 'Gratis', label: 'Empieza hoy', sub: 'sin tarjeta para iniciar' },
+          { value: `<${minutes} min`, label: 'Configuración rápida', sub: 'para lanzar tu tienda' },
+          { value: 'Simple', label: 'Sin programar', sub: 'pensado para pequeños negocios' },
         ].map((stat, i) => (
           <div key={i} style={{ textAlign: 'center' }}>
             <div style={{
@@ -384,12 +382,10 @@ function Features() {
   const [ref, inView] = useInView(0.1)
 
   const features = [
-    { icon: '🏪', title: 'Tienda pública al instante', desc: 'Tu catálogo con URL propia, diseño profesional y optimizado para móvil. Listo para compartir en redes sociales.', color: '#7c83fd' },
-    { icon: '💬', title: 'WhatsApp automático', desc: 'Cuando un cliente hace un pedido, recibes un mensaje de WhatsApp con todos los detalles al instante. Solo en plan PRO.', color: '#25d366' },
-    { icon: '📊', title: 'Métricas y estadísticas', desc: 'Visualiza tus ventas, productos más vendidos y evolución del negocio con gráficas en tiempo real.', color: '#34d399' },
-    { icon: '🎨', title: 'Diseño personalizado', desc: 'Elige colores, gradientes y animaciones para que tu tienda refleje la identidad de tu marca.', color: '#a78bfa' },
-    { icon: '💳', title: 'Métodos de pago', desc: 'Muestra Yape, Plin, transferencia o efectivo. Tus clientes sabrán cómo pagarte antes de hacer el pedido.', color: '#fbbf24' },
-    { icon: '🌐', title: 'Dominio personalizado', desc: 'Conecta tu propio dominio (mitienda.com) y proyecta una imagen 100% profesional. Plan Business.', color: '#38bdf8' },
+    { icon: '⚡', title: 'Publica productos en minutos', desc: 'Sube tus productos, agrega fotos, precios y descripciones para tener tu catálogo listo rápidamente.', color: '#7c83fd' },
+    { icon: '💬', title: 'Recibe pedidos directo por WhatsApp', desc: 'Tus clientes eligen sus productos y tú recibes el pedido con los detalles necesarios por WhatsApp.', color: '#25d366' },
+    { icon: '🧭', title: 'Gestiona tu negocio desde un solo lugar', desc: 'Organiza tu catálogo, revisa pedidos y administra la información principal de tu tienda desde una plataforma simple.', color: '#34d399' },
+    { icon: '🛠️', title: 'No necesitas saber programar', desc: 'Fluxy está pensado para pequeños negocios que quieren empezar a vender online sin conocimientos técnicos.', color: '#a78bfa' },
   ]
 
   return (
@@ -397,17 +393,17 @@ function Features() {
       <div style={{ maxWidth: 1200, margin: '0 auto' }}>
         <div style={{ textAlign: 'center', marginBottom: 64 }}>
           <div style={{ fontSize: 12, fontWeight: 700, color: '#7c83fd', textTransform: 'uppercase', letterSpacing: '2px', marginBottom: 16 }}>
-            Características
+            Beneficios clave
           </div>
           <h2 style={{
             fontFamily: "'Fraunces', serif",
             fontSize: 'clamp(28px, 5vw, 48px)', fontWeight: 800,
             color: 'white', marginBottom: 16, letterSpacing: '-1px',
           }}>
-            Todo lo que necesita tu negocio
+            Vende online de forma simple y rápida
           </h2>
-          <p style={{ fontSize: 17, color: 'var(--text-soft)', maxWidth: 520, margin: '0 auto', lineHeight: 1.7 }}>
-            Una plataforma completa diseñada para emprendedores peruanos que quieren vender más sin complicaciones.
+          <p style={{ fontSize: 17, color: 'var(--text-soft)', maxWidth: 560, margin: '0 auto', lineHeight: 1.7 }}>
+            Una plataforma diseñada para pequeños negocios peruanos que quieren publicar productos, recibir pedidos y empezar sin complicaciones.
           </p>
         </div>
 
@@ -446,10 +442,10 @@ function HowItWorks() {
   const [ref, inView] = useInView(0.1)
 
   const steps = [
-    { num: '01', title: 'Crea tu cuenta', desc: 'Regístrate gratis en menos de 2 minutos. Solo necesitas tu nombre, negocio y contraseña.', icon: '✍️' },
-    { num: '02', title: 'Agrega tus productos', desc: 'Sube fotos, pone precios y describe tus productos. Tu catálogo queda listo al instante.', icon: '📦' },
-    { num: '03', title: 'Comparte tu tienda', desc: 'Copia el link de tu tienda y compártelo en WhatsApp, Instagram o Facebook. Ya está.', icon: '🔗' },
-    { num: '04', title: 'Recibe pedidos', desc: 'Tus clientes eligen sus productos y tú recibes el pedido con todos los detalles por WhatsApp y email.', icon: '🛒' },
+    { num: '01', title: 'Crea tu tienda gratis', desc: 'Empieza sin tarjeta y configura la información principal de tu negocio en pocos minutos.', icon: '✍️' },
+    { num: '02', title: 'Publica tus productos', desc: 'Agrega fotos, precios y descripciones para armar tu catálogo online de manera sencilla.', icon: '📦' },
+    { num: '03', title: 'Comparte tu tienda', desc: 'Usa el enlace de tu tienda para mostrar tus productos en WhatsApp, redes sociales o a tus clientes directos.', icon: '🔗' },
+    { num: '04', title: 'Recibe pedidos por WhatsApp', desc: 'Tus clientes eligen lo que necesitan y tú recibes la información del pedido para atenderlos rápidamente.', icon: '🛒' },
   ]
 
   return (
@@ -464,7 +460,7 @@ function HowItWorks() {
             fontSize: 'clamp(28px, 5vw, 48px)', fontWeight: 800,
             color: 'white', letterSpacing: '-1px',
           }}>
-            De cero a vendiendo en 4 pasos
+            Lanza tu tienda en minutos
           </h2>
         </div>
 
@@ -509,18 +505,18 @@ function Testimonials() {
   const [ref, inView] = useInView(0.1)
 
   const testimonials = [
-    { name: 'María G.', business: 'Repostería Dulce', text: 'Antes tomaba pedidos por WhatsApp y se me perdían. Ahora todo llega organizado y mis clientes pueden ver el catálogo completo.', emoji: '👩🏽', stars: 5 },
-    { name: 'Carlos R.', business: 'Ropa Urbana CR', text: 'Empecé con el plan gratis y en una semana ya tenía ventas. El WhatsApp automático me ahorra mucho tiempo.', emoji: '🧑🏽', stars: 5 },
-    { name: 'Lucía P.', business: 'Cosmética Natural', text: 'Mis clientas pueden ver todos mis productos con fotos y precios. Ya no tengo que mandar catálogos por WhatsApp uno por uno.', emoji: '👩🏻', stars: 5 },
+    { name: 'Negocios reales', business: 'Fluxy en crecimiento', text: 'Negocios reales ya están comenzando a usar Fluxy para vender online de forma más simple.', emoji: '🏪', stars: 0 },
+    { name: 'Primeros usuarios', business: 'Prueba temprana', text: 'Sé de los primeros en probar la plataforma y lanzar tu tienda online en minutos.', emoji: '🚀', stars: 0 },
+    { name: 'Hecho para Perú', business: 'Pequeños negocios', text: 'Diseñada para negocios peruanos que quieren vender online de forma simple, rápida y sin conocimientos técnicos.', emoji: '🇵🇪', stars: 0 },
   ]
 
   return (
     <section style={{ padding: '100px 24px' }}>
       <div style={{ maxWidth: 1100, margin: '0 auto' }}>
         <div style={{ textAlign: 'center', marginBottom: 64 }}>
-          <div style={{ fontSize: 12, fontWeight: 700, color: '#7c83fd', textTransform: 'uppercase', letterSpacing: '2px', marginBottom: 16 }}>Testimonios</div>
+          <div style={{ fontSize: 12, fontWeight: 700, color: '#7c83fd', textTransform: 'uppercase', letterSpacing: '2px', marginBottom: 16 }}>Credibilidad</div>
           <h2 style={{ fontFamily: "'Fraunces', serif", fontSize: 'clamp(28px, 5vw, 44px)', fontWeight: 800, color: 'white', letterSpacing: '-1px' }}>
-            Lo que dicen nuestros vendedores
+            Una plataforma nueva, clara y realista
           </h2>
         </div>
 
@@ -566,22 +562,22 @@ function Pricing() {
 
   const plans = [
     {
-      name: 'Free', price: 'S/ 0', period: 'Para siempre',
+      name: 'Free', price: 'S/ 0', period: 'Sin tarjeta',
       color: '#9ca3af', border: 'rgba(255,255,255,0.08)',
-      features: ['Hasta 10 productos', 'Tienda pública con slug', 'Recepción de pedidos', 'Personalización básica'],
+      features: ['Publica productos en minutos', 'Tienda pública con link', 'Recepción de pedidos', 'Configuración simple'],
       cta: 'Empezar gratis', ctaLink: '/register-business', featured: false,
     },
     {
       name: 'Pro', price: 'S/ 19', period: '/mes',
       color: '#7c83fd', border: 'rgba(124,131,253,0.4)',
       badge: 'Más popular',
-      features: ['Hasta 100 productos', 'WhatsApp automático', 'Estadísticas completas', 'Personalización avanzada', 'Soporte por email'],
+      features: ['Más productos para tu catálogo', 'Pedidos por WhatsApp', 'Estadísticas para gestionar', 'Personalización avanzada', 'Soporte por email'],
       cta: 'Empezar con Pro', ctaLink: '/register-business', featured: true,
     },
     {
       name: 'Business', price: 'S/ 39', period: '/mes',
       color: '#34d399', border: 'rgba(52,211,153,0.25)',
-      features: ['Productos ilimitados', 'Todo lo del plan Pro', 'Dominio personalizado', 'Sin branding Fluxy', 'Soporte prioritario 24/7'],
+      features: ['Catálogo ampliado', 'Todo lo del plan Pro', 'Dominio personalizado', 'Sin branding Fluxy', 'Soporte prioritario'],
       cta: 'Empezar con Business', ctaLink: '/register-business', featured: false,
     },
   ]
@@ -595,7 +591,7 @@ function Pricing() {
             Elige el plan perfecto para ti
           </h2>
           <p style={{ fontSize: 16, color: 'var(--text-soft)', maxWidth: 480, margin: '0 auto' }}>
-            Empieza gratis y escala cuando tu negocio lo necesite. Sin contratos ni sorpresas.
+            Empieza gratis, sin tarjeta, y escala cuando tu negocio lo necesite.
           </p>
         </div>
 
@@ -685,10 +681,10 @@ function CTASection() {
             fontSize: 'clamp(28px, 5vw, 48px)', fontWeight: 800,
             color: 'white', marginBottom: 16, letterSpacing: '-1px',
           }}>
-            ¿Listo para vender más?
+            Empieza hoy gratis
           </h2>
           <p style={{ fontSize: 17, color: 'var(--text-soft)', lineHeight: 1.7, marginBottom: 36, maxWidth: 480, margin: '0 auto 36px' }}>
-            Únete a cientos de negocios peruanos que ya tienen su tienda online con Fluxy. Es gratis para empezar.
+            Empieza hoy gratis y lanza tu tienda en minutos. Crea tu catálogo, recibe pedidos por WhatsApp y vende online de forma simple.
           </p>
           <div style={{ display: 'flex', gap: 14, justifyContent: 'center', flexWrap: 'wrap' }}>
             <Link to="/register-business" style={{
@@ -717,7 +713,7 @@ function CTASection() {
             >Ya tengo cuenta</Link>
           </div>
           <p style={{ fontSize: 13, color: 'var(--text-muted)', marginTop: 20 }}>
-            Sin tarjeta de crédito · Cancela cuando quieras
+            Sin tarjeta · Configuración en menos de 5 minutos
           </p>
         </div>
       </div>
@@ -734,7 +730,7 @@ function Footer() {
           <div>
             <BrandLogo size={32} textSize={17} style={{ marginBottom: 16 }} />
             <p style={{ fontSize: 13, color: 'var(--text-muted)', lineHeight: 1.7, maxWidth: 240 }}>
-              La plataforma de tiendas online para negocios peruanos que quieren vender más.
+              Plataforma nueva en crecimiento para negocios peruanos que quieren vender online de forma simple y rápida.
             </p>
           </div>
           <div>
