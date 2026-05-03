@@ -4,23 +4,30 @@ import { createOrder } from '../api/storeApi'
 import toast from 'react-hot-toast'
 
 export default function CheckoutModal({ open, cart, total, company, onClose, onSuccess }) {
-  const [name, setName]       = useState('')
-  const [phone, setPhone]     = useState('')
-  const [address, setAddress] = useState('')
-  const [loading, setLoading] = useState(false)
-  const [orderId, setOrderId] = useState(null)
+  const [name, setName]           = useState('')
+  const [phone, setPhone]         = useState('')
+  const [address, setAddress]     = useState('')
+  const [loading, setLoading]     = useState(false)
+  const [orderId, setOrderId]     = useState(null)
+  const [whatsappUrl, setWhatsappUrl] = useState(null) // ← URL generada por el backend
 
   const handleConfirm = async () => {
     if (!name.trim()) { toast.error('Por favor ingresa tu nombre'); return }
     setLoading(true)
     try {
-      const order = await createOrder(company.id, {
-        customerName: name.trim(),
-        customerPhone: phone.trim(),
+      const data = await createOrder(company.id, {
+        customerName:    name.trim(),
+        customerPhone:   phone.trim(),
         customerAddress: address.trim(),
         items: cart.map(i => ({ productId: i.product.id, quantity: i.quantity })),
       })
-      setOrderId(order.id)
+
+      // El backend ahora retorna { order, orderId, total, whatsappUrl? }
+      const id  = data.orderId || data.order?.id || data.id
+      const url = data.whatsappUrl || null
+
+      setOrderId(id)
+      setWhatsappUrl(url)
       onSuccess()
     } catch (e) {
       toast.error(e.message)
@@ -29,12 +36,11 @@ export default function CheckoutModal({ open, cart, total, company, onClose, onS
     }
   }
 
-  const handleClose = () => { setName(''); setPhone(''); setOrderId(null); onClose() }
-
-  const waPhone = company?.phone?.replace(/[^0-9]/g, '')
-  const waMsg   = encodeURIComponent(
-    `¡Hola! Acabo de hacer el pedido #${orderId} en tu tienda Fluxy. ¿Cuándo me lo entregas? 🙌`
-  )
+  const handleClose = () => {
+    setName(''); setPhone(''); setAddress('')
+    setOrderId(null); setWhatsappUrl(null)
+    onClose()
+  }
 
   if (!open) return null
 
@@ -51,6 +57,7 @@ export default function CheckoutModal({ open, cart, total, company, onClose, onS
         boxShadow: '0 40px 80px rgba(0,0,0,0.6)',
         maxHeight: '90vh', overflowY: 'auto',
       }}>
+        {/* ── Pantalla de confirmación ── */}
         {orderId ? (
           <div style={{ textAlign: 'center', padding: '48px 36px' }}>
             <div style={{ fontSize: 52, marginBottom: 18 }}>🎉</div>
@@ -68,17 +75,23 @@ export default function CheckoutModal({ open, cart, total, company, onClose, onS
             }}>Pedido #{orderId}</div>
 
             <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
-              {waPhone && (
-                <a href={`https://wa.me/${waPhone}?text=${waMsg}`} target="_blank" rel="noreferrer"
+              {/* ✅ Botón WhatsApp — aparece solo si el backend lo retorna (plan PRO/BUSINESS) */}
+              {whatsappUrl && (
+                <a
+                  href={whatsappUrl}
+                  target="_blank"
+                  rel="noreferrer"
                   style={{
                     display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8,
                     background: 'linear-gradient(135deg, #25d366, #128c7e)',
                     color: 'white', padding: '13px 24px', borderRadius: 14,
-                    fontSize: 14, fontWeight: 600,
-                  }}>
+                    fontSize: 14, fontWeight: 600, textDecoration: 'none',
+                  }}
+                >
                   💬 Coordinar por WhatsApp
                 </a>
               )}
+
               <button onClick={handleClose} style={{
                 padding: '13px 24px',
                 background: 'rgba(255,255,255,0.04)',
@@ -90,6 +103,7 @@ export default function CheckoutModal({ open, cart, total, company, onClose, onS
           </div>
         ) : (
           <>
+            {/* ── Formulario ── */}
             <div style={{
               padding: '22px 26px',
               borderBottom: '1px solid rgba(255,255,255,0.06)',
@@ -106,7 +120,7 @@ export default function CheckoutModal({ open, cart, total, company, onClose, onS
             </div>
 
             <div style={{ padding: '24px 26px' }}>
-              {/* Resumen */}
+              {/* Resumen del carrito */}
               <div style={{
                 background: 'rgba(255,255,255,0.02)',
                 border: '1px solid rgba(255,255,255,0.06)',
@@ -125,10 +139,10 @@ export default function CheckoutModal({ open, cart, total, company, onClose, onS
                 ))}
               </div>
 
-              {/* Campos */}
+              {/* Campos del cliente */}
               {[
-                { label: 'Tu nombre completo *', value: name,  onChange: setName,  placeholder: 'Ej: Juan Pérez' },
-                { label: 'Tu teléfono',          value: phone, onChange: setPhone, placeholder: '+51 999 999 999' },
+                { label: 'Tu nombre completo *',    value: name,    onChange: setName,    placeholder: 'Ej: Juan Pérez' },
+                { label: 'Tu teléfono',             value: phone,   onChange: setPhone,   placeholder: '+51 999 999 999' },
                 { label: 'Tu dirección de entrega', value: address, onChange: setAddress, placeholder: 'Ej: Av. Ejemplo 123, Lima' },
               ].map(field => (
                 <div key={field.label} style={{ marginBottom: 16 }}>
@@ -137,7 +151,8 @@ export default function CheckoutModal({ open, cart, total, company, onClose, onS
                     fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.8px', marginBottom: 8,
                   }}>{field.label}</label>
                   <input
-                    value={field.value} onChange={e => field.onChange(e.target.value)}
+                    value={field.value}
+                    onChange={e => field.onChange(e.target.value)}
                     placeholder={field.placeholder}
                     style={{
                       width: '100%', background: 'rgba(255,255,255,0.03)',
