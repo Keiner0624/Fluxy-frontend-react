@@ -318,6 +318,12 @@ export default function SettingsPage() {
 
   return (
     <DashboardLayout>
+      <style>{`
+        @media (max-width: 768px) {
+          .fluxy-two-col { grid-template-columns: 1fr !important; }
+          .fluxy-sticky { position: relative !important; top: 0 !important; }
+        }
+      `}</style>
       <div style={{ marginBottom: 28 }}>
         <div style={{ fontSize: 11, color: 'var(--primary)', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '1.5px', marginBottom: 6 }}>Panel de vendedor</div>
         <h1 style={{ fontFamily: "'Fraunces', serif", fontSize: 28, fontWeight: 700, color: 'white' }}>Configuración de tienda</h1>
@@ -336,7 +342,7 @@ export default function SettingsPage() {
       {loading ? (
         <div style={{ textAlign: 'center', padding: 60, color: 'var(--text-muted)' }}>Cargando...</div>
       ) : (
-        <div style={{ display: 'grid', gridTemplateColumns: 'minmax(0,1fr) minmax(0,340px)', gap: 24, alignItems: 'start' }}>
+        <div className="fluxy-two-col" style={{ display: 'grid', gridTemplateColumns: 'minmax(0,1fr) minmax(0,340px)', gap: 24, alignItems: 'start' }}>
 
           {/* ── Columna izquierda: Formulario ── */}
           <form onSubmit={handleSubmit}>
@@ -416,7 +422,7 @@ export default function SettingsPage() {
           </form>
 
           {/* ── Vista previa ── */}
-          <div style={{ position: 'sticky', top: 24 }}>
+          <div className="fluxy-sticky" style={{ position: 'sticky', top: 24 }}>
             <div style={{ fontSize: 12, fontWeight: 600, color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '1px', marginBottom: 12 }}>Vista previa</div>
             <SettingsPreview form={form} logoPreview={logoPreview} />
             <div style={{ marginTop: 12, background: 'rgba(124,131,253,0.06)', border: '1px solid rgba(124,131,253,0.15)', borderRadius: 12, padding: '12px 16px' }}>
