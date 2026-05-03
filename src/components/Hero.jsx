@@ -135,7 +135,7 @@ export default function Hero({ company, loading, cartOpen }) {
                 </svg>
               </button>
 
-              {phone && (
+              {phone && company?.plan !== 'FREE' && (
                 <a href={`https://wa.me/${phone}?text=${waMsg}`} target="_blank" rel="noreferrer"
                   style={{
                     display: 'flex', alignItems: 'center', gap: 8,
@@ -277,7 +277,7 @@ export default function Hero({ company, loading, cartOpen }) {
       </div>
 
       {/* WhatsApp flotante */}
-      {phone && !cartOpen && (
+      {phone && company?.plan !== 'FREE' && !cartOpen && (
         <a href={`https://wa.me/${phone}?text=${waMsg}`} target="_blank" rel="noreferrer"
           style={{
             position: 'fixed', bottom: 24, left: 16, zIndex: 400,

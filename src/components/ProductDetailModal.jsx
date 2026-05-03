@@ -155,7 +155,7 @@ export default function ProductDetailModal({ product, onClose, onAddToCart, comp
               {isOut ? 'Sin stock' : adding ? '✓ ¡Agregado!' : `+ Agregar ${qty > 1 ? `(${qty})` : ''}`}
             </button>
 
-            {phone && (
+            {phone && company?.plan !== 'FREE' && (
               <a href={`https://wa.me/${phone}?text=${waMsg}`} target="_blank" rel="noreferrer"
                 style={{
                   flex: 1, padding: '14px',

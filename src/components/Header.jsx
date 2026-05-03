@@ -85,7 +85,7 @@ export default function Header({ company, cartCount, onCartOpen }) {
             </div>
           )}
 
-          {phone && (
+          {phone && company?.plan !== 'FREE' && (
             <a href={`https://wa.me/${phone}?text=${waMsg}`} target="_blank" rel="noreferrer"
               className="hide-mobile"
               style={{

@@ -175,7 +175,7 @@ export default function ProductCard({ product, onAddToCart, onViewDetail, index,
               onMouseLeave={e => { e.currentTarget.style.background = 'rgba(255,255,255,0.03)'; e.currentTarget.style.color = 'rgba(255,255,255,0.5)' }}
             >🔍 Ver detalles</button>
 
-            {phone && (
+            {phone && company?.plan !== 'FREE' && (
               <a href={`https://wa.me/${phone}?text=${waMsg}`} target="_blank" rel="noreferrer"
                 style={{
                   flex: 1, padding: '9px',
