@@ -50,38 +50,90 @@ export default function DashboardPage() {
   const navigate = useNavigate()
   const [searchParams] = useSearchParams()
   const [paymentStatus, setPaymentStatus] = useState(null)
+  const [plan, setPlan] = useState('FREE')
 
   const company  = JSON.parse(localStorage.getItem('company') || '{}') || {}
   const storeUrl = getCompanyStoreUrl(company)
   const user     = JSON.parse(localStorage.getItem('user')    || '{}') || {}
 
-  // ─── Detectar retorno de Mercado Pago ────────────────────────────────────
   useEffect(() => {
+    // Cargar plan
+    fetch(`${API_URL}/me`, { headers: { Authorization: `Bearer ${getToken()}` } })
+      .then(r => r.json())
+      .then(d => { if (d.planName) setPlan(d.planName) })
+      .catch(() => {})
+
+    // Detectar retorno de Mercado Pago
     const rawPayment = searchParams.get('payment')
       || searchParams.get('status')
       || searchParams.get('collection_status')
     const payment = PAYMENT_STATUS_MAP[rawPayment] || rawPayment
-    const plan    = searchParams.get('plan') || localStorage.getItem(PENDING_PLAN_KEY) || ''
+    const planParam = searchParams.get('plan') || localStorage.getItem(PENDING_PLAN_KEY) || ''
 
-    if (payment === 'success' || payment === 'approved') {
-      if(plan){
-        fetch(`${API_URL}/companies/plan`,  {
-          method: 'PUT',
-          headers: {
-            'Content-Type': 'application/json',
-            Authorization: `Bearer ${getToken()}`,
-          },
-          body: JSON.stringify({ plan: plan.toUpperCase(), months: '1' }),
-        }).catch(() => {})
-      }
-      setPaymentStatus({ status:'success', plan })
+    if (payment) {
+      setPaymentStatus({ status: payment, plan: planParam })
       window.history.replaceState({}, '', '/dashboard')
       localStorage.removeItem(PENDING_PLAN_KEY)
-      refreshSellerAccount(plan).catch(() => {})
+
+      if (payment === 'success') {
+        // Activar plan directamente
+        if (planParam) {
+          fetch(`${API_URL}/companies/plan`, {
+            method: 'PUT',
+            headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${getToken()}` },
+            body: JSON.stringify({ plan: planParam.toUpperCase(), months: '1' }),
+          }).catch(() => {})
+        }
+        refreshSellerAccount(planParam).catch(() => {})
+          .then(() => {
+            fetch(`${API_URL}/me`, { headers: { Authorization: `Bearer ${getToken()}` } })
+              .then(r => r.json())
+              .then(d => { if (d.planName) setPlan(d.planName) })
+              .catch(() => {})
+          })
+      }
       const timer = setTimeout(() => setPaymentStatus(null), 6000)
       return () => clearTimeout(timer)
     }
-  }, [searchParams])
+  }, [])
+
+  // ─── Badge del plan ───────────────────────────────────────────────────────
+  const PlanBadge = () => {
+    if (plan === 'BUSINESS') return (
+      <div style={{
+        display: 'flex', alignItems: 'center', gap: 8,
+        background: 'rgba(52,211,153,0.12)', border: '1px solid rgba(52,211,153,0.3)',
+        borderRadius: 12, padding: '11px 20px',
+        fontSize: 13, fontWeight: 700, color: '#34d399',
+      }}>🚀 Plan Business</div>
+    )
+    if (plan === 'PRO') return (
+      <div onClick={() => navigate('/dashboard/plans')} style={{
+        display: 'flex', alignItems: 'center', gap: 8,
+        background: 'rgba(124,131,253,0.15)', border: '1px solid rgba(124,131,253,0.35)',
+        borderRadius: 12, padding: '11px 20px',
+        fontSize: 13, fontWeight: 700, color: '#7c83fd',
+        cursor: 'pointer', transition: 'all 0.2s',
+      }}
+        onMouseEnter={e => e.currentTarget.style.background = 'rgba(124,131,253,0.22)'}
+        onMouseLeave={e => e.currentTarget.style.background = 'rgba(124,131,253,0.15)'}
+      >⚡ Plan Pro</div>
+    )
+    return (
+      <button onClick={() => navigate('/dashboard/plans')} style={{
+        display: 'flex', alignItems: 'center', gap: 8,
+        background: 'linear-gradient(135deg, #7c83fd, #4f46e5)',
+        color: 'white', border: 'none', borderRadius: 12,
+        padding: '11px 20px', fontSize: 13, fontWeight: 600,
+        cursor: 'pointer', whiteSpace: 'nowrap',
+        boxShadow: '0 4px 16px rgba(124,131,253,0.3)',
+        transition: 'all 0.2s',
+      }}
+        onMouseEnter={e => e.currentTarget.style.transform = 'translateY(-1px)'}
+        onMouseLeave={e => e.currentTarget.style.transform = 'translateY(0)'}
+      >⚡ Mejorar plan</button>
+    )
+  }
 
   return (
     <DashboardLayout>
@@ -102,7 +154,7 @@ export default function DashboardPage() {
                 Pago confirmado. Ya tienes acceso al plan {PLAN_NAMES[paymentStatus.plan] || paymentStatus.plan || 'seleccionado'}.
               </div>
               <div style={{ fontSize: 13, color: 'var(--text-muted)', marginTop: 2 }}>
-                Tu cuenta de vendedor fue actualizada correctamente.
+                Tu cuenta fue actualizada correctamente.
               </div>
             </div>
           </div>
@@ -149,12 +201,8 @@ export default function DashboardPage() {
         borderRadius: 20, padding: '28px 32px', marginBottom: 28,
         position: 'relative', overflow: 'hidden',
       }}>
-        <div style={{
-          position: 'absolute', top: 0, left: 0, right: 0, height: 2,
-          background: 'linear-gradient(to right, transparent, var(--primary), transparent)',
-        }}/>
+        <div style={{ position: 'absolute', top: 0, left: 0, right: 0, height: 2, background: 'linear-gradient(to right, transparent, var(--primary), transparent)' }}/>
 
-        {/* Header fila: texto + botón */}
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', flexWrap: 'wrap', gap: 16 }}>
           <div>
             <div style={{ fontSize: 11, color: 'var(--primary)', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '1.5px', marginBottom: 8 }}>
@@ -168,36 +216,18 @@ export default function DashboardPage() {
             </p>
           </div>
 
-          {/* ── Botón Mejorar plan ── */}
-          <button
-            onClick={() => navigate('/dashboard/plans')}
-            style={{
-              display: 'flex', alignItems: 'center', gap: 8,
-              background: 'linear-gradient(135deg, #7c83fd, #4f46e5)',
-              color: 'white', border: 'none', borderRadius: 12,
-              padding: '11px 20px', fontSize: 13, fontWeight: 600,
-              cursor: 'pointer', whiteSpace: 'nowrap',
-              boxShadow: '0 4px 16px rgba(124,131,253,0.3)',
-              transition: 'all 0.2s',
-            }}
-            onMouseEnter={e => e.currentTarget.style.transform = 'translateY(-1px)'}
-            onMouseLeave={e => e.currentTarget.style.transform = 'translateY(0)'}
-          >
-            ⚡ Mejorar plan
-          </button>
+          {/* ── Badge plan ── */}
+          <PlanBadge />
         </div>
       </div>
 
       {/* ── Cards rápidas ── */}
-      <div style={{
-        display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))',
-        gap: 16, marginBottom: 28,
-      }}>
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: 16, marginBottom: 28 }}>
         {[
-          { icon: '📦', label: 'Productos',     desc: 'Gestiona tu catálogo',   path: '/dashboard/products', color: '#7c83fd' },
-          { icon: '🛒', label: 'Pedidos',        desc: 'Ver pedidos recibidos',  path: '/dashboard/orders',   color: '#34d399' },
-          { icon: '⚙️', label: 'Configuración', desc: 'Edita tu tienda',        path: '/dashboard/settings', color: '#fbbf24' },
-          { icon: '⚡', label: 'Mejorar plan',  desc: 'Ver planes y precios',   path: '/dashboard/plans',    color: '#a78bfa' },
+          { icon: '📦', label: 'Productos',    desc: 'Gestiona tu catálogo',  path: '/dashboard/products', color: '#7c83fd' },
+          { icon: '🛒', label: 'Pedidos',      desc: 'Ver pedidos recibidos', path: '/dashboard/orders',   color: '#34d399' },
+          { icon: '⚙️', label: 'Configuración', desc: 'Edita tu tienda',      path: '/dashboard/settings', color: '#fbbf24' },
+          { icon: '⚡', label: 'Planes',       desc: 'Ver planes y precios',  path: '/dashboard/plans',    color: '#a78bfa' },
         ].map(card => (
           <button key={card.path} onClick={() => navigate(card.path)} style={{
             background: 'rgba(13,13,26,0.9)', border: '1px solid rgba(255,255,255,0.06)',
@@ -207,19 +237,14 @@ export default function DashboardPage() {
             onMouseEnter={e => { e.currentTarget.style.borderColor = `${card.color}40`; e.currentTarget.style.transform = 'translateY(-2px)' }}
             onMouseLeave={e => { e.currentTarget.style.borderColor = 'rgba(255,255,255,0.06)'; e.currentTarget.style.transform = 'translateY(0)' }}
           >
-            <div style={{
-              width: 40, height: 40, borderRadius: 11,
-              background: `${card.color}15`, border: `1px solid ${card.color}30`,
-              display: 'flex', alignItems: 'center', justifyContent: 'center',
-              fontSize: 20, marginBottom: 12,
-            }}>{card.icon}</div>
+            <div style={{ width: 40, height: 40, borderRadius: 11, background: `${card.color}15`, border: `1px solid ${card.color}30`, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 20, marginBottom: 12 }}>{card.icon}</div>
             <div style={{ fontSize: 15, fontWeight: 600, color: 'white', marginBottom: 4 }}>{card.label}</div>
             <div style={{ fontSize: 12, color: 'var(--text-muted)' }}>{card.desc}</div>
           </button>
         ))}
       </div>
 
-      {/* ── Link a la tienda ── */}
+      {/* ── Link tienda ── */}
       {storeUrl && (
         <div style={{
           background: 'rgba(13,13,26,0.8)', border: '1px solid rgba(255,255,255,0.06)',
