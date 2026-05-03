@@ -883,3 +883,8 @@ export default function LandingPage() {
     </>
   )
 }
+
+// Después de guardar el token y company en localStorage:
+const params = new URLSearchParams(window.location.search)
+const returnTo = params.get('returnTo')
+navigate(returnTo ? decodeURIComponent(returnTo) : '/dashboard')

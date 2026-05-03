@@ -1,29 +1,62 @@
 // src/modules/dashboard/components/DashboardLayout.jsx
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { Link, useNavigate, useLocation } from 'react-router-dom'
-import { getCompanyStoreUrl } from '../../../app/config'
+import { getCompanyStoreUrl, API_URL } from '../../../app/config'
 import BrandLogo from '../../../components/BrandLogo'
 
+function getToken() { return localStorage.getItem('token') || '' }
+
+const PLAN_ORDER = { FREE: 0, PRO: 1, BUSINESS: 2 }
+const PLAN_COLORS = {
+  FREE:     { bg: 'rgba(255,255,255,0.06)', border: 'rgba(255,255,255,0.12)', text: '#9ca3af' },
+  PRO:      { bg: 'rgba(124,131,253,0.15)', border: 'rgba(124,131,253,0.35)', text: '#7c83fd' },
+  BUSINESS: { bg: 'rgba(52,211,153,0.12)',  border: 'rgba(52,211,153,0.30)',  text: '#34d399' },
+}
+
+// requiredPlan: undefined = todos, 'PRO' = pro+, 'BUSINESS' = solo business
 const NAV_ITEMS = [
   { path: '/dashboard',          icon: '📊', label: 'Resumen' },
-   { path: '/dashboard/metrics',  icon: '📈', label: 'Métricas' },
   { path: '/dashboard/products', icon: '📦', label: 'Productos' },
   { path: '/dashboard/orders',   icon: '🛒', label: 'Pedidos' },
+  { path: '/dashboard/metrics',  icon: '📈', label: 'Métricas',      requiredPlan: 'PRO' },
+  { path: '/dashboard/style',    icon: '🎨', label: 'Estilo',        requiredPlan: 'PRO' },
   { path: '/dashboard/settings', icon: '⚙️', label: 'Configuración' },
-  { path: '/dashboard/style',    icon: '🎨', label: 'Estilo' },
+  { path: '/dashboard/plans',    icon: '⚡', label: 'Mejorar plan' },
 ]
 
 export default function DashboardLayout({ children }) {
   const navigate = useNavigate()
   const location = useLocation()
-  const company = JSON.parse(localStorage.getItem('company') || '{}') || {}
+  const company  = JSON.parse(localStorage.getItem('company') || '{}') || {}
   const storeUrl = getCompanyStoreUrl(company)
   const [sidebarOpen, setSidebarOpen] = useState(false)
+  const [plan, setPlan] = useState('FREE')
+
+  useEffect(() => {
+    const load = async () => {
+      try {
+        const res = await fetch(`${API_URL}/me`, {
+          headers: { Authorization: `Bearer ${getToken()}` },
+        })
+        if (!res.ok) return
+        const data = await res.json()
+        if (data.planName) setPlan(data.planName)
+      } catch { /* silencioso */ }
+    }
+    load()
+  }, [])
+
+  const canAccess = (requiredPlan) => {
+    if (!requiredPlan) return true
+    return (PLAN_ORDER[plan] || 0) >= (PLAN_ORDER[requiredPlan] || 0)
+  }
 
   const handleLogout = () => {
     localStorage.clear()
     navigate('/login')
   }
+
+  const planColor = PLAN_COLORS[plan] || PLAN_COLORS.FREE
 
   const Sidebar = ({ mobile = false }) => (
     <div style={{
@@ -42,13 +75,11 @@ export default function DashboardLayout({ children }) {
         borderBottom: '1px solid rgba(255,255,255,0.06)',
         marginBottom: 8,
       }}>
-        <Link to="/" style={{
-          display: 'flex', alignItems: 'center', gap: 10,
-        }}>
+        <Link to="/" style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
           <BrandLogo size={32} textSize={17} />
         </Link>
 
-        {/* Nombre negocio */}
+        {/* Nombre negocio + plan badge */}
         <div style={{
           marginTop: 12, padding: '8px 10px',
           background: 'rgba(124,131,253,0.08)',
@@ -56,8 +87,18 @@ export default function DashboardLayout({ children }) {
           borderRadius: 10,
         }}>
           <div style={{ fontSize: 11, color: 'var(--text-muted)', marginBottom: 2 }}>Tu negocio</div>
-          <div style={{ fontSize: 13, fontWeight: 600, color: 'white', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+          <div style={{ fontSize: 13, fontWeight: 600, color: 'white', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', marginBottom: 6 }}>
             {company.name || 'Mi Negocio'}
+          </div>
+          {/* Plan badge */}
+          <div style={{
+            display: 'inline-flex', alignItems: 'center', gap: 5,
+            background: planColor.bg, border: `1px solid ${planColor.border}`,
+            borderRadius: 6, padding: '2px 8px',
+          }}>
+            <span style={{ fontSize: 10, fontWeight: 700, color: planColor.text, textTransform: 'uppercase', letterSpacing: '0.5px' }}>
+              {plan === 'FREE' ? '🔒 Free' : plan === 'PRO' ? '⚡ Pro' : '🚀 Business'}
+            </span>
           </div>
         </div>
       </div>
@@ -65,25 +106,38 @@ export default function DashboardLayout({ children }) {
       {/* Nav */}
       <nav style={{ flex: 1, padding: '0 12px' }}>
         {NAV_ITEMS.map(item => {
-          const active = location.pathname === item.path
+          const active  = location.pathname === item.path
+          const locked  = !canAccess(item.requiredPlan)
+
           return (
-            <Link key={item.path} to={item.path}
+            <Link
+              key={item.path}
+              to={locked ? '/dashboard/plans' : item.path}
               onClick={() => setSidebarOpen(false)}
               style={{
                 display: 'flex', alignItems: 'center', gap: 10,
                 padding: '10px 12px', borderRadius: 10, marginBottom: 4,
                 background: active ? 'rgba(124,131,253,0.12)' : 'transparent',
                 border: active ? '1px solid rgba(124,131,253,0.2)' : '1px solid transparent',
-                color: active ? 'var(--primary)' : 'var(--text-soft)',
+                color: locked ? 'var(--text-muted)' : active ? 'var(--primary)' : 'var(--text-soft)',
                 fontSize: 14, fontWeight: active ? 600 : 400,
-                transition: 'all 0.2s',
-                textDecoration: 'none',
+                transition: 'all 0.2s', textDecoration: 'none',
+                opacity: locked ? 0.6 : 1,
               }}
-              onMouseEnter={e => { if (!active) e.currentTarget.style.background = 'rgba(255,255,255,0.04)' }}
+              onMouseEnter={e => { if (!active && !locked) e.currentTarget.style.background = 'rgba(255,255,255,0.04)' }}
               onMouseLeave={e => { if (!active) e.currentTarget.style.background = 'transparent' }}
             >
               <span style={{ fontSize: 16 }}>{item.icon}</span>
-              {item.label}
+              <span style={{ flex: 1 }}>{item.label}</span>
+              {locked && (
+                <span style={{
+                  fontSize: 9, fontWeight: 700, color: '#7c83fd',
+                  background: 'rgba(124,131,253,0.15)',
+                  border: '1px solid rgba(124,131,253,0.25)',
+                  borderRadius: 4, padding: '1px 5px',
+                  textTransform: 'uppercase', letterSpacing: '0.5px',
+                }}>PRO</span>
+              )}
             </Link>
           )
         })}
@@ -165,8 +219,7 @@ export default function DashboardLayout({ children }) {
 
       {/* Main content */}
       <div className="dashboard-main" style={{
-        marginLeft: 240,
-        flex: 1, minWidth: 0,
+        marginLeft: 240, flex: 1, minWidth: 0,
         padding: '32px 32px',
       }}>
         {children}
