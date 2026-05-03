@@ -65,13 +65,13 @@ export default function DashboardPage() {
 
     if (payment === 'success' || payment === 'approved') {
       if(plan){
-        fetch('${API_URL}/companies/plan',  {
+        fetch(`${API_URL}/companies/plan`,  {
           method: 'PUT',
           headers: {
             'Content-Type': 'application/json',
             Authorization: `Bearer ${getToken()}`,
           },
-          body, JSON.stringify({ plan: plan.toLocaleLowerCase(), method: '1' }),
+          body: JSON.stringify({ plan: plan.toUpperCase(), months: '1' }),
         }).catch(() => {})
       }
       setPaymentStatus({ status:'success', plan })
