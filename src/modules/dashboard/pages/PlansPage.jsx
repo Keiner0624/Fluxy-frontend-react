@@ -188,7 +188,7 @@ export default function PlansPage() {
               transition: 'all 0.2s',
             }}>
 
-            // ✅ DESPUÉS — solo uno a la vez:
+           
 {isCurrent ? (
   <div style={{
     position: 'absolute', top: 16, right: 16,
