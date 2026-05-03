@@ -1,8 +1,8 @@
 // src/modules/auth/pages/ResetPasswordPage.jsx
 import { useState, useEffect } from 'react'
 import { Link, useSearchParams, useNavigate } from 'react-router-dom'
-import { API_URL } from '../../../app/config'
-import BrandLogo from '../../../components/BrandLogo'
+import { API_URL } from '../../app/config'
+import BrandLogo from '../../components/BrandLogo'
 
 export default function ResetPasswordPage() {
   const [searchParams]          = useSearchParams()

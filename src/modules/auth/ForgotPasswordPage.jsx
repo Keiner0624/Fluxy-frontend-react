@@ -1,8 +1,8 @@
 // src/modules/auth/pages/ForgotPasswordPage.jsx
 import { useState } from 'react'
 import { Link } from 'react-router-dom'
-import { API_URL } from '../../../app/config'
-import BrandLogo from '../../../components/BrandLogo'
+import { API_URL } from '../../app/config'
+import BrandLogo from '../../components/BrandLogo'
 
 export default function ForgotPasswordPage() {
   const [email, setEmail]     = useState('')

@@ -12,8 +12,8 @@ import SettingsPage from '../modules/dashboard/pages/SettingsPage'
 import StylePage from '../modules/dashboard/pages/StylePage'
 import MetricsPage from '../modules/dashboard/pages/MetricsPage'
 import PlansPage from '../modules/dashboard/pages/PlansPage'
-import ForgotPasswordPage from '../modules/auth/pages/ForgotPasswordPage'
-import ResetPasswordPage from '../modules/auth/pages/ResetPasswordPage'
+import ForgotPasswordPage from '../modules/auth/ForgotPasswordPage'
+import ResetPasswordPage from '../modules/auth/ResetPasswordPage'
 
 const PAYMENT_STATUS_MAP = {
   approved: 'success',
