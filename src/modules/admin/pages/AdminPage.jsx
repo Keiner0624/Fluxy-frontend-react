@@ -153,7 +153,14 @@ export default function AdminPage() {
   const [deleting, setDeleting] = useState(null)
   const [msg, setMsg]           = useState('')
 
-  useEffect(() => { loadAll() }, [])
+  useEffect(() => {
+    if (!getToken()) {
+      navigate('/admin/login')
+      return
+    }
+
+    loadAll()
+  }, [])
 
   const loadAll = async () => {
     setLoading(true)
