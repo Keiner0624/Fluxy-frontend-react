@@ -11,17 +11,6 @@ const PLAN_COLORS = {
   BUSINESS: { color: '#34d399', bg: 'rgba(52,211,153,0.1)',  border: 'rgba(52,211,153,0.25)'  },
 }
 
-const PLAN_OPTIONS = [
-  { value: 'FREE', label: 'FREE - Gratis' },
-  { value: 'PRO', label: 'PRO - S/ 19/mes' },
-  { value: 'BUSINESS', label: 'BUSINESS - S/ 39/mes' },
-]
-
-const MONTH_OPTIONS = [1, 2, 3, 6, 12].map(m => ({
-  value: String(m),
-  label: `${m} mes${m > 1 ? 'es' : ''}`,
-}))
-
 function StatCard({ icon, label, value, color = '#7c83fd', sub }) {
   return (
     <div style={{
@@ -41,104 +30,6 @@ function StatCard({ icon, label, value, color = '#7c83fd', sub }) {
   )
 }
 
-function AdminSelect({ value, options, onChange }) {
-  const [open, setOpen] = useState(false)
-  const selected = options.find(option => option.value === value) || options[0]
-
-  const selectOption = (nextValue) => {
-    onChange(nextValue)
-    setOpen(false)
-  }
-
-  return (
-    <div style={{ position: 'relative' }}>
-      <button
-        type="button"
-        onClick={() => setOpen(current => !current)}
-        onBlur={() => setTimeout(() => setOpen(false), 120)}
-        style={{
-          width: '100%',
-          background: 'rgba(255,255,255,0.05)',
-          border: `1px solid ${open ? 'rgba(124,131,253,0.45)' : 'rgba(255,255,255,0.1)'}`,
-          borderRadius: 12,
-          padding: '12px 14px',
-          color: 'white',
-          fontSize: 14,
-          fontWeight: 700,
-          outline: 'none',
-          fontFamily: 'DM Sans, sans-serif',
-          cursor: 'pointer',
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'space-between',
-          gap: 12,
-          boxShadow: open ? '0 0 0 3px rgba(124,131,253,0.12)' : 'none',
-          transition: 'border 0.2s, box-shadow 0.2s, background 0.2s',
-        }}
-      >
-        <span>{selected?.label}</span>
-        <span style={{
-          color: '#c8c9ff',
-          fontSize: 16,
-          lineHeight: 1,
-          transform: open ? 'rotate(180deg)' : 'rotate(0deg)',
-          transition: 'transform 0.2s',
-        }}>⌄</span>
-      </button>
-
-      {open && (
-        <div style={{
-          position: 'absolute',
-          zIndex: 250,
-          top: 'calc(100% + 8px)',
-          left: 0,
-          right: 0,
-          background: '#111126',
-          border: '1px solid rgba(124,131,253,0.28)',
-          borderRadius: 14,
-          padding: 6,
-          boxShadow: '0 18px 40px rgba(0,0,0,0.45)',
-          animation: 'fadeIn 0.18s ease',
-          overflow: 'hidden',
-        }}>
-          {options.map(option => {
-            const active = option.value === value
-            return (
-              <button
-                key={option.value}
-                type="button"
-                onMouseDown={e => e.preventDefault()}
-                onClick={() => selectOption(option.value)}
-                style={{
-                  width: '100%',
-                  border: 'none',
-                  borderRadius: 10,
-                  padding: '10px 12px',
-                  background: active ? 'linear-gradient(135deg, rgba(124,131,253,0.24), rgba(79,70,229,0.22))' : 'transparent',
-                  color: active ? '#ffffff' : 'rgba(255,255,255,0.68)',
-                  fontSize: 13,
-                  fontWeight: active ? 800 : 600,
-                  textAlign: 'left',
-                  fontFamily: 'DM Sans, sans-serif',
-                  cursor: 'pointer',
-                }}
-                onMouseEnter={e => {
-                  if (!active) e.currentTarget.style.background = 'rgba(255,255,255,0.06)'
-                }}
-                onMouseLeave={e => {
-                  if (!active) e.currentTarget.style.background = 'transparent'
-                }}
-              >
-                {option.label}
-              </button>
-            )
-          })}
-        </div>
-      )}
-    </div>
-  )
-}
-
 export default function AdminPage() {
   const navigate = useNavigate()
   const [metrics, setMetrics]   = useState(null)
@@ -153,14 +44,7 @@ export default function AdminPage() {
   const [deleting, setDeleting] = useState(null)
   const [msg, setMsg]           = useState('')
 
-  useEffect(() => {
-    if (!getToken()) {
-      navigate('/admin/login')
-      return
-    }
-
-    loadAll()
-  }, [])
+  useEffect(() => { loadAll() }, [])
 
   const loadAll = async () => {
     setLoading(true)
@@ -175,7 +59,7 @@ export default function AdminPage() {
         return
       }
       setMetrics(await mRes.json())
-      setVendors(await vRes.json())
+      const vData = await vRes.json(); setVendors(Array.isArray(vData) ? vData : [])
     } catch { navigate('/dashboard') }
     finally { setLoading(false) }
   }
@@ -205,6 +89,7 @@ export default function AdminPage() {
         headers: { Authorization: `Bearer ${getToken()}` },
       })
       setMsg('✅ Vendedor eliminado.')
+      setVendors(prev => Array.isArray(prev) ? prev.filter(v => v.companyId !== companyId) : [])
       loadAll()
     } catch { setMsg('⚠️ Error al eliminar') }
     finally { setDeleting(null); setTimeout(() => setMsg(''), 3000) }
@@ -260,18 +145,6 @@ export default function AdminPage() {
           <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
             <button onClick={loadAll} style={{ padding: '7px 14px', borderRadius: 9, background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.1)', color: 'var(--text-muted, #9898b8)', fontSize: 12, cursor: 'pointer' }}>
               🔄 Actualizar
-            </button>
-            <button onClick={() => {
-              localStorage.removeItem('token')
-              localStorage.removeItem('company')
-              navigate('/admin/login')
-            }} style={{
-              padding: '7px 14px', borderRadius: 9,
-              background: 'rgba(248,113,113,0.08)',
-              border: '1px solid rgba(248,113,113,0.2)',
-              color: '#f87171', fontSize: 12, fontWeight: 600, cursor: 'pointer',
-            }}>
-              Cerrar sesión
             </button>
             <button onClick={() => navigate('/dashboard')} style={{ padding: '7px 14px', borderRadius: 9, background: 'rgba(124,131,253,0.1)', border: '1px solid rgba(124,131,253,0.25)', color: '#7c83fd', fontSize: 12, fontWeight: 600, cursor: 'pointer' }}>
               ← Dashboard
@@ -421,13 +294,42 @@ export default function AdminPage() {
 
             <div style={{ marginBottom: 16 }}>
               <label style={{ fontSize: 12, fontWeight: 600, color: 'rgba(255,255,255,0.4)', textTransform: 'uppercase', letterSpacing: '0.8px', display: 'block', marginBottom: 8 }}>Plan</label>
-              <AdminSelect value={newPlan} options={PLAN_OPTIONS} onChange={setNewPlan} />
+              <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+                {[
+                  { value: 'FREE',     label: 'FREE',     sub: 'Gratis',     color: '#9ca3af' },
+                  { value: 'PRO',      label: 'PRO',      sub: 'S/ 19/mes',  color: '#7c83fd' },
+                  { value: 'BUSINESS', label: 'BUSINESS', sub: 'S/ 39/mes',  color: '#34d399' },
+                ].map(p => (
+                  <button key={p.value} type="button" onClick={() => setNewPlan(p.value)} style={{
+                    display: 'flex', alignItems: 'center', justifyContent: 'space-between',
+                    padding: '12px 16px', borderRadius: 11, cursor: 'pointer', transition: 'all 0.2s',
+                    background: newPlan === p.value ? `${p.color}18` : 'rgba(255,255,255,0.04)',
+                    border: newPlan === p.value ? `1px solid ${p.color}50` : '1px solid rgba(255,255,255,0.08)',
+                  }}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+                      <div style={{ width: 10, height: 10, borderRadius: '50%', background: p.color }}/>
+                      <span style={{ fontSize: 14, fontWeight: 700, color: newPlan === p.value ? p.color : 'white' }}>{p.label}</span>
+                    </div>
+                    <span style={{ fontSize: 12, color: 'rgba(255,255,255,0.4)' }}>{p.sub}</span>
+                  </button>
+                ))}
+              </div>
             </div>
 
             {newPlan !== 'FREE' && (
               <div style={{ marginBottom: 24 }}>
                 <label style={{ fontSize: 12, fontWeight: 600, color: 'rgba(255,255,255,0.4)', textTransform: 'uppercase', letterSpacing: '0.8px', display: 'block', marginBottom: 8 }}>Meses</label>
-                <AdminSelect value={months} options={MONTH_OPTIONS} onChange={setMonths} />
+                <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
+                  {[1,2,3,6,12].map(m => (
+                    <button key={m} type="button" onClick={() => setMonths(String(m))} style={{
+                      flex: 1, minWidth: 52, padding: '10px 8px', borderRadius: 10,
+                      cursor: 'pointer', transition: 'all 0.2s', fontSize: 13, fontWeight: 600,
+                      background: months === String(m) ? 'rgba(124,131,253,0.15)' : 'rgba(255,255,255,0.04)',
+                      border: months === String(m) ? '1px solid rgba(124,131,253,0.4)' : '1px solid rgba(255,255,255,0.08)',
+                      color: months === String(m) ? '#7c83fd' : 'rgba(255,255,255,0.5)',
+                    }}>{m} {m === 1 ? 'mes' : 'meses'}</button>
+                  ))}
+                </div>
               </div>
             )}
 
