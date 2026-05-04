@@ -44,7 +44,14 @@ export default function AdminPage() {
   const [deleting, setDeleting] = useState(null)
   const [msg, setMsg]           = useState('')
 
-  useEffect(() => { loadAll() }, [])
+  useEffect(() => {
+    // ✅ Si no hay token, ir al login
+    if (!getToken()) {
+      navigate('/admin/login')
+      return
+    }
+    loadAll()
+  }, [])
 
   const loadAll = async () => {
     setLoading(true)
