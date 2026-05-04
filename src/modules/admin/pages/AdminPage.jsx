@@ -126,6 +126,17 @@ export default function AdminPage() {
         @keyframes fadeIn { from { opacity:0; transform:translateY(-8px) } to { opacity:1; transform:translateY(0) } }
         * { box-sizing: border-box; margin: 0; padding: 0; }
         ::-webkit-scrollbar { width: 6px; } ::-webkit-scrollbar-track { background: #0a0a18; } ::-webkit-scrollbar-thumb { background: rgba(124,131,253,0.3); border-radius: 3px; }
+        @media (max-width: 768px) {
+          .admin-stats { grid-template-columns: repeat(2, 1fr) !important; }
+          .admin-table-header { flex-direction: column !important; align-items: stretch !important; }
+          .admin-filters { flex-wrap: wrap !important; }
+          .admin-search { width: 100% !important; }
+          .admin-nav-btns { gap: 6px !important; }
+          .admin-nav-btns button { padding: 6px 10px !important; font-size: 11px !important; }
+        }
+        @media (max-width: 480px) {
+          .admin-stats { grid-template-columns: 1fr !important; }
+        }
       `}</style>
 
       {/* Fondo */}
@@ -142,12 +153,15 @@ export default function AdminPage() {
               <div style={{ fontSize: 10, color: '#7c83fd', fontWeight: 600 }}>Panel de control</div>
             </div>
           </div>
-          <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
-            <button onClick={loadAll} style={{ padding: '7px 14px', borderRadius: 9, background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.1)', color: 'var(--text-muted, #9898b8)', fontSize: 12, cursor: 'pointer' }}>
-              🔄 Actualizar
+          <div className="admin-nav-btns" style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+            <button onClick={loadAll} style={{ padding: '7px 14px', borderRadius: 9, background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.1)', color: 'rgba(255,255,255,0.5)', fontSize: 12, cursor: 'pointer' }}>
+              🔄
             </button>
             <button onClick={() => navigate('/dashboard')} style={{ padding: '7px 14px', borderRadius: 9, background: 'rgba(124,131,253,0.1)', border: '1px solid rgba(124,131,253,0.25)', color: '#7c83fd', fontSize: 12, fontWeight: 600, cursor: 'pointer' }}>
               ← Dashboard
+            </button>
+            <button onClick={() => { localStorage.removeItem('token'); localStorage.removeItem('company'); navigate('/admin/login') }} style={{ padding: '7px 14px', borderRadius: 9, background: 'rgba(248,113,113,0.08)', border: '1px solid rgba(248,113,113,0.2)', color: '#f87171', fontSize: 12, fontWeight: 600, cursor: 'pointer' }}>
+              Cerrar sesión
             </button>
           </div>
         </div>
@@ -170,7 +184,7 @@ export default function AdminPage() {
 
         {/* Stats */}
         {metrics && (
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: 16, marginBottom: 32 }}>
+          <div className="admin-stats" style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: 16, marginBottom: 32 }}>
             <StatCard icon="🏪" label="Vendedores totales" value={metrics.totalVendedores} color="#7c83fd" sub="Registrados en Fluxy"/>
             <StatCard icon="⚡" label="Plan Pro" value={metrics.planPro} color="#7c83fd" sub={`S/ ${(metrics.planPro * 19).toFixed(0)}/mes`}/>
             <StatCard icon="🚀" label="Plan Business" value={metrics.planBusiness} color="#34d399" sub={`S/ ${(metrics.planBusiness * 39).toFixed(0)}/mes`}/>
@@ -184,14 +198,14 @@ export default function AdminPage() {
         <div style={{ background: 'rgba(13,13,26,0.9)', border: '1px solid rgba(255,255,255,0.06)', borderRadius: 20, overflow: 'hidden' }}>
 
           {/* Header tabla */}
-          <div style={{ padding: '20px 24px', borderBottom: '1px solid rgba(255,255,255,0.06)', display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: 12 }}>
+          <div className="admin-table-header" style={{ padding: '20px 24px', borderBottom: '1px solid rgba(255,255,255,0.06)', display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: 12 }}>
             <div style={{ fontSize: 15, fontWeight: 700, color: 'white' }}>
               Vendedores <span style={{ fontSize: 12, color: 'var(--text-muted, #9898b8)', fontWeight: 400, marginLeft: 8 }}>{filtered.length} de {vendors.length}</span>
             </div>
-            <div style={{ display: 'flex', gap: 10, flexWrap: 'wrap' }}>
+            <div className="admin-filters" style={{ display: 'flex', gap: 10, flexWrap: 'wrap' }}>
               {/* Búsqueda */}
               <input value={search} onChange={e => setSearch(e.target.value)} placeholder="🔍 Buscar negocio o email..."
-                style={{ background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.08)', borderRadius: 10, padding: '8px 14px', color: 'white', fontSize: 13, outline: 'none', width: 220, fontFamily: 'DM Sans, sans-serif' }}
+                className="admin-search" style={{ background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.08)', borderRadius: 10, padding: '8px 14px', color: 'white', fontSize: 13, outline: 'none', width: 220, fontFamily: 'DM Sans, sans-serif' }}
                 onFocus={e => e.target.style.borderColor = 'rgba(124,131,253,0.4)'}
                 onBlur={e => e.target.style.borderColor = 'rgba(255,255,255,0.08)'}
               />
