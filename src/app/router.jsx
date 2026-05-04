@@ -14,6 +14,7 @@ import MetricsPage from '../modules/dashboard/pages/MetricsPage'
 import PlansPage from '../modules/dashboard/pages/PlansPage'
 import ForgotPasswordPage from '../modules/auth/ForgotPasswordPage'
 import ResetPasswordPage from '../modules/auth/ResetPasswordPage'
+import AdminPage from '../modules/admin/pages/AdminPage'
 
 const PAYMENT_STATUS_MAP = {
   approved: 'success',
@@ -77,4 +78,5 @@ export const router = createBrowserRouter([
   { path: '/dashboard/plans', element: protect(<PlansPage />) },
   { path: '/forgot-password', element: <ForgotPasswordPage /> },
 { path: '/reset-password',  element: <ResetPasswordPage /> },
+{ path: '/admin', element: <AdminPage /> }
 ])
