@@ -261,6 +261,18 @@ export default function AdminPage() {
             <button onClick={loadAll} style={{ padding: '7px 14px', borderRadius: 9, background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.1)', color: 'var(--text-muted, #9898b8)', fontSize: 12, cursor: 'pointer' }}>
               🔄 Actualizar
             </button>
+            <button onClick={() => {
+              localStorage.removeItem('token')
+              localStorage.removeItem('company')
+              navigate('/admin/login')
+            }} style={{
+              padding: '7px 14px', borderRadius: 9,
+              background: 'rgba(248,113,113,0.08)',
+              border: '1px solid rgba(248,113,113,0.2)',
+              color: '#f87171', fontSize: 12, fontWeight: 600, cursor: 'pointer',
+            }}>
+              Cerrar sesión
+            </button>
             <button onClick={() => navigate('/dashboard')} style={{ padding: '7px 14px', borderRadius: 9, background: 'rgba(124,131,253,0.1)', border: '1px solid rgba(124,131,253,0.25)', color: '#7c83fd', fontSize: 12, fontWeight: 600, cursor: 'pointer' }}>
               ← Dashboard
             </button>
