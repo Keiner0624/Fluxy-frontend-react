@@ -11,6 +11,17 @@ const PLAN_COLORS = {
   BUSINESS: { color: '#34d399', bg: 'rgba(52,211,153,0.1)',  border: 'rgba(52,211,153,0.25)'  },
 }
 
+const PLAN_OPTIONS = [
+  { value: 'FREE', label: 'FREE - Gratis' },
+  { value: 'PRO', label: 'PRO - S/ 19/mes' },
+  { value: 'BUSINESS', label: 'BUSINESS - S/ 39/mes' },
+]
+
+const MONTH_OPTIONS = [1, 2, 3, 6, 12].map(m => ({
+  value: String(m),
+  label: `${m} mes${m > 1 ? 'es' : ''}`,
+}))
+
 function StatCard({ icon, label, value, color = '#7c83fd', sub }) {
   return (
     <div style={{
@@ -26,6 +37,104 @@ function StatCard({ icon, label, value, color = '#7c83fd', sub }) {
       <div style={{ fontFamily: "'Fraunces', serif", fontSize: 36, fontWeight: 900, color, marginBottom: 4 }}>{value}</div>
       <div style={{ fontSize: 14, fontWeight: 600, color: 'white', marginBottom: 2 }}>{label}</div>
       {sub && <div style={{ fontSize: 12, color: 'var(--text-muted)' }}>{sub}</div>}
+    </div>
+  )
+}
+
+function AdminSelect({ value, options, onChange }) {
+  const [open, setOpen] = useState(false)
+  const selected = options.find(option => option.value === value) || options[0]
+
+  const selectOption = (nextValue) => {
+    onChange(nextValue)
+    setOpen(false)
+  }
+
+  return (
+    <div style={{ position: 'relative' }}>
+      <button
+        type="button"
+        onClick={() => setOpen(current => !current)}
+        onBlur={() => setTimeout(() => setOpen(false), 120)}
+        style={{
+          width: '100%',
+          background: 'rgba(255,255,255,0.05)',
+          border: `1px solid ${open ? 'rgba(124,131,253,0.45)' : 'rgba(255,255,255,0.1)'}`,
+          borderRadius: 12,
+          padding: '12px 14px',
+          color: 'white',
+          fontSize: 14,
+          fontWeight: 700,
+          outline: 'none',
+          fontFamily: 'DM Sans, sans-serif',
+          cursor: 'pointer',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'space-between',
+          gap: 12,
+          boxShadow: open ? '0 0 0 3px rgba(124,131,253,0.12)' : 'none',
+          transition: 'border 0.2s, box-shadow 0.2s, background 0.2s',
+        }}
+      >
+        <span>{selected?.label}</span>
+        <span style={{
+          color: '#c8c9ff',
+          fontSize: 16,
+          lineHeight: 1,
+          transform: open ? 'rotate(180deg)' : 'rotate(0deg)',
+          transition: 'transform 0.2s',
+        }}>⌄</span>
+      </button>
+
+      {open && (
+        <div style={{
+          position: 'absolute',
+          zIndex: 250,
+          top: 'calc(100% + 8px)',
+          left: 0,
+          right: 0,
+          background: '#111126',
+          border: '1px solid rgba(124,131,253,0.28)',
+          borderRadius: 14,
+          padding: 6,
+          boxShadow: '0 18px 40px rgba(0,0,0,0.45)',
+          animation: 'fadeIn 0.18s ease',
+          overflow: 'hidden',
+        }}>
+          {options.map(option => {
+            const active = option.value === value
+            return (
+              <button
+                key={option.value}
+                type="button"
+                onMouseDown={e => e.preventDefault()}
+                onClick={() => selectOption(option.value)}
+                style={{
+                  width: '100%',
+                  border: 'none',
+                  borderRadius: 10,
+                  padding: '10px 12px',
+                  background: active ? 'linear-gradient(135deg, rgba(124,131,253,0.24), rgba(79,70,229,0.22))' : 'transparent',
+                  color: active ? '#ffffff' : 'rgba(255,255,255,0.68)',
+                  fontSize: 13,
+                  fontWeight: active ? 800 : 600,
+                  textAlign: 'left',
+                  fontFamily: 'DM Sans, sans-serif',
+                  cursor: 'pointer',
+                }}
+                onMouseEnter={e => {
+                  if (!active) e.currentTarget.style.background = 'rgba(255,255,255,0.06)'
+                }}
+                onMouseLeave={e => {
+                  if (!active) e.currentTarget.style.background = 'transparent'
+                }}
+              >
+                {option.label}
+              </button>
+            )
+          })}
+        </div>
+      )}
     </div>
   )
 }
@@ -293,19 +402,13 @@ export default function AdminPage() {
 
             <div style={{ marginBottom: 16 }}>
               <label style={{ fontSize: 12, fontWeight: 600, color: 'rgba(255,255,255,0.4)', textTransform: 'uppercase', letterSpacing: '0.8px', display: 'block', marginBottom: 8 }}>Plan</label>
-              <select value={newPlan} onChange={e => setNewPlan(e.target.value)} style={{ width: '100%', background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.1)', borderRadius: 10, padding: '11px 14px', color: 'white', fontSize: 14, outline: 'none', fontFamily: 'DM Sans, sans-serif' }}>
-                <option value="FREE">FREE — Gratis</option>
-                <option value="PRO">PRO — S/ 19/mes</option>
-                <option value="BUSINESS">BUSINESS — S/ 39/mes</option>
-              </select>
+              <AdminSelect value={newPlan} options={PLAN_OPTIONS} onChange={setNewPlan} />
             </div>
 
             {newPlan !== 'FREE' && (
               <div style={{ marginBottom: 24 }}>
                 <label style={{ fontSize: 12, fontWeight: 600, color: 'rgba(255,255,255,0.4)', textTransform: 'uppercase', letterSpacing: '0.8px', display: 'block', marginBottom: 8 }}>Meses</label>
-                <select value={months} onChange={e => setMonths(e.target.value)} style={{ width: '100%', background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.1)', borderRadius: 10, padding: '11px 14px', color: 'white', fontSize: 14, outline: 'none', fontFamily: 'DM Sans, sans-serif' }}>
-                  {[1,2,3,6,12].map(m => <option key={m} value={m}>{m} mes{m > 1 ? 'es' : ''}</option>)}
-                </select>
+                <AdminSelect value={months} options={MONTH_OPTIONS} onChange={setMonths} />
               </div>
             )}
 
