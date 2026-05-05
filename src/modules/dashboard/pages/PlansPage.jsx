@@ -245,17 +245,7 @@ export default function PlansPage() {
             }}>
 
               {/* Badge */}
-              {plan.badge && (
-                <div style={{
-                  position: 'absolute', top: 16, right: 16,
-                  background: plan.color, color: 'white',
-                  borderRadius: 20, padding: '3px 10px',
-                  fontSize: 11, fontWeight: 700,
-                }}>{plan.badge}</div>
-              )}
-
-              {/* Plan actual badge */}
-              {isCurrent && (
+              {isCurrent ? (
                 <div style={{
                   position: 'absolute', top: 16, right: 16,
                   background: 'rgba(255,255,255,0.1)', color: 'white',
@@ -263,7 +253,14 @@ export default function PlansPage() {
                   borderRadius: 20, padding: '3px 10px',
                   fontSize: 11, fontWeight: 700,
                 }}>✓ Tu plan</div>
-              )}
+              ) : plan.badge ? (
+                <div style={{
+                  position: 'absolute', top: 16, right: 16,
+                  background: plan.color, color: 'white',
+                  borderRadius: 20, padding: '3px 10px',
+                  fontSize: 11, fontWeight: 700,
+                }}>{plan.badge}</div>
+              ) : null}
 
               {/* Header del plan */}
               <div style={{ padding: '24px 24px 20px', borderBottom: `1px solid ${plan.border}` }}>
