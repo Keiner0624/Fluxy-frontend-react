@@ -89,9 +89,12 @@ const PLANS = [
 ]
 
 export default function PlansPage() {
-  const [currentPlan, setCurrentPlan] = useState('FREE')
-  const [loadingPayment, setLoadingPayment] = useState(null) // 'PRO' | 'BUSINESS'
-  const [paymentError, setPaymentError] = useState('')
+  const [currentPlan, setCurrentPlan]     = useState('FREE')
+  const [trialUsed, setTrialUsed]         = useState(false)
+  const [loadingPayment, setLoadingPayment] = useState(null)
+  const [loadingTrial, setLoadingTrial]   = useState(false)
+  const [trialSuccess, setTrialSuccess]   = useState(false)
+  const [paymentError, setPaymentError]   = useState('')
 
   useEffect(() => { loadPlan() }, [])
 
@@ -103,7 +106,40 @@ export default function PlansPage() {
       if (!res.ok) return
       const data = await res.json()
       if (data.planName) setCurrentPlan(data.planName)
+      if (data.trialUsed !== undefined) setTrialUsed(data.trialUsed)
+      // También revisar en /companies/my-company
+      const cRes = await fetch(`${API_URL}/companies/my-company`, {
+        headers: { Authorization: `Bearer ${getToken()}` },
+      })
+      if (cRes.ok) {
+        const cData = await cRes.json()
+        if (cData.trialUsed !== undefined) setTrialUsed(cData.trialUsed)
+      }
     } catch { /* silencioso */ }
+  }
+
+  const handleTrial = async () => {
+    setLoadingTrial(true)
+    setPaymentError('')
+    try {
+      const res = await fetch(`${API_URL}/companies/trial`, {
+        method: 'POST',
+        headers: { Authorization: `Bearer ${getToken()}` },
+      })
+      const data = await res.json()
+      if (!res.ok || !data.success) throw new Error(data.message || 'Error al activar prueba')
+      setTrialSuccess(true)
+      setCurrentPlan('PRO')
+      setTrialUsed(true)
+      // Actualizar localStorage
+      const company = JSON.parse(localStorage.getItem('company') || '{}')
+      localStorage.setItem('company', JSON.stringify({ ...company, plan: 'PRO' }))
+      setTimeout(() => setTrialSuccess(false), 5000)
+    } catch (err) {
+      setPaymentError(err.message)
+    } finally {
+      setLoadingTrial(false)
+    }
   }
 
   const handleUpgrade = async (plan) => {
@@ -130,7 +166,26 @@ export default function PlansPage() {
 
   return (
     <DashboardLayout>
-      <style>{`@keyframes spin { to { transform: rotate(360deg) } }`}</style>
+      <style>{`
+        @keyframes spin { to { transform: rotate(360deg) } }
+        @keyframes fadeIn { from { opacity:0; transform:translateY(-8px) } to { opacity:1; transform:translateY(0) } }
+      `}</style>
+
+      {/* ── Trial activado ── */}
+      {trialSuccess && (
+        <div style={{
+          background: 'rgba(52,211,153,0.1)', border: '1px solid rgba(52,211,153,0.3)',
+          borderRadius: 14, padding: '16px 20px', marginBottom: 24,
+          display: 'flex', alignItems: 'center', gap: 12,
+          animation: 'fadeIn 0.4s ease',
+        }}>
+          <span style={{ fontSize: 28 }}>🎉</span>
+          <div>
+            <div style={{ fontSize: 15, fontWeight: 700, color: '#34d399' }}>¡Plan Pro activado gratis por 1 mes!</div>
+            <div style={{ fontSize: 13, color: 'var(--text-muted)', marginTop: 2 }}>Disfruta todas las funciones premium. Al vencer volverás al plan Free.</div>
+          </div>
+        </div>
+      )}
 
       {/* ── Header ── */}
       <div style={{ marginBottom: 32 }}>
@@ -177,6 +232,7 @@ export default function PlansPage() {
         {PLANS.map(plan => {
           const isCurrent  = currentPlan === plan.key
           const isLoading  = loadingPayment === plan.key
+          const canUpgrade = !isCurrent && plan.key !== 'FREE'
 
           return (
             <div key={plan.key} style={{
@@ -188,23 +244,26 @@ export default function PlansPage() {
               transition: 'all 0.2s',
             }}>
 
-           
-{isCurrent ? (
-  <div style={{
-    position: 'absolute', top: 16, right: 16,
-    background: 'rgba(255,255,255,0.1)', color: 'white',
-    border: '1px solid rgba(255,255,255,0.2)',
-    borderRadius: 20, padding: '3px 10px',
-    fontSize: 11, fontWeight: 700,
-  }}>✓ Tu plan</div>
-) : plan.badge ? (
-  <div style={{
-    position: 'absolute', top: 16, right: 16,
-    background: plan.color, color: 'white',
-    borderRadius: 20, padding: '3px 10px',
-    fontSize: 11, fontWeight: 700,
-  }}>{plan.badge}</div>
-) : null}
+              {/* Badge */}
+              {plan.badge && (
+                <div style={{
+                  position: 'absolute', top: 16, right: 16,
+                  background: plan.color, color: 'white',
+                  borderRadius: 20, padding: '3px 10px',
+                  fontSize: 11, fontWeight: 700,
+                }}>{plan.badge}</div>
+              )}
+
+              {/* Plan actual badge */}
+              {isCurrent && (
+                <div style={{
+                  position: 'absolute', top: 16, right: 16,
+                  background: 'rgba(255,255,255,0.1)', color: 'white',
+                  border: '1px solid rgba(255,255,255,0.2)',
+                  borderRadius: 20, padding: '3px 10px',
+                  fontSize: 11, fontWeight: 700,
+                }}>✓ Tu plan</div>
+              )}
 
               {/* Header del plan */}
               <div style={{ padding: '24px 24px 20px', borderBottom: `1px solid ${plan.border}` }}>
@@ -252,13 +311,7 @@ export default function PlansPage() {
                     color: 'var(--text-muted)',
                   }}>✓ Plan activo</div>
                 ) : plan.key === 'FREE' ? (
-                  <div style={{
-                    textAlign: 'center', padding: '12px',
-                    background: 'rgba(255,255,255,0.04)',
-                    border: '1px solid rgba(255,255,255,0.08)',
-                    borderRadius: 12, fontSize: 13,
-                    color: 'var(--text-muted)',
-                  }}>Plan base</div>
+                  <div style={{ textAlign: 'center', padding: '12px', background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.08)', borderRadius: 12, fontSize: 13, color: 'var(--text-muted)' }}>Plan base</div>
                 ) : (
                   <button
                     onClick={() => handleUpgrade(plan.key)}
@@ -291,6 +344,47 @@ export default function PlansPage() {
           )
         })}
       </div>
+
+      {/* ── Banner prueba gratuita ── */}
+      {currentPlan === 'FREE' && (
+        <div style={{
+          background: 'linear-gradient(135deg, rgba(124,131,253,0.1), rgba(79,70,229,0.06))',
+          border: '1px solid rgba(124,131,253,0.25)',
+          borderRadius: 20, padding: '28px 32px', marginTop: 24, marginBottom: 8,
+          display: 'flex', alignItems: 'center', justifyContent: 'space-between',
+          flexWrap: 'wrap', gap: 20, position: 'relative', overflow: 'hidden',
+        }}>
+          <div style={{ position: 'absolute', top: -40, right: -40, width: 150, height: 150, borderRadius: '50%', background: 'rgba(124,131,253,0.08)', pointerEvents: 'none' }}/>
+          <div>
+            <div style={{ fontSize: 11, color: '#7c83fd', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '1.5px', marginBottom: 8 }}>Oferta especial</div>
+            <h3 style={{ fontFamily: "'Fraunces', serif", fontSize: 22, fontWeight: 800, color: 'white', marginBottom: 8 }}>
+              Prueba el Plan Pro gratis por 1 mes 🚀
+            </h3>
+            <p style={{ fontSize: 14, color: 'var(--text-muted)', lineHeight: 1.6, maxWidth: 440 }}>
+              Activa todas las funciones premium sin pagar nada. Al vencer el mes, tu cuenta vuelve al plan Free automáticamente.
+            </p>
+          </div>
+          {trialUsed ? (
+            <div style={{ background: 'rgba(156,163,175,0.1)', border: '1px solid rgba(156,163,175,0.2)', borderRadius: 14, padding: '14px 24px', fontSize: 13, color: '#9ca3af', textAlign: 'center' }}>
+              ✓ Ya usaste tu prueba gratuita
+            </div>
+          ) : (
+            <button onClick={handleTrial} disabled={loadingTrial} style={{
+              background: loadingTrial ? 'rgba(124,131,253,0.4)' : 'linear-gradient(135deg, #7c83fd, #4f46e5)',
+              color: 'white', border: 'none', borderRadius: 14,
+              padding: '14px 28px', fontSize: 15, fontWeight: 700,
+              cursor: loadingTrial ? 'not-allowed' : 'pointer',
+              boxShadow: loadingTrial ? 'none' : '0 8px 24px rgba(124,131,253,0.35)',
+              whiteSpace: 'nowrap', flexShrink: 0, transition: 'all 0.2s',
+            }}
+              onMouseEnter={e => { if (!loadingTrial) e.currentTarget.style.transform = 'translateY(-2px)' }}
+              onMouseLeave={e => e.currentTarget.style.transform = 'translateY(0)'}
+            >
+              {loadingTrial ? 'Activando...' : '🎁 Probar Pro gratis 1 mes'}
+            </button>
+          )}
+        </div>
+      )}
 
       {/* ── Footer info ── */}
       <div style={{
