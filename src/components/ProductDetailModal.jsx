@@ -11,20 +11,13 @@ export default function ProductDetailModal({ product, onClose, onAddToCart, comp
   // Construir array de imágenes
   const getImages = () => {
     let imgs = []
-    if (Array.isArray(product.images)) {
-      imgs = product.images
-    } else if (typeof product.images === 'string' && product.images.trim()) {
-      try {
-        const parsed = JSON.parse(product.images)
-        imgs = Array.isArray(parsed) ? parsed : []
-      } catch {
-        imgs = []
-      }
+    if (product.images) {
+      try { imgs = JSON.parse(product.images) } catch {}
     }
     if (product.imageUrl && !imgs.includes(product.imageUrl)) {
       imgs = [product.imageUrl, ...imgs]
     }
-    return imgs.filter(src => typeof src === 'string' && src.trim())
+    return imgs.length > 0 ? imgs : []
   }
   const images = getImages()
 
