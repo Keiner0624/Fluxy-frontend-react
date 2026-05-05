@@ -2,10 +2,24 @@
 import { useState } from 'react'
 
 export default function ProductDetailModal({ product, onClose, onAddToCart, company }) {
-  const [adding, setAdding] = useState(false)
-  const [qty, setQty]       = useState(1)
+  const [adding, setAdding]       = useState(false)
+  const [qty, setQty]             = useState(1)
+  const [activeImg, setActiveImg] = useState(0)
 
   if (!product) return null
+
+  // Construir array de imágenes
+  const getImages = () => {
+    let imgs = []
+    if (product.images) {
+      try { imgs = JSON.parse(product.images) } catch {}
+    }
+    if (product.imageUrl && !imgs.includes(product.imageUrl)) {
+      imgs = [product.imageUrl, ...imgs]
+    }
+    return imgs.length > 0 ? imgs : []
+  }
+  const images = getImages()
 
   const phone = company?.phone?.replace(/[^0-9]/g, '')
   const waMsg = encodeURIComponent(
@@ -22,6 +36,9 @@ export default function ProductDetailModal({ product, onClose, onAddToCart, comp
     setTimeout(() => { setAdding(false); onClose() }, 900)
   }
 
+  const prevImg = (e) => { e.stopPropagation(); setActiveImg(i => (i - 1 + images.length) % images.length) }
+  const nextImg = (e) => { e.stopPropagation(); setActiveImg(i => (i + 1) % images.length) }
+
   return (
     <div
       onClick={onClose}
@@ -37,6 +54,7 @@ export default function ProductDetailModal({ product, onClose, onAddToCart, comp
           background: '#09091a',
           border: '1px solid rgba(255,255,255,0.08)',
           borderRadius: 26, width: '100%', maxWidth: 540,
+          maxHeight: '92vh', overflowY: 'auto',
           boxShadow: '0 48px 100px rgba(0,0,0,0.7), 0 0 0 1px rgba(124,131,253,0.08)',
           overflow: 'hidden',
           animation: 'modalIn 0.35s cubic-bezier(0.23, 1, 0.32, 1)',
@@ -47,9 +65,10 @@ export default function ProductDetailModal({ product, onClose, onAddToCart, comp
             from { opacity: 0; transform: scale(0.95) translateY(20px); }
             to   { opacity: 1; transform: scale(1) translateY(0); }
           }
+          @keyframes pulse { 0%,100%{opacity:1;transform:scale(1)} 50%{opacity:0.5;transform:scale(0.85)} }
         `}</style>
 
-        {/* ── Imagen ── */}
+        {/* ── Imagen principal ── */}
         <div style={{
           height: 280, position: 'relative',
           background: 'linear-gradient(135deg, #0a0a1a, #141432)',
@@ -79,18 +98,88 @@ export default function ProductDetailModal({ product, onClose, onAddToCart, comp
             }}>⚡ Solo {product.stock} disponibles</div>
           )}
 
-          {product.imageUrl ? (
-            <img src={product.imageUrl} alt={product.name} style={{ width: '100%', height: '100%', objectFit: 'cover' }}/>
+          {/* Imagen activa */}
+          {images.length > 0 ? (
+            <img
+              src={images[activeImg]}
+              alt={product.name}
+              style={{ width: '100%', height: '100%', objectFit: 'cover', transition: 'opacity 0.2s' }}
+            />
           ) : (
             <div style={{ width: '100%', height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 80 }}>📦</div>
           )}
 
           {/* Gradient */}
           <div style={{ position: 'absolute', bottom: 0, left: 0, right: 0, height: 80, background: 'linear-gradient(to top, #09091a, transparent)', pointerEvents: 'none' }}/>
+
+          {/* Flechas de navegación */}
+          {images.length > 1 && (
+            <>
+              <button onClick={prevImg} style={{
+                position: 'absolute', left: 12, top: '50%', transform: 'translateY(-50%)', zIndex: 10,
+                width: 36, height: 36, borderRadius: '50%',
+                background: 'rgba(0,0,0,0.6)', backdropFilter: 'blur(8px)',
+                border: '1px solid rgba(255,255,255,0.1)',
+                color: 'white', fontSize: 16, cursor: 'pointer',
+                display: 'flex', alignItems: 'center', justifyContent: 'center',
+                transition: 'all 0.2s',
+              }}
+                onMouseEnter={e => e.currentTarget.style.background = 'rgba(124,131,253,0.4)'}
+                onMouseLeave={e => e.currentTarget.style.background = 'rgba(0,0,0,0.6)'}
+              >‹</button>
+              <button onClick={nextImg} style={{
+                position: 'absolute', right: 12, top: '50%', transform: 'translateY(-50%)', zIndex: 10,
+                width: 36, height: 36, borderRadius: '50%',
+                background: 'rgba(0,0,0,0.6)', backdropFilter: 'blur(8px)',
+                border: '1px solid rgba(255,255,255,0.1)',
+                color: 'white', fontSize: 16, cursor: 'pointer',
+                display: 'flex', alignItems: 'center', justifyContent: 'center',
+                transition: 'all 0.2s',
+              }}
+                onMouseEnter={e => e.currentTarget.style.background = 'rgba(124,131,253,0.4)'}
+                onMouseLeave={e => e.currentTarget.style.background = 'rgba(0,0,0,0.6)'}
+              >›</button>
+
+              {/* Indicador de puntos */}
+              <div style={{
+                position: 'absolute', bottom: 16, left: '50%', transform: 'translateX(-50%)',
+                display: 'flex', gap: 6, zIndex: 10,
+              }}>
+                {images.map((_, i) => (
+                  <button key={i} onClick={e => { e.stopPropagation(); setActiveImg(i) }} style={{
+                    width: i === activeImg ? 20 : 6, height: 6, borderRadius: 3,
+                    background: i === activeImg ? 'var(--primary, #7c83fd)' : 'rgba(255,255,255,0.3)',
+                    border: 'none', cursor: 'pointer', padding: 0,
+                    transition: 'all 0.2s',
+                  }}/>
+                ))}
+              </div>
+            </>
+          )}
         </div>
 
+        {/* ── Thumbnails ── */}
+        {images.length > 1 && (
+          <div style={{
+            display: 'flex', gap: 8, padding: '12px 20px',
+            background: 'rgba(0,0,0,0.3)', overflowX: 'auto',
+            borderBottom: '1px solid rgba(255,255,255,0.05)',
+          }}>
+            {images.map((src, i) => (
+              <button key={i} onClick={() => setActiveImg(i)} style={{
+                width: 52, height: 52, borderRadius: 10, overflow: 'hidden', flexShrink: 0,
+                border: i === activeImg ? '2px solid var(--primary, #7c83fd)' : '2px solid rgba(255,255,255,0.08)',
+                cursor: 'pointer', padding: 0, transition: 'all 0.2s',
+                opacity: i === activeImg ? 1 : 0.5,
+              }}>
+                <img src={src} alt={`thumb-${i}`} style={{ width: '100%', height: '100%', objectFit: 'cover' }}/>
+              </button>
+            ))}
+          </div>
+        )}
+
         {/* ── Contenido ── */}
-        <div style={{ padding: '24px 28px 28px' }}>
+        <div style={{ padding: '20px 28px 28px' }}>
           {/* Nombre y precio */}
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: 16, marginBottom: 12 }}>
             <h3 style={{ fontFamily: "'Fraunces', serif", fontSize: 22, fontWeight: 800, color: 'white', lineHeight: 1.2 }}>
