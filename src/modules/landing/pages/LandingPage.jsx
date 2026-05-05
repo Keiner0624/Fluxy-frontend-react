@@ -758,6 +758,20 @@ function Footer() {
               </div>
             ))}
           </div>
+          <div>
+            <div style={{ fontSize: 12, fontWeight: 700, color: 'white', textTransform: 'uppercase', letterSpacing: '1px', marginBottom: 16 }}>Legal</div>
+            {[
+              { label: 'Términos y condiciones', to: '/terms' },
+              { label: 'Política de privacidad', to: '/terms' },
+            ].map(item => (
+              <div key={item.label} style={{ marginBottom: 10 }}>
+                <Link to={item.to} style={{ fontSize: 14, color: 'var(--text-muted)', textDecoration: 'none', transition: 'color 0.2s' }}
+                  onMouseEnter={e => e.currentTarget.style.color = 'white'}
+                  onMouseLeave={e => e.currentTarget.style.color = 'var(--text-muted)'}
+                >{item.label}</Link>
+              </div>
+            ))}
+          </div>
         </div>
 
         <div style={{ borderTop: '1px solid rgba(255,255,255,0.04)', paddingTop: 24, display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: 12 }}>

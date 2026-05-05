@@ -16,6 +16,7 @@ import ForgotPasswordPage from '../modules/auth/ForgotPasswordPage'
 import ResetPasswordPage from '../modules/auth/ResetPasswordPage'
 import AdminPage from '../modules/admin/pages/AdminPage'
 import AdminLoginPage from '../modules/admin/pages/AdminLoginPage'
+import TermsPage from '../modules/landing/pages/TermsPage'
 
 const PAYMENT_STATUS_MAP = {
   approved: 'success',
@@ -81,4 +82,5 @@ export const router = createBrowserRouter([
   { path: '/reset-password',  element: <ResetPasswordPage /> },
   { path: '/admin', element: <AdminPage /> },
   { path: '/admin/login', element: <AdminLoginPage /> },
+  { path: '/terms', element: <TermsPage /> }
 ])
