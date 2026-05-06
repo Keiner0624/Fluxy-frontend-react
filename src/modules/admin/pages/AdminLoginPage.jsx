@@ -28,37 +28,20 @@ export default function AdminLoginPage() {
   const handleSubmit = async (e) => {
     e.preventDefault()
     setError('')
-
-    // Validar email de admin antes de hacer request
-    if (email.trim().toLowerCase() !== ADMIN_EMAIL.toLowerCase()) {
-      setError('Acceso denegado. No tienes permisos de administrador.')
-      return
-    }
-
     setLoading(true)
     try {
-      const res = await fetch(`${API_URL}/auth/login`, {
+      const res = await fetch(`${API_URL}/auth/admin-login`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ email: email.trim(), password }),
       })
-
-      if (!res.ok) throw new Error('Credenciales incorrectas.')
-      const data = await res.json()
-
-      // Verificar que sea admin en el backend
-      const meRes = await fetch(`${API_URL}/admin/metrics`, {
-        headers: { Authorization: `Bearer ${data.token}` },
-      })
-
-      if (!meRes.ok) {
-        setError('Acceso denegado. No tienes permisos de administrador.')
-        return
+      if (!res.ok) {
+        const data = await res.json().catch(() => ({}))
+        throw new Error(data.message || 'Credenciales incorrectas.')
       }
-
+      const data = await res.json()
       localStorage.setItem('token', data.token)
       navigate('/admin')
-
     } catch (err) {
       setError(err.message)
     } finally {
