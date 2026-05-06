@@ -3,8 +3,6 @@ import { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { API_URL, buildStoreUrl } from '../../../app/config'
 
-const ADMIN_EMAIL = 'pkeinerr.e13@gmail.com'
-
 function getToken() { return localStorage.getItem('token') || '' }
 
 export default function AdminLoginPage() {
