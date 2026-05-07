@@ -1,10 +1,10 @@
 // src/components/TrustSection.jsx
 
 const trustItems = [
-  { icon: '👤', title: 'Trato directo',     desc: 'Habla directo con el vendedor, sin intermediarios ni bots.', color: '#7c83fd' },
-  { icon: '⚡', title: 'Respuesta rápida',  desc: 'Tu pedido confirmado en minutos, no en días.', color: '#fbbf24' },
-  { icon: '🔒', title: 'Compra segura',     desc: 'Tu información y pagos siempre protegidos.', color: '#34d399' },
-  { icon: '✅', title: 'Negocio verificado', desc: 'Tienda registrada y validada en la plataforma Fluxy.', color: '#f87171' },
+  { icon: '', title: 'Trato directo',     desc: 'Habla directo con el vendedor, sin intermediarios ni bots.', color: '#7c83fd' },
+  { icon: '', title: 'Respuesta rápida',  desc: 'Tu pedido confirmado en minutos, no en días.', color: '#fbbf24' },
+  { icon: '', title: 'Compra segura',     desc: 'Tu información y pagos siempre protegidos.', color: '#34d399' },
+  { icon: '', title: 'Negocio verificado', desc: 'Tienda registrada y validada en la plataforma Fluxy.', color: '#f87171' },
 ]
 
 export default function TrustSection() {

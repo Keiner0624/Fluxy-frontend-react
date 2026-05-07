@@ -97,7 +97,7 @@ export default function ResetPasswordPage() {
           {/* Token inválido */}
           {!validating && !tokenValid && (
             <div style={{ textAlign: 'center' }}>
-              <div style={{ fontSize: 52, marginBottom: 16 }}>⏰</div>
+              <div style={{ fontSize: 52, marginBottom: 16 }}></div>
               <h2 style={{ fontFamily: "'Fraunces', serif", fontSize: 22, color: 'white', marginBottom: 12 }}>
                 Link expirado
               </h2>
@@ -119,7 +119,7 @@ export default function ResetPasswordPage() {
           {/* Contraseña restablecida */}
           {done && (
             <div style={{ textAlign: 'center' }}>
-              <div style={{ fontSize: 52, marginBottom: 16 }}>✅</div>
+              <div style={{ fontSize: 52, marginBottom: 16 }}></div>
               <h2 style={{ fontFamily: "'Fraunces', serif", fontSize: 22, color: 'white', marginBottom: 12 }}>
                 ¡Contraseña actualizada!
               </h2>
@@ -154,7 +154,7 @@ export default function ResetPasswordPage() {
                     Nueva contraseña
                   </label>
                   <div style={{ position: 'relative' }}>
-                    <span style={{ position: 'absolute', left: 14, top: '50%', transform: 'translateY(-50%)', fontSize: 16, pointerEvents: 'none' }}>🔒</span>
+                    <span style={{ position: 'absolute', left: 14, top: '50%', transform: 'translateY(-50%)', fontSize: 16, pointerEvents: 'none' }}></span>
                     <input
                       type={showPass ? 'text' : 'password'}
                       value={password}
@@ -166,7 +166,7 @@ export default function ResetPasswordPage() {
                       onBlur={e => { e.target.style.borderColor = 'rgba(255,255,255,0.08)'; e.target.style.background = 'rgba(255,255,255,0.04)' }}
                     />
                     <button type="button" onClick={() => setShowPass(!showPass)} style={{ position: 'absolute', right: 12, top: '50%', transform: 'translateY(-50%)', background: 'transparent', border: 'none', color: 'var(--text-muted)', fontSize: 16, cursor: 'pointer', padding: 4 }}>
-                      {showPass ? '🙈' : '👁️'}
+                      {showPass ? '' : ''}
                     </button>
                   </div>
                 </div>
@@ -177,7 +177,7 @@ export default function ResetPasswordPage() {
                     Confirmar contraseña
                   </label>
                   <div style={{ position: 'relative' }}>
-                    <span style={{ position: 'absolute', left: 14, top: '50%', transform: 'translateY(-50%)', fontSize: 16, pointerEvents: 'none' }}>🔑</span>
+                    <span style={{ position: 'absolute', left: 14, top: '50%', transform: 'translateY(-50%)', fontSize: 16, pointerEvents: 'none' }}></span>
                     <input
                       type={showPass ? 'text' : 'password'}
                       value={confirm}
@@ -191,14 +191,14 @@ export default function ResetPasswordPage() {
                   {/* Indicador de coincidencia */}
                   {confirm && (
                     <div style={{ fontSize: 12, marginTop: 6, color: password === confirm ? '#34d399' : '#f87171' }}>
-                      {password === confirm ? '✅ Las contraseñas coinciden' : '❌ No coinciden'}
+                      {password === confirm ? ' Las contraseñas coinciden' : ' No coinciden'}
                     </div>
                   )}
                 </div>
 
                 {error && (
                   <div style={{ background: 'rgba(248,113,113,0.08)', border: '1px solid rgba(248,113,113,0.2)', borderRadius: 10, padding: '12px 16px', fontSize: 13, color: '#f87171', marginBottom: 16, textAlign: 'center' }}>
-                    ⚠️ {error}
+                     {error}
                   </div>
                 )}
 
@@ -210,7 +210,7 @@ export default function ResetPasswordPage() {
                   boxShadow: loading ? 'none' : '0 8px 24px rgba(124,131,253,0.3)',
                   border: 'none', transition: 'all 0.3s',
                 }}>
-                  {loading ? 'Guardando...' : '🔐 Guardar nueva contraseña'}
+                  {loading ? 'Guardando...' : ' Guardar nueva contraseña'}
                 </button>
               </form>
             </>

@@ -10,7 +10,7 @@ export default function Header({ company, cartCount, onCartOpen }) {
   }, [])
 
   const phone = company?.phone?.replace(/[^0-9]/g, '')
-  const waMsg = encodeURIComponent(`¡Hola! 👋 Vi tu tienda *${company?.name}* en Fluxy y quiero hacer un pedido.`)
+  const waMsg = encodeURIComponent(`¡Hola!  Vi tu tienda *${company?.name}* en Fluxy y quiero hacer un pedido.`)
 
   return (
     <header style={{

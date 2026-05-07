@@ -141,7 +141,7 @@ export default function RegisterBusinessPage() {
                 <span style={{
                   position: 'absolute', left: 14, top: '50%',
                   transform: 'translateY(-50%)', fontSize: 16,
-                }}>🏪</span>
+                }}></span>
                 <input
                   name="businesName"
                   value={form.businesName}
@@ -173,7 +173,7 @@ export default function RegisterBusinessPage() {
                 <span style={{
                   position: 'absolute', left: 14, top: '50%',
                   transform: 'translateY(-50%)', fontSize: 16,
-                }}>📱</span>
+                }}></span>
                 <input
                   name="whatssapp"
                   value={form.whatssapp}
@@ -205,7 +205,7 @@ export default function RegisterBusinessPage() {
                 <span style={{
                   position: 'absolute', left: 14, top: '50%',
                   transform: 'translateY(-50%)', fontSize: 16,
-                }}>✉️</span>
+                }}></span>
                 <input
                   name="email"
                   type="email"
@@ -238,7 +238,7 @@ export default function RegisterBusinessPage() {
                 <span style={{
                   position: 'absolute', left: 14, top: '50%',
                   transform: 'translateY(-50%)', fontSize: 16,
-                }}>🔒</span>
+                }}></span>
                 <input
                   name="password"
                   type={showPassword ? 'text' : 'password'}
@@ -266,7 +266,7 @@ export default function RegisterBusinessPage() {
                     background: 'transparent', border: 'none',
                     color: 'var(--text-muted)', fontSize: 14, cursor: 'pointer',
                   }}
-                >{showPassword ? '🙈' : '👁️'}</button>
+                >{showPassword ? '' : ''}</button>
               </div>
             </div>
 
@@ -278,7 +278,7 @@ export default function RegisterBusinessPage() {
                 borderRadius: 10, padding: '10px 14px',
                 fontSize: 13, color: '#f87171',
                 marginBottom: 16, textAlign: 'center',
-              }}>⚠️ {error}</div>
+              }}> {error}</div>
             )}
 
             {/* Botón */}

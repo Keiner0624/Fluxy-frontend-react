@@ -1,7 +1,7 @@
 // src/components/Footer.jsx
 
 export default function Footer({ company }) {
-  // ✅ Ocultar branding si el plan es BUSINESS
+  //  Ocultar branding si el plan es BUSINESS
   const showBranding = company?.plan !== 'BUSINESS'
 
   return (
@@ -31,7 +31,7 @@ export default function Footer({ company }) {
                 <div style={{ fontFamily: "'Fraunces', serif", fontSize: 16, fontWeight: 600, color: 'white' }}>
                   {company?.name || 'Tienda'}
                 </div>
-                {/* ✅ Solo muestra "via Fluxy" si NO es BUSINESS */}
+                {/*  Solo muestra "via Fluxy" si NO es BUSINESS */}
                 {showBranding && (
                   <div style={{ fontSize: 11, color: 'var(--text-muted, #4a4a6a)' }}>via Fluxy</div>
                 )}
@@ -48,12 +48,12 @@ export default function Footer({ company }) {
             </div>
             {company?.address && (
               <div style={{ fontSize: 13, color: 'var(--text-muted, #4a4a6a)', marginBottom: 8 }}>
-                📍 {company.address}
+                 {company.address}
               </div>
             )}
             {company?.phone && (
               <div style={{ fontSize: 13, color: 'var(--text-muted, #4a4a6a)' }}>
-                📞 {company.phone}
+                 {company.phone}
               </div>
             )}
           </div>
@@ -66,9 +66,9 @@ export default function Footer({ company }) {
           alignItems: 'center', flexWrap: 'wrap', gap: 12,
         }}>
           <div style={{ fontSize: 12, color: 'var(--text-muted, #4a4a6a)' }}>
-            © {new Date().getFullYear()} {company?.name}. Todos los derechos reservados.
+             {new Date().getFullYear()} {company?.name}. Todos los derechos reservados.
           </div>
-          {/* ✅ Solo muestra "Powered by Fluxy" si NO es BUSINESS */}
+          {/*  Solo muestra "Powered by Fluxy" si NO es BUSINESS */}
           {showBranding && (
             <div style={{ fontSize: 12, color: 'var(--text-muted, #4a4a6a)' }}>
               Powered by <strong style={{ color: 'var(--primary, #7c83fd)' }}>Fluxy</strong>

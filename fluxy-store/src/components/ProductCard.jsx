@@ -10,12 +10,12 @@ export default function ProductCard({ product, onAddToCart, onViewDetail, index,
     const isNew = index <= 2 && product.stock > 10
 
     const phone = company?.phone?.replace(/[^0-9]/g, '')
-    const waMsg = encodeURIComponent(`¡Hola! 👋 Estoy interesado en *${product.name}* que vi en tu tienda *${company?.name}* en Fluxy. ¿Está disponible?`)
+    const waMsg = encodeURIComponent(`¡Hola!  Estoy interesado en *${product.name}* que vi en tu tienda *${company?.name}* en Fluxy. ¿Está disponible?`)
 
     const label = isOut ? null
-        : isLowStock ? { text: '⚡ Últimas unidades', color: '#fbbf24', bg: 'rgba(251,191,36,0.1)' }
-            : isTop      ? { text: '🔥 Más vendido',      color: '#f87171', bg: 'rgba(248,113,113,0.1)' }
-                : isNew      ? { text: '✨ Nuevo',             color: '#7c83fd', bg: 'rgba(124,131,253,0.1)' }
+        : isLowStock ? { text: ' Últimas unidades', color: '#fbbf24', bg: 'rgba(251,191,36,0.1)' }
+            : isTop      ? { text: ' Más vendido',      color: '#f87171', bg: 'rgba(248,113,113,0.1)' }
+                : isNew      ? { text: ' Nuevo',             color: '#7c83fd', bg: 'rgba(124,131,253,0.1)' }
                     : null
 
     const handleAdd = async () => {
@@ -88,7 +88,7 @@ export default function ProductCard({ product, onAddToCart, onViewDetail, index,
                         display: 'flex', alignItems: 'center', justifyContent: 'center',
                         fontSize: 56,
                         animation: hovered ? 'float 3s ease infinite' : 'none',
-                    }}>📦</div>
+                    }}></div>
                 )}
             </div>
 
@@ -146,7 +146,7 @@ export default function ProductCard({ product, onAddToCart, onViewDetail, index,
                         cursor: isOut ? 'not-allowed' : 'pointer',
                         boxShadow: !isOut && !adding ? '0 4px 16px rgba(124,131,253,0.25)' : 'none',
                     }}>
-                        {isOut ? 'No disponible' : adding ? '✓ Agregado' : '+ Agregar al carrito'}
+                        {isOut ? 'No disponible' : adding ? ' Agregado' : '+ Agregar al carrito'}
                     </button>
 
                     <div style={{ display: 'flex', gap: 8 }}>

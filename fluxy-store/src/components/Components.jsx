@@ -48,12 +48,12 @@ export function ProductGrid({ products, loading, error, onAddToCart, onViewDetai
                         background: 'rgba(248,113,113,0.05)',
                         border: '1px solid rgba(248,113,113,0.15)',
                         borderRadius: 20, color: 'var(--error)',
-                    }}>❌ {error}</div>
+                    }}> {error}</div>
                 )}
 
                 {!loading && !error && products.length === 0 && (
                     <div style={{ textAlign: 'center', padding: 80, color: 'var(--text-muted)' }}>
-                        <div style={{ fontSize: 48, marginBottom: 16 }}>📭</div>
+                        <div style={{ fontSize: 48, marginBottom: 16 }}></div>
                         No hay productos disponibles aún.
                     </div>
                 )}
@@ -79,10 +79,10 @@ export function ProductGrid({ products, loading, error, onAddToCart, onViewDetai
 
 // ═══ TrustSection.jsx ═══
 const trustItems = [
-    { icon: '👤', title: 'Atención directa', desc: 'Habla directo con el vendedor, sin intermediarios' },
-    { icon: '⚡', title: 'Respuesta rápida', desc: 'Tu pedido confirmado en minutos' },
-    { icon: '🔒', title: 'Compra segura', desc: 'Tu información siempre protegida' },
-    { icon: '✅', title: 'Negocio verificado', desc: 'Tienda registrada y validada en Fluxy' },
+    { icon: '', title: 'Atención directa', desc: 'Habla directo con el vendedor, sin intermediarios' },
+    { icon: '', title: 'Respuesta rápida', desc: 'Tu pedido confirmado en minutos' },
+    { icon: '', title: 'Compra segura', desc: 'Tu información siempre protegida' },
+    { icon: '', title: 'Negocio verificado', desc: 'Tienda registrada y validada en Fluxy' },
 ]
 
 export function TrustSection() {
@@ -183,12 +183,12 @@ export function Footer({ company }) {
                         <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
                             {company?.address && (
                                 <div style={{ fontSize: 13, color: 'var(--text-muted)', display: 'flex', gap: 8 }}>
-                                    <span>📍</span> {company.address}
+                                    <span></span> {company.address}
                                 </div>
                             )}
                             {company?.phone && (
                                 <div style={{ fontSize: 13, color: 'var(--text-muted)', display: 'flex', gap: 8 }}>
-                                    <span>📞</span> {company.phone}
+                                    <span></span> {company.phone}
                                 </div>
                             )}
                         </div>
@@ -199,7 +199,7 @@ export function Footer({ company }) {
                             Pagos
                         </div>
                         <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6 }}>
-                            {['💵 Efectivo', '📱 Yape', '🏦 Plin', '💳 Tarjeta'].map(p => (
+                            {[' Efectivo', ' Yape', ' Plin', ' Tarjeta'].map(p => (
                                 <span key={p} style={{
                                     background: 'rgba(255,255,255,0.03)',
                                     border: '1px solid rgba(255,255,255,0.07)',
@@ -216,7 +216,7 @@ export function Footer({ company }) {
                     display: 'flex', justifyContent: 'space-between', alignItems: 'center',
                 }}>
                     <div style={{ fontSize: 12, color: 'var(--text-muted)' }}>
-                        © {new Date().getFullYear()} {company?.name}. Todos los derechos reservados.
+                         {new Date().getFullYear()} {company?.name}. Todos los derechos reservados.
                     </div>
                     <div style={{ fontSize: 12, color: 'var(--text-muted)' }}>
                         Powered by{' '}
@@ -266,14 +266,14 @@ export function Cart({ open, cart, total, onClose, onIncrease, onDecrease, onChe
                         border: '1px solid rgba(255,255,255,0.08)',
                         color: 'var(--text-muted)', fontSize: 16,
                         display: 'flex', alignItems: 'center', justifyContent: 'center',
-                    }}>✕</button>
+                    }}>x</button>
                 </div>
 
                 {/* Items */}
                 <div style={{ flex: 1, overflowY: 'auto', padding: '16px 20px' }}>
                     {cart.length === 0 ? (
                         <div style={{ textAlign: 'center', padding: '80px 20px', color: 'var(--text-muted)' }}>
-                            <div style={{ fontSize: 48, marginBottom: 16 }}>🛒</div>
+                            <div style={{ fontSize: 48, marginBottom: 16 }}></div>
                             <div style={{ fontSize: 15, marginBottom: 6 }}>Tu carrito está vacío</div>
                             <div style={{ fontSize: 13 }}>Agrega productos para continuar</div>
                         </div>
@@ -290,7 +290,7 @@ export function Cart({ open, cart, total, onClose, onIncrease, onDecrease, onChe
                             }}>
                                 {item.product.imageUrl
                                     ? <img src={item.product.imageUrl} alt={item.product.name} style={{ width: '100%', height: '100%', objectFit: 'cover' }}/>
-                                    : <span style={{ fontSize: 24 }}>📦</span>}
+                                    : <span style={{ fontSize: 24 }}></span>}
                             </div>
                             <div style={{ flex: 1, minWidth: 0 }}>
                                 <div style={{ fontSize: 13, fontWeight: 600, color: 'white', marginBottom: 3, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
@@ -345,10 +345,10 @@ export function Cart({ open, cart, total, onClose, onIncrease, onDecrease, onChe
                         }}>
                             <span style={{ fontSize: 11, color: 'var(--text-muted)' }}>Pagos aceptados</span>
                             <div style={{ display: 'flex', gap: 8, fontSize: 15 }}>
-                                <span title="Efectivo">💵</span>
-                                <span title="Yape">📱</span>
-                                <span title="Plin">🏦</span>
-                                <span title="Tarjeta">💳</span>
+                                <span title="Efectivo"></span>
+                                <span title="Yape"></span>
+                                <span title="Plin"></span>
+                                <span title="Tarjeta"></span>
                             </div>
                         </div>
                         <button onClick={onCheckout} style={{
@@ -370,7 +370,7 @@ export function Cart({ open, cart, total, onClose, onIncrease, onDecrease, onChe
                             </svg>
                         </button>
                         <div style={{ textAlign: 'center', fontSize: 12, color: 'var(--text-muted)' }}>
-                            También puedes consultar por WhatsApp 💬
+                            También puedes consultar por WhatsApp 
                         </div>
                     </div>
                 )}
@@ -410,7 +410,7 @@ export function CheckoutModal({ open, cart, total, company, onClose, onSuccess }
     const handleClose = () => { setName(''); setPhone(''); setOrderId(null); onClose() }
 
     const waPhone = company?.phone?.replace(/[^0-9]/g, '')
-    const waMsg = encodeURIComponent(`¡Hola! Acabo de hacer el pedido #${orderId} en tu tienda Fluxy. ¿Cuándo me lo entregas? 🙌`)
+    const waMsg = encodeURIComponent(`¡Hola! Acabo de hacer el pedido #${orderId} en tu tienda Fluxy. ¿Cuándo me lo entregas? `)
 
     if (!open) return null
 
@@ -437,7 +437,7 @@ export function CheckoutModal({ open, cart, total, company, onClose, onSuccess }
                             border: '2px solid rgba(52,211,153,0.3)',
                             display: 'flex', alignItems: 'center', justifyContent: 'center',
                             fontSize: 32, margin: '0 auto 24px',
-                        }}>🎉</div>
+                        }}></div>
                         <h2 style={{ fontFamily: "'Fraunces', serif", fontSize: 26, marginBottom: 12 }}>
                             ¡Pedido Confirmado!
                         </h2>
@@ -489,7 +489,7 @@ export function CheckoutModal({ open, cart, total, company, onClose, onSuccess }
                                 background: 'rgba(255,255,255,0.04)',
                                 border: '1px solid rgba(255,255,255,0.08)',
                                 color: 'var(--text-muted)', fontSize: 16,
-                            }}>✕</button>
+                            }}>x</button>
                         </div>
 
                         <div style={{ padding: '24px 28px' }}>
@@ -549,7 +549,7 @@ export function CheckoutModal({ open, cart, total, company, onClose, onSuccess }
                                 fontSize: 12, color: 'var(--text-muted)',
                                 textAlign: 'center', marginBottom: 20,
                             }}>
-                                🔒 Tu información es confidencial y solo se usa para este pedido
+                                 Tu información es confidencial y solo se usa para este pedido
                             </div>
 
                             <div style={{
@@ -573,7 +573,7 @@ export function CheckoutModal({ open, cart, total, company, onClose, onSuccess }
                                 boxShadow: '0 8px 24px rgba(124,131,253,0.25)',
                                 display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8,
                             }}>
-                                {loading ? 'Procesando...' : '✅ Confirmar pedido'}
+                                {loading ? 'Procesando...' : ' Confirmar pedido'}
                             </button>
                         </div>
                     </>
@@ -625,11 +625,11 @@ export function ProductDetailModal({ product, onClose, onAddToCart, company }) {
                         border: '1px solid rgba(255,255,255,0.1)',
                         color: 'white', fontSize: 16,
                         display: 'flex', alignItems: 'center', justifyContent: 'center',
-                    }}>✕</button>
+                    }}>x</button>
 
                     {product.imageUrl
                         ? <img src={product.imageUrl} alt={product.name} style={{ width: '100%', height: '100%', objectFit: 'cover' }}/>
-                        : <div style={{ width: '100%', height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 72 }}>📦</div>
+                        : <div style={{ width: '100%', height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 72 }}></div>
                     }
                 </div>
 
@@ -677,7 +677,7 @@ export function ProductDetailModal({ product, onClose, onAddToCart, company }) {
                             cursor: product.stock === 0 ? 'not-allowed' : 'pointer',
                             transition: 'all 0.3s',
                         }}>
-                            {product.stock === 0 ? 'Sin stock' : adding ? '✓ Agregado' : '+ Agregar al carrito'}
+                            {product.stock === 0 ? 'Sin stock' : adding ? ' Agregado' : '+ Agregar al carrito'}
                         </button>
 
                         {phone && (

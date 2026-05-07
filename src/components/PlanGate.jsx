@@ -31,7 +31,7 @@ export default function PlanGate({ currentPlan, requiredPlan = 'PRO', children }
         border: '1px solid rgba(124,131,253,0.2)',
         gap: 16, padding: 32, textAlign: 'center',
       }}>
-        <div style={{ fontSize: 48 }}>🔒</div>
+        <div style={{ fontSize: 48 }}></div>
         <div>
           <div style={{ fontFamily: "'Fraunces', serif", fontSize: 22, fontWeight: 700, color: 'white', marginBottom: 8 }}>
             Función del plan {PLAN_LABELS[requiredPlan]}
@@ -53,7 +53,7 @@ export default function PlanGate({ currentPlan, requiredPlan = 'PRO', children }
             boxShadow: '0 4px 16px rgba(124,131,253,0.3)',
           }}
         >
-          ⚡ Ver planes
+           Ver planes
         </button>
       </div>
     </div>

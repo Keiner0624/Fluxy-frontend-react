@@ -216,7 +216,7 @@ export default function AdminLoginPage() {
                   background: 'none', border: 'none', color: 'rgba(255,255,255,0.3)',
                   cursor: 'pointer', fontSize: 14, padding: 4,
                 }}>
-                  {showPass ? '🙈' : '👁️'}
+                  {showPass ? '' : ''}
                 </button>
               </div>
             </div>
@@ -231,7 +231,7 @@ export default function AdminLoginPage() {
                 marginBottom: 16, textAlign: 'center',
                 display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8,
               }}>
-                🔒 {error}
+                 {error}
               </div>
             )}
 

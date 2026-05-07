@@ -22,7 +22,7 @@ export default function ProductDetailModal({ product, onClose, onAddToCart }) {
                         <h2 style={{ fontFamily: 'Playfair Display', fontSize: 24, color: 'var(--text)', flex: 1 }}>
                             {product.name}
                         </h2>
-                        <button onClick={onClose} style={{ background: 'none', border: 'none', color: 'var(--text-muted)', fontSize: 22, cursor: 'pointer', marginLeft: 12 }}>✕</button>
+                        <button onClick={onClose} style={{ background: 'none', border: 'none', color: 'var(--text-muted)', fontSize: 22, cursor: 'pointer', marginLeft: 12 }}>x</button>
                     </div>
 
                     {product.description && (

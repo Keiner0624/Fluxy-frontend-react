@@ -117,7 +117,7 @@ export default function DashboardPage() {
         background: 'rgba(52,211,153,0.12)', border: '1px solid rgba(52,211,153,0.3)',
         borderRadius: 12, padding: '11px 20px',
         fontSize: 13, fontWeight: 700, color: '#34d399',
-      }}>🚀 Plan Business</div>
+      }}> Plan Business</div>
     )
     if (plan === 'PRO') return (
       <div onClick={() => navigate('/dashboard/plans')} style={{
@@ -129,7 +129,7 @@ export default function DashboardPage() {
       }}
         onMouseEnter={e => e.currentTarget.style.background = 'rgba(124,131,253,0.22)'}
         onMouseLeave={e => e.currentTarget.style.background = 'rgba(124,131,253,0.15)'}
-      >⚡ Plan Pro</div>
+      > Plan Pro</div>
     )
     return (
       <button onClick={() => navigate('/dashboard/plans')} style={{
@@ -143,7 +143,7 @@ export default function DashboardPage() {
       }}
         onMouseEnter={e => e.currentTarget.style.transform = 'translateY(-1px)'}
         onMouseLeave={e => e.currentTarget.style.transform = 'translateY(0)'}
-      >⚡ Mejorar plan</button>
+      > Mejorar plan</button>
     )
   }
 
@@ -161,7 +161,7 @@ export default function DashboardPage() {
           gap: 12, flexWrap: 'wrap', animation: 'fadeIn 0.4s ease',
         }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
-            <span style={{ fontSize: 24 }}>{daysLeft <= 3 ? '🚨' : '⏰'}</span>
+            <span style={{ fontSize: 24 }}>{daysLeft <= 3 ? '' : ''}</span>
             <div>
               <div style={{ fontSize: 14, fontWeight: 700, color: daysLeft <= 3 ? '#f87171' : '#fbbf24' }}>
                 Tu plan vence en {daysLeft} día{daysLeft !== 1 ? 's' : ''}
@@ -191,7 +191,7 @@ export default function DashboardPage() {
           gap: 12, flexWrap: 'wrap', animation: 'fadeIn 0.4s ease',
         }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
-            <span style={{ fontSize: 28 }}>🎉</span>
+            <span style={{ fontSize: 28 }}></span>
             <div>
               <div style={{ fontSize: 15, fontWeight: 700, color: '#34d399' }}>
                 Pago confirmado. Ya tienes acceso al plan {PLAN_NAMES[paymentStatus.plan] || paymentStatus.plan || 'seleccionado'}.
@@ -215,7 +215,7 @@ export default function DashboardPage() {
           borderRadius: 14, padding: '16px 20px', marginBottom: 24,
           display: 'flex', alignItems: 'center', gap: 12,
         }}>
-          <span style={{ fontSize: 24 }}>❌</span>
+          <span style={{ fontSize: 24 }}></span>
           <div>
             <div style={{ fontSize: 14, fontWeight: 600, color: '#f87171' }}>El pago no pudo procesarse</div>
             <div style={{ fontSize: 13, color: 'var(--text-muted)', marginTop: 2 }}>Intenta de nuevo con otro método de pago.</div>
@@ -229,7 +229,7 @@ export default function DashboardPage() {
           borderRadius: 14, padding: '16px 20px', marginBottom: 24,
           display: 'flex', alignItems: 'center', gap: 12,
         }}>
-          <span style={{ fontSize: 24 }}>⏳</span>
+          <span style={{ fontSize: 24 }}></span>
           <div>
             <div style={{ fontSize: 14, fontWeight: 600, color: '#fbbf24' }}>Pago pendiente de confirmación</div>
             <div style={{ fontSize: 13, color: 'var(--text-muted)', marginTop: 2 }}>Tu plan se activará automáticamente cuando el pago sea confirmado.</div>
@@ -252,7 +252,7 @@ export default function DashboardPage() {
               Panel de control
             </div>
             <h1 style={{ fontFamily: "'Fraunces', serif", fontSize: 28, fontWeight: 700, color: 'white', marginBottom: 6 }}>
-              ¡Bienvenido, {company.name || user.fullName}! 👋
+              ¡Bienvenido, {company.name || user.fullName}! 
             </h1>
             <p style={{ fontSize: 14, color: 'var(--text-soft)' }}>
               Desde aquí gestionas todo tu negocio en Fluxy.
@@ -268,10 +268,10 @@ export default function DashboardPage() {
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: 16, marginBottom: 28 }}>
         {loadingPlan && [1,2,3,4].map(i => <DashboardCardSkeleton key={i}/>)}
         {!loadingPlan && [
-          { icon: '📦', label: 'Productos',    desc: 'Gestiona tu catálogo',  path: '/dashboard/products', color: '#7c83fd' },
-          { icon: '🛒', label: 'Pedidos',      desc: 'Ver pedidos recibidos', path: '/dashboard/orders',   color: '#34d399' },
-          { icon: '⚙️', label: 'Configuración', desc: 'Edita tu tienda',      path: '/dashboard/settings', color: '#fbbf24' },
-          { icon: '⚡', label: 'Planes',       desc: 'Ver planes y precios',  path: '/dashboard/plans',    color: '#a78bfa' },
+          { icon: '', label: 'Productos',    desc: 'Gestiona tu catálogo',  path: '/dashboard/products', color: '#7c83fd' },
+          { icon: '', label: 'Pedidos',      desc: 'Ver pedidos recibidos', path: '/dashboard/orders',   color: '#34d399' },
+          { icon: '', label: 'Configuración', desc: 'Edita tu tienda',      path: '/dashboard/settings', color: '#fbbf24' },
+          { icon: '', label: 'Planes',       desc: 'Ver planes y precios',  path: '/dashboard/plans',    color: '#a78bfa' },
         ].map(card => (
           <button key={card.path} onClick={() => navigate(card.path)} style={{
             background: 'rgba(13,13,26,0.9)', border: '1px solid rgba(255,255,255,0.06)',
@@ -297,7 +297,7 @@ export default function DashboardPage() {
           flexWrap: 'wrap', gap: 12,
         }}>
           <div>
-            <div style={{ fontSize: 12, color: 'var(--text-muted)', marginBottom: 4 }}>🔗 Tu tienda pública</div>
+            <div style={{ fontSize: 12, color: 'var(--text-muted)', marginBottom: 4 }}> Tu tienda pública</div>
             <div style={{ fontSize: 14, color: 'var(--primary)', fontWeight: 500 }}>{storeUrl}</div>
           </div>
           <a href={storeUrl} target="_blank" rel="noreferrer" style={{

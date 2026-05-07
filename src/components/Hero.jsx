@@ -2,11 +2,11 @@
 import { useState, useEffect } from 'react'
 
 const ALL_PAYMENTS = [
-  { key: 'efectivo',      label: '💵', name: 'Efectivo' },
-  { key: 'yape',          label: '📱', name: 'Yape' },
-  { key: 'plin',          label: '🏦', name: 'Plin' },
-  { key: 'tarjeta',       label: '💳', name: 'Tarjeta' },
-  { key: 'transferencia', label: '🏧', name: 'Transferencia' },
+  { key: 'efectivo',      label: '', name: 'Efectivo' },
+  { key: 'yape',          label: '', name: 'Yape' },
+  { key: 'plin',          label: '', name: 'Plin' },
+  { key: 'tarjeta',       label: '', name: 'Tarjeta' },
+  { key: 'transferencia', label: '', name: 'Transferencia' },
 ]
 
 function getPaymentMethods(company) {
@@ -24,7 +24,7 @@ export default function Hero({ company, loading, cartOpen }) {
 
   const phone = company?.phone?.replace(/[^0-9]/g, '')
   const waMsg = encodeURIComponent(
-    `¡Hola! 👋 Vi tu tienda *${company?.name}* y quiero hacer un pedido. ¿Me puedes ayudar?`
+    `¡Hola!  Vi tu tienda *${company?.name}* y quiero hacer un pedido. ¿Me puedes ayudar?`
   )
   const paymentKeys      = getPaymentMethods(company)
   const acceptedPayments = ALL_PAYMENTS.filter(p => paymentKeys.includes(p.key))
@@ -159,9 +159,9 @@ export default function Hero({ company, loading, cartOpen }) {
             {/* Trust badges */}
             <div style={{ display: 'flex', gap: 20, flexWrap: 'wrap' }}>
               {[
-                { icon: '⚡', label: 'Respuesta rápida' },
-                { icon: '🔒', label: 'Compra segura' },
-                { icon: '✅', label: 'Negocio verificado' },
+                { icon: '', label: 'Respuesta rápida' },
+                { icon: '', label: 'Compra segura' },
+                { icon: '', label: 'Negocio verificado' },
               ].map(s => (
                 <div key={s.label} style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
                   <span style={{ fontSize: 14 }}>{s.icon}</span>
@@ -219,10 +219,10 @@ export default function Hero({ company, loading, cartOpen }) {
               </div>
               <div style={{ display: 'flex', flexDirection: 'column', gap: 0 }}>
                 {[
-                  company?.address && { icon: '📍', label: 'Ubicación', text: company.address },
-                  company?.phone   && { icon: '📞', label: 'Teléfono',  text: company.phone },
-                  { icon: '🕐', label: 'Atención',  text: 'Respuesta inmediata' },
-                  { icon: '🔒', label: 'Seguridad', text: 'Compra 100% segura' },
+                  company?.address && { icon: '', label: 'Ubicación', text: company.address },
+                  company?.phone   && { icon: '', label: 'Teléfono',  text: company.phone },
+                  { icon: '', label: 'Atención',  text: 'Respuesta inmediata' },
+                  { icon: '', label: 'Seguridad', text: 'Compra 100% segura' },
                 ].filter(Boolean).map((item, i, arr) => (
                   <div key={i} style={{
                     display: 'flex', gap: 12, alignItems: 'flex-start',
@@ -273,7 +273,7 @@ export default function Hero({ company, loading, cartOpen }) {
         padding: '10px 16px', textAlign: 'center',
         fontSize: 13, color: '#fbbf24', fontWeight: 500,
       }}>
-        🔥 Stock limitado — Asegura tu pedido hoy mismo
+         Stock limitado — Asegura tu pedido hoy mismo
       </div>
 
       {/* WhatsApp flotante */}

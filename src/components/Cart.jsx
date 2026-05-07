@@ -50,7 +50,7 @@ export default function Cart({ open, cart, total, onClose, onIncrease, onDecreas
             border: '1px solid rgba(255,255,255,0.1)',
             color: 'var(--text-muted, #4a4a6a)', fontSize: 16,
             display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer',
-          }}>✕</button>
+          }}>x</button>
         </div>
 
         {/* Items */}
@@ -61,7 +61,7 @@ export default function Cart({ open, cart, total, onClose, onIncrease, onDecreas
               alignItems: 'center', justifyContent: 'center',
               height: '100%', color: 'var(--text-muted, #4a4a6a)', gap: 12,
             }}>
-              <div style={{ fontSize: 48 }}>🛒</div>
+              <div style={{ fontSize: 48 }}></div>
               <div style={{ fontSize: 15 }}>Tu carrito está vacío</div>
               <div style={{ fontSize: 13 }}>Agrega productos para continuar</div>
             </div>
@@ -79,7 +79,7 @@ export default function Cart({ open, cart, total, onClose, onIncrease, onDecreas
                 }}>
                   {item.product.imageUrl
                     ? <img src={item.product.imageUrl} alt={item.product.name} style={{ width: '100%', height: '100%', objectFit: 'cover' }}/>
-                    : <span style={{ fontSize: 22 }}>📦</span>
+                    : <span style={{ fontSize: 22 }}></span>
                   }
                 </div>
                 <div style={{ flex: 1, minWidth: 0 }}>
@@ -145,7 +145,7 @@ export default function Cart({ open, cart, total, onClose, onIncrease, onDecreas
               </svg>
             </button>
             <div style={{ textAlign: 'center', fontSize: 12, color: 'var(--text-muted, #4a4a6a)' }}>
-              También puedes consultar por WhatsApp 💬
+              También puedes consultar por WhatsApp 
             </div>
           </div>
         )}

@@ -12,13 +12,13 @@ export default function ProductCard({ product, onAddToCart, onViewDetail, index,
 
   const phone = company?.phone?.replace(/[^0-9]/g, '')
   const waMsg = encodeURIComponent(
-    `¡Hola! 👋 Estoy interesado en *${product.name}* de tu tienda *${company?.name}*. ¿Está disponible?`
+    `¡Hola!  Estoy interesado en *${product.name}* de tu tienda *${company?.name}*. ¿Está disponible?`
   )
 
   const badge = isOut      ? null
-    : isLowStock ? { text: '⚡ Últimas unidades', color: '#fbbf24', bg: 'rgba(251,191,36,0.12)', border: 'rgba(251,191,36,0.25)' }
-    : isTop      ? { text: '🔥 Más vendido',      color: '#f87171', bg: 'rgba(248,113,113,0.12)', border: 'rgba(248,113,113,0.25)' }
-    : isNew      ? { text: '✨ Nuevo',             color: '#7c83fd', bg: 'rgba(124,131,253,0.12)', border: 'rgba(124,131,253,0.25)' }
+    : isLowStock ? { text: ' Últimas unidades', color: '#fbbf24', bg: 'rgba(251,191,36,0.12)', border: 'rgba(251,191,36,0.25)' }
+    : isTop      ? { text: ' Más vendido',      color: '#f87171', bg: 'rgba(248,113,113,0.12)', border: 'rgba(248,113,113,0.25)' }
+    : isNew      ? { text: ' Nuevo',             color: '#7c83fd', bg: 'rgba(124,131,253,0.12)', border: 'rgba(124,131,253,0.25)' }
     : null
 
   const handleAdd = () => {
@@ -92,7 +92,7 @@ export default function ProductCard({ product, onAddToCart, onViewDetail, index,
             display: 'flex', alignItems: 'center', justifyContent: 'center',
             fontSize: 60,
             background: `radial-gradient(circle at 50% 50%, rgba(124,131,253,0.08) 0%, transparent 70%)`,
-          }}>📦</div>
+          }}></div>
         )}
 
         {/* Gradient bottom */}
@@ -159,7 +159,7 @@ export default function ProductCard({ product, onAddToCart, onViewDetail, index,
             transition: 'all 0.3s',
             boxShadow: isOut || adding ? 'none' : hovered ? '0 6px 20px rgba(124,131,253,0.3)' : 'none',
           }}>
-            {isOut ? 'No disponible' : adding ? '✓ Agregado al carrito' : '+ Agregar al carrito'}
+            {isOut ? 'No disponible' : adding ? ' Agregado al carrito' : '+ Agregar al carrito'}
           </button>
 
           <div style={{ display: 'flex', gap: 8 }}>
@@ -173,7 +173,7 @@ export default function ProductCard({ product, onAddToCart, onViewDetail, index,
             }}
               onMouseEnter={e => { e.currentTarget.style.background = 'rgba(255,255,255,0.07)'; e.currentTarget.style.color = 'white' }}
               onMouseLeave={e => { e.currentTarget.style.background = 'rgba(255,255,255,0.03)'; e.currentTarget.style.color = 'rgba(255,255,255,0.5)' }}
-            >🔍 Ver detalles</button>
+            > Ver detalles</button>
 
             {phone && company?.plan !== 'FREE' && (
               <a href={`https://wa.me/${phone}?text=${waMsg}`} target="_blank" rel="noreferrer"

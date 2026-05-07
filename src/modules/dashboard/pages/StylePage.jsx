@@ -27,11 +27,11 @@ const PRIMARY_COLORS = [
 ]
 
 const ANIMATIONS = [
-  { key: 'none',  label: 'Sin animación',    icon: '⬜' },
-  { key: 'mesh',  label: 'Mesh gradiente',   icon: '🌐' },
-  { key: 'wave',  label: 'Olas suaves',      icon: '🌊' },
-  { key: 'pulse', label: 'Pulso radial',     icon: '💫' },
-  { key: 'flow',  label: 'Flujo de colores', icon: '🎨' },
+  { key: 'none',  label: 'Sin animación',    icon: '' },
+  { key: 'mesh',  label: 'Mesh gradiente',   icon: '' },
+  { key: 'wave',  label: 'Olas suaves',      icon: '' },
+  { key: 'pulse', label: 'Pulso radial',     icon: '' },
+  { key: 'flow',  label: 'Flujo de colores', icon: '' },
 ]
 
 const DEFAULT_STYLE = {
@@ -102,7 +102,7 @@ function StorePreview({ style, company }) {
                 <div style={{ fontSize: 8, color: 'rgba(255,255,255,0.35)' }}>via Fluxy</div>
               </div>
             </div>
-            <div style={{ background: primary, borderRadius: 8, padding: '4px 10px', fontSize: 9, fontWeight: 700, color: '#fff' }}>🛒 0</div>
+            <div style={{ background: primary, borderRadius: 8, padding: '4px 10px', fontSize: 9, fontWeight: 700, color: '#fff' }}> 0</div>
           </div>
 
           {/* Hero */}
@@ -123,7 +123,7 @@ function StorePreview({ style, company }) {
 
             <div style={{ fontSize: 9, color: 'rgba(255,255,255,0.3)', textTransform: 'uppercase', letterSpacing: '1px', marginBottom: 8, fontWeight: 700 }}>Catálogo</div>
             <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 8 }}>
-              {['📦', '🛍️', '🎁', '🧴'].map((emoji, i) => (
+              {['', '', '', ''].map((emoji, i) => (
                 <div key={i} style={{ background: 'rgba(0,0,0,0.3)', backdropFilter: 'blur(8px)', border: '1px solid rgba(255,255,255,0.07)', borderRadius: 10, overflow: 'hidden' }}>
                   <div style={{ height: 44, background: 'rgba(255,255,255,0.04)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 18 }}>{emoji}</div>
                   <div style={{ padding: '6px 8px' }}>
@@ -195,7 +195,7 @@ function StyleContent() {
         body: JSON.stringify({ storeStyle: payload }),
       })
     } catch { /* no crítico */ }
-    setSuccess('✅ Estilo guardado y aplicado a tu tienda.')
+    setSuccess(' Estilo guardado y aplicado a tu tienda.')
     setTimeout(() => setSuccess(''), 3000)
     setSaving(false)
   }
@@ -212,7 +212,7 @@ function StyleContent() {
 
         {/* Presets */}
         <div style={{ background: 'rgba(13,13,26,0.9)', border: '1px solid rgba(255,255,255,0.06)', borderRadius: 20, padding: '24px' }}>
-          <div style={{ fontSize: 13, fontWeight: 600, color: 'white', marginBottom: 16, paddingBottom: 12, borderBottom: '1px solid rgba(255,255,255,0.06)' }}>🎨 Temas prediseñados</div>
+          <div style={{ fontSize: 13, fontWeight: 600, color: 'white', marginBottom: 16, paddingBottom: 12, borderBottom: '1px solid rgba(255,255,255,0.06)' }}> Temas prediseñados</div>
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(145px, 1fr))', gap: 10 }}>
             {PRESETS.map(preset => (
               <button key={preset.id} type="button" onClick={() => applyPreset(preset)} style={{
@@ -225,7 +225,7 @@ function StyleContent() {
                   <div style={{ fontSize: 12, fontWeight: 600, color: 'white', marginBottom: 1 }}>{preset.name}</div>
                   <div style={{ fontSize: 10, color: 'var(--text-muted)' }}>{preset.description}</div>
                 </div>
-                {style.preset === preset.id && <div style={{ background: 'var(--primary)', padding: '3px', textAlign: 'center', fontSize: 10, color: 'white', fontWeight: 600 }}>✓ Activo</div>}
+                {style.preset === preset.id && <div style={{ background: 'var(--primary)', padding: '3px', textAlign: 'center', fontSize: 10, color: 'white', fontWeight: 600 }}> Activo</div>}
               </button>
             ))}
           </div>
@@ -233,12 +233,12 @@ function StyleContent() {
 
         {/* Color primario */}
         <div style={{ background: 'rgba(13,13,26,0.9)', border: '1px solid rgba(255,255,255,0.06)', borderRadius: 20, padding: '24px' }}>
-          <div style={{ fontSize: 13, fontWeight: 600, color: 'white', marginBottom: 16, paddingBottom: 12, borderBottom: '1px solid rgba(255,255,255,0.06)' }}>🎯 Color de acento</div>
+          <div style={{ fontSize: 13, fontWeight: 600, color: 'white', marginBottom: 16, paddingBottom: 12, borderBottom: '1px solid rgba(255,255,255,0.06)' }}> Color de acento</div>
           <div style={{ display: 'flex', flexWrap: 'wrap', gap: 10, marginBottom: 12 }}>
             {PRIMARY_COLORS.map(c => (
               <button key={c.color} type="button" onClick={() => setStyle(s => ({ ...s, primary: c.color, preset: 'custom' }))}
                 style={{ width: 42, height: 42, borderRadius: 11, background: c.color, border: style.primary === c.color ? '3px solid white' : '3px solid transparent', cursor: 'pointer', transition: 'all 0.2s', boxShadow: style.primary === c.color ? `0 0 16px ${c.color}80` : 'none', position: 'relative' }} title={c.name}>
-                {style.primary === c.color && <span style={{ position: 'absolute', inset: 0, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 16, color: c.color === '#ffffff' ? '#000' : '#fff' }}>✓</span>}
+                {style.primary === c.color && <span style={{ position: 'absolute', inset: 0, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 16, color: c.color === '#ffffff' ? '#000' : '#fff' }}></span>}
               </button>
             ))}
             <input type="color" value={style.primary} onChange={e => setStyle(s => ({ ...s, primary: e.target.value, preset: 'custom' }))} style={{ width: 42, height: 42, borderRadius: 11, border: '2px dashed rgba(255,255,255,0.2)', cursor: 'pointer', padding: 2 }} title="Custom"/>
@@ -251,7 +251,7 @@ function StyleContent() {
 
         {/* Colores del fondo */}
         <div style={{ background: 'rgba(13,13,26,0.9)', border: '1px solid rgba(255,255,255,0.06)', borderRadius: 20, padding: '24px' }}>
-          <div style={{ fontSize: 13, fontWeight: 600, color: 'white', marginBottom: 16, paddingBottom: 12, borderBottom: '1px solid rgba(255,255,255,0.06)' }}>🖼️ Colores del fondo</div>
+          <div style={{ fontSize: 13, fontWeight: 600, color: 'white', marginBottom: 16, paddingBottom: 12, borderBottom: '1px solid rgba(255,255,255,0.06)' }}> Colores del fondo</div>
           <div style={{ display: 'flex', gap: 10, flexWrap: 'wrap', marginBottom: 14 }}>
             {style.colors.map((color, i) => (
               <div key={i} style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
@@ -269,9 +269,9 @@ function StyleContent() {
           <div style={{ height: 48, borderRadius: 10, background: previewBg(), border: '1px solid rgba(255,255,255,0.08)', transition: 'background 0.3s' }}/>
         </div>
 
-        {/* 🆕 Imagen de fondo */}
+        {/*  Imagen de fondo */}
         <div style={{ background: 'rgba(13,13,26,0.9)', border: '1px solid rgba(255,255,255,0.06)', borderRadius: 20, padding: '24px' }}>
-          <div style={{ fontSize: 13, fontWeight: 600, color: 'white', marginBottom: 4, paddingBottom: 12, borderBottom: '1px solid rgba(255,255,255,0.06)' }}>🌄 Imagen de fondo</div>
+          <div style={{ fontSize: 13, fontWeight: 600, color: 'white', marginBottom: 4, paddingBottom: 12, borderBottom: '1px solid rgba(255,255,255,0.06)' }}> Imagen de fondo</div>
           <p style={{ fontSize: 12, color: 'var(--text-muted)', marginBottom: 16, marginTop: 12, lineHeight: 1.6 }}>
             Sube una foto como fondo de tu tienda. El gradiente se aplica encima para mantener legibilidad. Se adapta automáticamente a escritorio y móvil.
           </p>
@@ -286,7 +286,7 @@ function StyleContent() {
                   <span style={{ fontSize: 11, color: 'white', background: 'rgba(0,0,0,0.5)', borderRadius: 6, padding: '3px 8px' }}>Vista previa del overlay</span>
                 </div>
                 <button type="button" onClick={() => setStyle(s => ({ ...s, bgImage: '', preset: 'custom' }))} style={{ position: 'absolute', top: 8, right: 8, background: 'rgba(0,0,0,0.7)', border: 'none', borderRadius: 7, padding: '4px 10px', color: '#f87171', fontSize: 12, fontWeight: 600, cursor: 'pointer' }}>
-                  ✕ Quitar
+                   Quitar
                 </button>
               </div>
 
@@ -307,7 +307,7 @@ function StyleContent() {
               </div>
 
               <button type="button" onClick={() => bgImgRef.current?.click()} style={{ width: '100%', marginTop: 12, padding: '9px', background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.08)', borderRadius: 10, color: 'var(--text-muted)', fontSize: 12, cursor: 'pointer' }}>
-                🔄 Cambiar imagen
+                 Cambiar imagen
               </button>
             </div>
           ) : (
@@ -322,17 +322,17 @@ function StyleContent() {
                 onMouseLeave={e => e.currentTarget.style.borderColor = 'rgba(124,131,253,0.25)'}
               >
                 {uploadingBg ? (
-                  <div style={{ fontSize: 12, color: 'var(--text-muted)' }}>⬆️ Subiendo...</div>
+                  <div style={{ fontSize: 12, color: 'var(--text-muted)' }}> Subiendo...</div>
                 ) : (
                   <>
-                    <span style={{ fontSize: 24 }}>🌄</span>
+                    <span style={{ fontSize: 24 }}></span>
                     <span style={{ fontSize: 12, color: 'var(--text-muted)' }}>Clic para subir imagen de fondo</span>
                     <span style={{ fontSize: 10, color: 'var(--text-muted)', opacity: 0.6 }}>JPG, PNG — Recomendado 1920×1080px</span>
                   </>
                 )}
               </div>
               <button type="button" onClick={() => bgImgRef.current?.click()} disabled={uploadingBg} style={{ width: '100%', padding: '10px', background: 'rgba(124,131,253,0.08)', border: '1px solid rgba(124,131,253,0.2)', borderRadius: 10, color: 'var(--primary)', fontSize: 13, fontWeight: 600, cursor: 'pointer' }}>
-                {uploadingBg ? '⬆️ Subiendo...' : '📤 Subir imagen de fondo'}
+                {uploadingBg ? ' Subiendo...' : ' Subir imagen de fondo'}
               </button>
             </>
           )}
@@ -341,7 +341,7 @@ function StyleContent() {
 
         {/* Animaciones */}
         <div style={{ background: 'rgba(13,13,26,0.9)', border: '1px solid rgba(255,255,255,0.06)', borderRadius: 20, padding: '24px' }}>
-          <div style={{ fontSize: 13, fontWeight: 600, color: 'white', marginBottom: 16, paddingBottom: 12, borderBottom: '1px solid rgba(255,255,255,0.06)' }}>✨ Animación de fondo</div>
+          <div style={{ fontSize: 13, fontWeight: 600, color: 'white', marginBottom: 16, paddingBottom: 12, borderBottom: '1px solid rgba(255,255,255,0.06)' }}> Animación de fondo</div>
           <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
             {ANIMATIONS.map(anim => (
               <button key={anim.key} type="button" onClick={() => setStyle(s => ({ ...s, animation: anim.key, preset: 'custom' }))} style={{
@@ -353,7 +353,7 @@ function StyleContent() {
               }}>
                 <span style={{ fontSize: 18 }}>{anim.icon}</span>
                 <span>{anim.label}</span>
-                {style.animation === anim.key && <span style={{ marginLeft: 'auto', fontSize: 12 }}>✓</span>}
+                {style.animation === anim.key && <span style={{ marginLeft: 'auto', fontSize: 12 }}></span>}
               </button>
             ))}
           </div>
@@ -362,7 +362,7 @@ function StyleContent() {
         {success && <div style={{ background: 'rgba(52,211,153,0.08)', border: '1px solid rgba(52,211,153,0.2)', borderRadius: 10, padding: '11px 14px', fontSize: 13, color: '#34d399' }}>{success}</div>}
 
         <button onClick={handleSave} disabled={saving} style={{ width: '100%', padding: '15px', borderRadius: 14, background: saving ? 'rgba(124,131,253,0.4)' : 'linear-gradient(135deg, #7c83fd, #4f46e5)', border: 'none', color: 'white', fontSize: 15, fontWeight: 700, cursor: saving ? 'not-allowed' : 'pointer', boxShadow: saving ? 'none' : '0 8px 24px rgba(124,131,253,0.25)' }}>
-          {saving ? 'Guardando...' : '💾 Aplicar estilo a mi tienda'}
+          {saving ? 'Guardando...' : ' Aplicar estilo a mi tienda'}
         </button>
       </div>
 
@@ -370,7 +370,7 @@ function StyleContent() {
       <div style={{ position: 'sticky', top: 24, display: 'flex', flexDirection: 'column', gap: 12 }}>
         {/* Toggle */}
         <div style={{ display: 'flex', gap: 8 }}>
-          {[{ key: 'desktop', icon: '🖥️', label: 'Escritorio' }, { key: 'mobile', icon: '📱', label: 'Móvil' }].map(m => (
+          {[{ key: 'desktop', icon: '', label: 'Escritorio' }, { key: 'mobile', icon: '', label: 'Móvil' }].map(m => (
             <button key={m.key} onClick={() => setPreviewMode(m.key)} style={{
               flex: 1, padding: '8px', borderRadius: 10, fontSize: 12, fontWeight: 600, cursor: 'pointer', transition: 'all 0.2s',
               background: previewMode === m.key ? 'rgba(124,131,253,0.15)' : 'rgba(255,255,255,0.04)',

@@ -191,7 +191,7 @@ export default function ProductsPage() {
 
       if (!res.ok) throw new Error('Error al guardar producto')
 
-      setSuccess(editProduct ? '✅ Producto actualizado.' : '✅ Producto creado.')
+      setSuccess(editProduct ? ' Producto actualizado.' : ' Producto creado.')
       setShowForm(false)
       loadProducts()
     } catch (err) {
@@ -281,7 +281,7 @@ export default function ProductsPage() {
           border: '1px dashed rgba(255,255,255,0.08)',
           borderRadius: 20,
         }}>
-          <div style={{ fontSize: 48, marginBottom: 16 }}>📦</div>
+          <div style={{ fontSize: 48, marginBottom: 16 }}></div>
           <h3 style={{ color: 'white', marginBottom: 8, fontFamily: "'Fraunces', serif" }}>
             Sin productos aún
           </h3>
@@ -328,7 +328,7 @@ export default function ProductsPage() {
               {product.imageUrl
                 ? <img src={product.imageUrl} alt={product.name}
                     style={{ width: '100%', height: '100%', objectFit: 'cover' }}/>
-                : '📦'
+                : ''
               }
               {/* Stock badge */}
               <div style={{
@@ -379,7 +379,7 @@ export default function ProductsPage() {
                 }}
                   onMouseEnter={e => e.currentTarget.style.background = 'rgba(124,131,253,0.15)'}
                   onMouseLeave={e => e.currentTarget.style.background = 'rgba(124,131,253,0.08)'}
-                >✏️ Editar</button>
+                > Editar</button>
                 <button onClick={() => setDeleteId(product.id)} style={{
                   padding: '9px 14px',
                   background: 'rgba(248,113,113,0.06)',
@@ -390,7 +390,7 @@ export default function ProductsPage() {
                 }}
                   onMouseEnter={e => e.currentTarget.style.background = 'rgba(248,113,113,0.12)'}
                   onMouseLeave={e => e.currentTarget.style.background = 'rgba(248,113,113,0.06)'}
-                >🗑️</button>
+                >Eliminar</button>
               </div>
             </div>
           </div>
@@ -427,7 +427,7 @@ export default function ProductsPage() {
                 border: '1px solid rgba(255,255,255,0.1)',
                 color: 'var(--text-muted)', fontSize: 16, cursor: 'pointer',
                 display: 'flex', alignItems: 'center', justifyContent: 'center',
-              }}>✕</button>
+              }}>x</button>
             </div>
 
             <form onSubmit={handleSubmit} style={{ padding: '24px 26px' }}>
@@ -442,7 +442,7 @@ export default function ProductsPage() {
                     <div key={idx} style={{ position: 'relative', height: 88, borderRadius: 10, overflow: 'hidden', border: '2px solid rgba(124,131,253,0.6)' }}>
                       <img src={src} alt="preview-producto" style={{ width: '100%', height: '100%', objectFit: 'cover' }}/>
                       <div style={{ position: 'absolute', bottom: 0, left: 0, right: 0, background: 'rgba(124,131,253,0.85)', fontSize: 9, fontWeight: 700, color: 'white', textAlign: 'center', padding: '2px' }}>PRINCIPAL</div>
-                      <button type="button" onClick={removeImage} style={{ position: 'absolute', top: 4, right: 4, width: 18, height: 18, borderRadius: '50%', background: 'rgba(248,113,113,0.9)', border: 'none', color: 'white', fontSize: 9, cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 700 }}>✕</button>
+                      <button type="button" onClick={removeImage} style={{ position: 'absolute', top: 4, right: 4, width: 18, height: 18, borderRadius: '50%', background: 'rgba(248,113,113,0.9)', border: 'none', color: 'white', fontSize: 9, cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 700 }}>x</button>
                     </div>
                   ))}
                   {imagePreviews.length < 1 && (
@@ -450,7 +450,7 @@ export default function ProductsPage() {
                       onMouseEnter={e => e.currentTarget.style.borderColor = 'rgba(124,131,253,0.5)'}
                       onMouseLeave={e => e.currentTarget.style.borderColor = 'rgba(124,131,253,0.25)'}
                     >
-                      <span style={{ fontSize: 20 }}>📷</span>
+                      <span style={{ fontSize: 20 }}></span>
                       <span style={{ fontSize: 10, color: 'var(--text-muted)' }}>Agregar</span>
                     </div>
                   )}
@@ -584,7 +584,7 @@ export default function ProductsPage() {
                   border: '1px solid rgba(248,113,113,0.2)',
                   borderRadius: 10, padding: '10px 14px',
                   fontSize: 13, color: '#f87171', marginBottom: 16,
-                }}>⚠️ {error}</div>
+                }}> {error}</div>
               )}
 
               {/* Botones */}
@@ -606,10 +606,10 @@ export default function ProductsPage() {
                   cursor: saving ? 'not-allowed' : 'pointer',
                   boxShadow: saving ? 'none' : '0 4px 16px rgba(124,131,253,0.25)',
                 }}>
-                  {uploadingImage ? '📤 Subiendo imágenes...'
+                  {uploadingImage ? ' Subiendo imágenes...'
                     : saving ? 'Guardando...'
-                    : editProduct ? '✅ Guardar cambios'
-                    : '✅ Crear producto'}
+                    : editProduct ? ' Guardar cambios'
+                    : ' Crear producto'}
                 </button>
               </div>
             </form>
@@ -631,7 +631,7 @@ export default function ProductsPage() {
             borderRadius: 20, padding: '32px 28px',
             maxWidth: 360, width: '100%', textAlign: 'center',
           }}>
-            <div style={{ fontSize: 40, marginBottom: 16 }}>🗑️</div>
+            <div style={{ fontSize: 40, marginBottom: 16 }}></div>
             <h3 style={{ fontFamily: "'Fraunces', serif", fontSize: 20, color: 'white', marginBottom: 8 }}>
               ¿Eliminar producto?
             </h3>

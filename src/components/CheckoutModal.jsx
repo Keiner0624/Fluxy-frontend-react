@@ -60,7 +60,7 @@ export default function CheckoutModal({ open, cart, total, company, onClose, onS
         {/* ── Pantalla de confirmación ── */}
         {orderId ? (
           <div style={{ textAlign: 'center', padding: '48px 36px' }}>
-            <div style={{ fontSize: 52, marginBottom: 18 }}>🎉</div>
+            <div style={{ fontSize: 52, marginBottom: 18 }}></div>
             <h2 style={{ fontFamily: "'Fraunces', serif", fontSize: 26, marginBottom: 12 }}>
               ¡Pedido Confirmado!
             </h2>
@@ -75,7 +75,7 @@ export default function CheckoutModal({ open, cart, total, company, onClose, onS
             }}>Pedido #{orderId}</div>
 
             <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
-              {/* ✅ Botón WhatsApp — aparece solo si el backend lo retorna (plan PRO/BUSINESS) */}
+              {/*  Botón WhatsApp — aparece solo si el backend lo retorna (plan PRO/BUSINESS) */}
               {whatsappUrl && (
                 <a
                   href={whatsappUrl}
@@ -88,7 +88,7 @@ export default function CheckoutModal({ open, cart, total, company, onClose, onS
                     fontSize: 14, fontWeight: 600, textDecoration: 'none',
                   }}
                 >
-                  💬 Coordinar por WhatsApp
+                   Coordinar por WhatsApp
                 </a>
               )}
 
@@ -116,7 +116,7 @@ export default function CheckoutModal({ open, cart, total, company, onClose, onS
                 border: '1px solid rgba(255,255,255,0.08)',
                 color: 'var(--text-muted, #4a4a6a)', fontSize: 16,
                 cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center',
-              }}>✕</button>
+              }}>x</button>
             </div>
 
             <div style={{ padding: '24px 26px' }}>
@@ -186,7 +186,7 @@ export default function CheckoutModal({ open, cart, total, company, onClose, onS
                 opacity: loading ? 0.7 : 1,
                 cursor: loading ? 'not-allowed' : 'pointer', border: 'none',
               }}>
-                {loading ? 'Procesando...' : '✅ Confirmar Pedido'}
+                {loading ? 'Procesando...' : ' Confirmar Pedido'}
               </button>
             </div>
           </>
