@@ -3,15 +3,20 @@ import { useState } from 'react'
 import { createOrder } from '../api/storeApi'
 import toast from 'react-hot-toast'
 import { useTranslation } from '../hooks/useTranslation'
+import { API_URL } from '../app/config'
 
 export default function CheckoutModal({ open, cart, total, company, onClose, onSuccess }) {
   const t = useTranslation()
-  const [name, setName]           = useState('')
-  const [phone, setPhone]         = useState('')
-  const [address, setAddress]     = useState('')
-  const [loading, setLoading]     = useState(false)
-  const [orderId, setOrderId]     = useState(null)
-  const [whatsappUrl, setWhatsappUrl] = useState(null) // ← URL generada por el backend
+  const [name, setName]             = useState('')
+  const [phone, setPhone]           = useState('')
+  const [address, setAddress]       = useState('')
+  const [coupon, setCoupon]         = useState('')
+  const [couponData, setCouponData] = useState(null) // { discount, finalTotal, code }
+  const [couponLoading, setCouponLoading] = useState(false)
+  const [couponError, setCouponError]     = useState('')
+  const [loading, setLoading]       = useState(false)
+  const [orderId, setOrderId]       = useState(null)
+  const [whatsappUrl, setWhatsappUrl] = useState(null)
 
   const handleConfirm = async () => {
     if (!name.trim()) { toast.error(t.fullName.replace(' *', '')); return }
@@ -22,6 +27,7 @@ export default function CheckoutModal({ open, cart, total, company, onClose, onS
         customerPhone:   phone.trim(),
         customerAddress: address.trim(),
         items: cart.map(i => ({ productId: i.product.id, quantity: i.quantity })),
+        couponCode: couponData ? couponData.code : null,
       })
 
       // El backend ahora retorna { order, orderId, total, whatsappUrl? }
@@ -38,8 +44,21 @@ export default function CheckoutModal({ open, cart, total, company, onClose, onS
     }
   }
 
+  const validateCoupon = async () => {
+    if (!coupon.trim()) return
+    setCouponLoading(true); setCouponError(''); setCouponData(null)
+    try {
+      const res = await fetch(`${API_URL}/coupons/validate?code=${encodeURIComponent(coupon.toUpperCase())}&companyId=${company.id}&orderTotal=${total}`)
+      const data = await res.json()
+      if (!res.ok || !data.valid) throw new Error(data.error || 'Cupón inválido')
+      setCouponData(data)
+    } catch (err) { setCouponError(err.message) }
+    finally { setCouponLoading(false) }
+  }
+
   const handleClose = () => {
     setName(''); setPhone(''); setAddress('')
+    setCoupon(''); setCouponData(null); setCouponError('')
     setOrderId(null); setWhatsappUrl(null)
     onClose()
   }
@@ -169,16 +188,41 @@ export default function CheckoutModal({ open, cart, total, company, onClose, onS
                 </div>
               ))}
 
+              {/* Cupón */}
+              <div style={{ marginBottom: 16 }}>
+                <label style={{ display: 'block', fontSize: 11, color: 'var(--text-muted, #4a4a6a)', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.8px', marginBottom: 8 }}>🎟️ Cupón de descuento</label>
+                <div style={{ display: 'flex', gap: 8 }}>
+                  <input value={coupon} onChange={e => { setCoupon(e.target.value.toUpperCase()); setCouponData(null); setCouponError('') }}
+                    placeholder="Ej: PROMO20"
+                    style={{ flex: 1, background: 'rgba(255,255,255,0.03)', border: `1px solid ${couponData ? 'rgba(52,211,153,0.4)' : 'rgba(255,255,255,0.08)'}`, borderRadius: 12, padding: '11px 14px', color: 'white', fontSize: 14, outline: 'none', fontFamily: 'DM Sans, sans-serif', fontWeight: 600, letterSpacing: '0.5px' }}
+                    onFocus={e => e.target.style.borderColor = 'rgba(124,131,253,0.4)'}
+                    onBlur={e => e.target.style.borderColor = couponData ? 'rgba(52,211,153,0.4)' : 'rgba(255,255,255,0.08)'}
+                    onKeyDown={e => e.key === 'Enter' && validateCoupon()}
+                  />
+                  <button type="button" onClick={validateCoupon} disabled={couponLoading || !coupon.trim()} style={{ padding: '11px 16px', borderRadius: 12, background: 'rgba(124,131,253,0.1)', border: '1px solid rgba(124,131,253,0.25)', color: '#7c83fd', fontSize: 13, fontWeight: 600, cursor: 'pointer', whiteSpace: 'nowrap', opacity: !coupon.trim() ? 0.5 : 1 }}>
+                    {couponLoading ? '...' : 'Aplicar'}
+                  </button>
+                </div>
+                {couponError && <div style={{ fontSize: 12, color: '#f87171', marginTop: 6 }}>⚠️ {couponError}</div>}
+                {couponData && <div style={{ fontSize: 12, color: '#34d399', marginTop: 6, display: 'flex', alignItems: 'center', gap: 6 }}>✅ Cupón aplicado — Descuento: S/ {couponData.discount.toFixed(2)}</div>}
+              </div>
+
               {/* Total */}
               <div style={{
                 display: 'flex', justifyContent: 'space-between', alignItems: 'center',
                 marginBottom: 20, padding: '16px 0',
                 borderTop: '1px solid rgba(255,255,255,0.06)',
               }}>
-                <span style={{ fontSize: 14, color: 'var(--text-muted, #4a4a6a)' }}>{t.totalToPay}</span>
-                <span style={{ fontFamily: "'Fraunces', serif", fontSize: 28, fontWeight: 700 }}>
-                  S/ {total.toFixed(2)}
-                </span>
+                <div>
+                  <span style={{ fontSize: 14, color: 'var(--text-muted, #4a4a6a)' }}>{t.totalToPay}</span>
+                  {couponData && <div style={{ fontSize: 11, color: '#34d399', marginTop: 2 }}>🎟️ Descuento aplicado</div>}
+                </div>
+                <div style={{ textAlign: 'right' }}>
+                  {couponData && <div style={{ fontSize: 13, color: 'rgba(255,255,255,0.3)', textDecoration: 'line-through', marginBottom: 2 }}>S/ {total.toFixed(2)}</div>}
+                  <span style={{ fontFamily: "'Fraunces', serif", fontSize: 28, fontWeight: 700, color: couponData ? '#34d399' : 'white' }}>
+                    S/ {(couponData ? couponData.finalTotal : total).toFixed(2)}
+                  </span>
+                </div>
               </div>
 
               <button onClick={handleConfirm} disabled={loading} style={{
