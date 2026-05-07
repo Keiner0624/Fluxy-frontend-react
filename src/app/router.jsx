@@ -18,7 +18,7 @@ import ResetPasswordPage from '../modules/auth/ResetPasswordPage'
 import AdminPage from '../modules/admin/pages/AdminPage'
 import AdminLoginPage from '../modules/admin/pages/AdminLoginPage'
 import TermsPage from '../modules/landing/pages/TermsPage'
-import CategoryPanel from '../../../components/CategoryPanel'
+import CategoryPanel from '../components/CategoryPanel'
 
 const PAYMENT_STATUS_MAP = {
   approved: 'success',
