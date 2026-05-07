@@ -155,7 +155,7 @@ function Hero() {
         transition: 'all 0.6s ease 0.1s',
       }}>
         <div style={{ width: 6, height: 6, borderRadius: '50%', background: '#34d399', animation: 'pulse 2s infinite' }}/>
-        <span style={{ fontSize: 13, color: '#7c83fd', fontWeight: 600 }}>Plataforma de tiendas online para negocios peruanos</span>
+        <span style={{ fontSize: 13, color: '#7c83fd', fontWeight: 600 }}>Plataforma de tiendas online para toda Latinoamérica 🌎</span>
       </div>
 
       {/* Título */}
@@ -675,6 +675,97 @@ function Pricing() {
   )
 }
 
+
+// ─── Países disponibles ───────────────────────────────────────────────────────
+function CountriesSection() {
+  const [ref, inView] = useInView(0.1)
+
+  const countries = [
+    { flag: '🇵🇪', name: 'Perú',       currency: 'PEN' },
+    { flag: '🇨🇴', name: 'Colombia',   currency: 'COP' },
+    { flag: '🇲🇽', name: 'México',     currency: 'MXN' },
+    { flag: '🇦🇷', name: 'Argentina',  currency: 'ARS' },
+    { flag: '🇨🇱', name: 'Chile',      currency: 'CLP' },
+    { flag: '🇧🇷', name: 'Brasil',     currency: 'BRL' },
+    { flag: '🇺🇾', name: 'Uruguay',    currency: 'UYU' },
+    { flag: '🇧🇴', name: 'Bolivia',    currency: 'BOB' },
+    { flag: '🇪🇨', name: 'Ecuador',    currency: 'USD' },
+    { flag: '🇵🇾', name: 'Paraguay',   currency: 'PYG' },
+    { flag: '🇻🇪', name: 'Venezuela',  currency: 'USD' },
+  ]
+
+  return (
+    <section style={{ padding: '80px 24px', borderTop: '1px solid rgba(255,255,255,0.04)' }}>
+      <div style={{ maxWidth: 1100, margin: '0 auto' }}>
+        <div style={{ textAlign: 'center', marginBottom: 52 }}>
+          <div style={{ fontSize: 12, fontWeight: 700, color: '#7c83fd', textTransform: 'uppercase', letterSpacing: '2px', marginBottom: 16 }}>Disponibilidad</div>
+          <h2 style={{
+            fontFamily: "'Fraunces', serif",
+            fontSize: 'clamp(26px, 4vw, 42px)', fontWeight: 800,
+            color: 'white', marginBottom: 16, letterSpacing: '-1px',
+          }}>
+            Disponible en toda Latinoamérica 🌎
+          </h2>
+          <p style={{ fontSize: 16, color: 'var(--text-soft)', maxWidth: 500, margin: '0 auto', lineHeight: 1.7 }}>
+            Fluxy detecta tu país automáticamente y muestra los precios en tu moneda local. Paga con Mercado Pago desde cualquier país.
+          </p>
+        </div>
+
+        <div ref={ref} style={{
+          display: 'grid',
+          gridTemplateColumns: 'repeat(auto-fill, minmax(140px, 1fr))',
+          gap: 14,
+        }}>
+          {countries.map((country, i) => (
+            <div key={i} style={{
+              background: 'rgba(13,13,26,0.8)',
+              border: '1px solid rgba(255,255,255,0.06)',
+              borderRadius: 16, padding: '20px 16px',
+              textAlign: 'center',
+              opacity: inView ? 1 : 0,
+              transform: inView ? 'translateY(0)' : 'translateY(20px)',
+              transition: `all 0.5s ease ${i * 0.05}s`,
+              cursor: 'default',
+            }}
+              onMouseEnter={e => { e.currentTarget.style.borderColor = 'rgba(124,131,253,0.3)'; e.currentTarget.style.transform = 'translateY(-4px)' }}
+              onMouseLeave={e => { e.currentTarget.style.borderColor = 'rgba(255,255,255,0.06)'; e.currentTarget.style.transform = 'translateY(0)' }}
+            >
+              <div style={{ fontSize: 36, marginBottom: 10 }}>{country.flag}</div>
+              <div style={{ fontSize: 13, fontWeight: 600, color: 'white', marginBottom: 4 }}>{country.name}</div>
+              <div style={{ fontSize: 11, color: 'var(--text-muted)', background: 'rgba(124,131,253,0.08)', border: '1px solid rgba(124,131,253,0.15)', borderRadius: 6, padding: '2px 8px', display: 'inline-block' }}>{country.currency}</div>
+            </div>
+          ))}
+
+          {/* Próximamente */}
+          <div style={{
+            background: 'rgba(124,131,253,0.04)',
+            border: '1px dashed rgba(124,131,253,0.2)',
+            borderRadius: 16, padding: '20px 16px',
+            textAlign: 'center',
+            opacity: inView ? 1 : 0,
+            transform: inView ? 'translateY(0)' : 'translateY(20px)',
+            transition: `all 0.5s ease ${countries.length * 0.05}s`,
+          }}>
+            <div style={{ fontSize: 36, marginBottom: 10 }}>🌍</div>
+            <div style={{ fontSize: 13, fontWeight: 600, color: '#7c83fd', marginBottom: 4 }}>Más países</div>
+            <div style={{ fontSize: 11, color: 'var(--text-muted)' }}>Próximamente</div>
+          </div>
+        </div>
+
+        {/* Badge de Mercado Pago */}
+        <div style={{ textAlign: 'center', marginTop: 40 }}>
+          <div style={{ display: 'inline-flex', alignItems: 'center', gap: 10, background: 'rgba(0,188,255,0.06)', border: '1px solid rgba(0,188,255,0.15)', borderRadius: 50, padding: '10px 22px' }}>
+            <span style={{ fontSize: 18 }}>💳</span>
+            <span style={{ fontSize: 14, color: 'rgba(255,255,255,0.6)' }}>Pagos procesados con</span>
+            <span style={{ fontSize: 14, fontWeight: 700, color: '#00bcff' }}>Mercado Pago</span>
+            <span style={{ fontSize: 14, color: 'rgba(255,255,255,0.4)' }}>en todos los países</span>
+          </div>
+        </div>
+      </div>
+    </section>
+  )
+}
+
 // ─── CTA Final ────────────────────────────────────────────────────────────────
 function CTASection() {
   const [ref, inView] = useInView()
@@ -749,7 +840,7 @@ function Footer() {
           <div>
             <BrandLogo size={32} textSize={17} style={{ marginBottom: 16 }} />
             <p style={{ fontSize: 13, color: 'var(--text-muted)', lineHeight: 1.7, maxWidth: 240 }}>
-              La plataforma de tiendas online para negocios peruanos que quieren vender más.
+              La plataforma de tiendas online para emprendedores latinoamericanos. Disponible en 11 países.
             </p>
           </div>
           <div>
@@ -784,7 +875,7 @@ function Footer() {
             © {new Date().getFullYear()} Fluxy. Todos los derechos reservados.
           </div>
           <div style={{ fontSize: 13, color: 'var(--text-muted)' }}>
-            Hecho con ❤️ para negocios peruanos 🇵🇪
+            Hecho con ❤️ para toda Latinoamérica 🌎
           </div>
         </div>
       </div>
@@ -847,6 +938,7 @@ export default function LandingPage() {
       <HowItWorks />
       <Testimonials />
       <Pricing />
+      <CountriesSection />
       <CTASection />
       <Footer />
     </div>
