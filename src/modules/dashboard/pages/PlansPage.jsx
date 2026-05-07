@@ -2,6 +2,7 @@
 import { useState, useEffect } from 'react'
 import DashboardLayout from '../components/DashboardLayout'
 import { API_URL } from '../../../app/config'
+import { useCurrency } from '../../../hooks/useCurrency'
 
 function getToken() {
   return localStorage.getItem('token') || ''
@@ -89,6 +90,7 @@ const PLANS = [
 ]
 
 export default function PlansPage() {
+  const { currencyInfo, formatProPrice, formatBusinessPrice } = useCurrency()
   const [currentPlan, setCurrentPlan]     = useState('FREE')
   const [trialUsed, setTrialUsed]         = useState(false)
   const [loadingPayment, setLoadingPayment] = useState(null)
@@ -152,7 +154,12 @@ export default function PlansPage() {
           'Content-Type': 'application/json',
           Authorization: `Bearer ${getToken()}`,
         },
-        body: JSON.stringify({ plan, months: '1' }),
+        body: JSON.stringify({
+          plan,
+          months: '1',
+          currency: currencyInfo.currency,
+          price: plan === 'PRO' ? currencyInfo.proPrize : currencyInfo.businessPrice,
+        }),
       })
       const data = await res.json()
       if (!res.ok) throw new Error(data.error || 'Error al crear preferencia')
@@ -245,7 +252,17 @@ export default function PlansPage() {
             }}>
 
               {/* Badge */}
-              {isCurrent ? (
+              {plan.badge && (
+                <div style={{
+                  position: 'absolute', top: 16, right: 16,
+                  background: plan.color, color: 'white',
+                  borderRadius: 20, padding: '3px 10px',
+                  fontSize: 11, fontWeight: 700,
+                }}>{plan.badge}</div>
+              )}
+
+              {/* Plan actual badge */}
+              {isCurrent && (
                 <div style={{
                   position: 'absolute', top: 16, right: 16,
                   background: 'rgba(255,255,255,0.1)', color: 'white',
@@ -253,14 +270,7 @@ export default function PlansPage() {
                   borderRadius: 20, padding: '3px 10px',
                   fontSize: 11, fontWeight: 700,
                 }}>✓ Tu plan</div>
-              ) : plan.badge ? (
-                <div style={{
-                  position: 'absolute', top: 16, right: 16,
-                  background: plan.color, color: 'white',
-                  borderRadius: 20, padding: '3px 10px',
-                  fontSize: 11, fontWeight: 700,
-                }}>{plan.badge}</div>
-              ) : null}
+              )}
 
               {/* Header del plan */}
               <div style={{ padding: '24px 24px 20px', borderBottom: `1px solid ${plan.border}` }}>
@@ -270,7 +280,7 @@ export default function PlansPage() {
                 }}>{plan.name}</div>
                 <div style={{ display: 'flex', alignItems: 'baseline', gap: 6, marginBottom: 4 }}>
                   <span style={{ fontFamily: "'Fraunces', serif", fontSize: 36, fontWeight: 900, color: 'white' }}>
-                    {plan.priceLabel}
+                    {plan.key === 'FREE' ? 'Gratis' : plan.key === 'PRO' ? formatProPrice() : formatBusinessPrice()}
                   </span>
                   {plan.price > 0 && (
                     <span style={{ fontSize: 13, color: 'var(--text-muted)' }}>/mes</span>
@@ -332,7 +342,7 @@ export default function PlansPage() {
                         Redirigiendo...
                       </>
                     ) : (
-                      <>⚡ Activar {plan.name} — {plan.priceLabel}/mes</>
+                      <>⚡ Activar {plan.name} — {plan.key === 'PRO' ? formatProPrice() : formatBusinessPrice()}/mes</>
                     )}
                   </button>
                 )}
@@ -392,6 +402,7 @@ export default function PlansPage() {
       }}>
         <div style={{ fontSize: 13, color: 'var(--text-muted)', marginBottom: 6 }}>
           🔒 Pago seguro con <strong style={{ color: '#00bcff' }}>Mercado Pago</strong>
+          {currencyInfo?.name && <span style={{ marginLeft: 12, opacity: 0.6 }}>· Precios en {currencyInfo.currency} ({currencyInfo.name})</span>}
         </div>
         <div style={{ fontSize: 12, color: 'var(--text-muted)', opacity: 0.7 }}>
           Cancela cuando quieras · Sin contratos · Soporte en español
