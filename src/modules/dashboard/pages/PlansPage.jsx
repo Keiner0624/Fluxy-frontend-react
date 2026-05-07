@@ -19,11 +19,11 @@ const PLANS = [
     border: 'rgba(255,255,255,0.10)',
     badge: null,
     benefits: [
-      { icon: '', text: 'Hasta 10 productos en tu tienda' },
-      { icon: '', text: 'Recepción de pedidos básica' },
-      { icon: '', text: 'Personalización de colores y logo' },
-      { icon: '', text: 'Tienda pública con slug propio' },
-      { icon: '', text: 'Métricas básicas de ventas' },
+      { icon: '📦', text: 'Hasta 10 productos en tu tienda' },
+      { icon: '🛒', text: 'Recepción de pedidos básica' },
+      { icon: '🎨', text: 'Personalización de colores y logo' },
+      { icon: '🔗', text: 'Tienda pública con slug propio' },
+      { icon: '📊', text: 'Métricas básicas de ventas' },
     ],
     excluded: [
       'Mensaje automático por WhatsApp',
@@ -43,17 +43,17 @@ const PLANS = [
     border: 'rgba(124,131,253,0.30)',
     badge: 'Más popular',
     benefits: [
-      { icon: '', text: 'Hasta 100 productos en tu tienda' },
-      { icon: '', text: 'Mensaje automático de pedido por WhatsApp al vendedor' },
-      { icon: '', text: 'Notificación al cliente con resumen del pedido' },
-      { icon: '', text: 'Panel de pedidos con estados (Pendiente, Completado, Cancelado)' },
-      { icon: '', text: 'Estadísticas completas de ventas y gráficas' },
-      { icon: '', text: 'Ranking de productos más vendidos' },
-      { icon: '', text: 'Personalización avanzada: colores, gradientes y animaciones' },
-      { icon: '', text: 'Logo personalizado en tu tienda' },
-      { icon: '', text: 'Múltiples métodos de pago visibles (Yape, Plin, transferencia)' },
-      { icon: '', text: 'Tienda 100% responsive para móvil' },
-      { icon: '', text: 'Soporte por correo electrónico' },
+      { icon: '📦', text: 'Hasta 100 productos en tu tienda' },
+      { icon: '💬', text: 'Mensaje automático de pedido por WhatsApp al vendedor' },
+      { icon: '🔔', text: 'Notificación al cliente con resumen del pedido' },
+      { icon: '📋', text: 'Panel de pedidos con estados (Pendiente, Completado, Cancelado)' },
+      { icon: '📊', text: 'Estadísticas completas de ventas y gráficas' },
+      { icon: '🏆', text: 'Ranking de productos más vendidos' },
+      { icon: '🎨', text: 'Personalización avanzada: colores, gradientes y animaciones' },
+      { icon: '🖼️', text: 'Logo personalizado en tu tienda' },
+      { icon: '💳', text: 'Múltiples métodos de pago visibles (Yape, Plin, transferencia)' },
+      { icon: '📱', text: 'Tienda 100% responsive para móvil' },
+      { icon: '⚡', text: 'Soporte por correo electrónico' },
     ],
     excluded: [
       'Dominio personalizado',
@@ -71,19 +71,19 @@ const PLANS = [
     border: 'rgba(52,211,153,0.25)',
     badge: 'Todo incluido',
     benefits: [
-      { icon: '', text: 'Productos ilimitados en tu tienda' },
-      { icon: '', text: 'Mensaje automático de pedido por WhatsApp al vendedor' },
-      { icon: '', text: 'Notificación al cliente con resumen del pedido' },
-      { icon: '', text: 'Panel de pedidos con estados avanzados' },
-      { icon: '', text: 'Estadísticas completas de ventas y gráficas' },
-      { icon: '', text: 'Ranking de productos más vendidos' },
-      { icon: '', text: 'Personalización avanzada: colores, gradientes y animaciones' },
-      { icon: '', text: 'Dominio personalizado para tu tienda' },
-      { icon: '', text: 'Quitar branding de Fluxy de tu tienda' },
-      { icon: '', text: 'Múltiples métodos de pago visibles' },
-      { icon: '', text: 'Tienda 100% responsive para móvil' },
-      { icon: '', text: 'Soporte prioritario 24/7' },
-      { icon: '', text: 'Reportes avanzados de ventas por período' },
+      { icon: '♾️', text: 'Productos ilimitados en tu tienda' },
+      { icon: '💬', text: 'Mensaje automático de pedido por WhatsApp al vendedor' },
+      { icon: '🔔', text: 'Notificación al cliente con resumen del pedido' },
+      { icon: '📋', text: 'Panel de pedidos con estados avanzados' },
+      { icon: '📊', text: 'Estadísticas completas de ventas y gráficas' },
+      { icon: '🏆', text: 'Ranking de productos más vendidos' },
+      { icon: '🎨', text: 'Personalización avanzada: colores, gradientes y animaciones' },
+      { icon: '🌐', text: 'Dominio personalizado para tu tienda' },
+      { icon: '🏷️', text: 'Quitar branding de Fluxy de tu tienda' },
+      { icon: '💳', text: 'Múltiples métodos de pago visibles' },
+      { icon: '📱', text: 'Tienda 100% responsive para móvil' },
+      { icon: '🚀', text: 'Soporte prioritario 24/7' },
+      { icon: '📈', text: 'Reportes avanzados de ventas por período' },
     ],
     excluded: [],
   },
@@ -186,7 +186,7 @@ export default function PlansPage() {
           display: 'flex', alignItems: 'center', gap: 12,
           animation: 'fadeIn 0.4s ease',
         }}>
-          <span style={{ fontSize: 28 }}></span>
+          <span style={{ fontSize: 28 }}>🎉</span>
           <div>
             <div style={{ fontSize: 15, fontWeight: 700, color: '#34d399' }}>¡Plan Pro activado gratis por 1 mes!</div>
             <div style={{ fontSize: 13, color: 'var(--text-muted)', marginTop: 2 }}>Disfruta todas las funciones premium. Al vencer volverás al plan Free.</div>
@@ -213,12 +213,12 @@ export default function PlansPage() {
         borderRadius: 12, padding: '12px 18px', marginBottom: 32,
         display: 'flex', alignItems: 'center', gap: 10,
       }}>
-        <span style={{ fontSize: 16 }}></span>
+        <span style={{ fontSize: 16 }}>💡</span>
         <span style={{ fontSize: 13, color: 'var(--text-muted)' }}>
           Tu plan actual: <strong style={{ color: 'white' }}>{currentPlan}</strong>
           {currentPlan === 'FREE' && ' — Mejora para desbloquear más funciones'}
           {currentPlan === 'PRO' && ' — ¡Considera Business para funciones ilimitadas!'}
-          {currentPlan === 'BUSINESS' && ' — Tienes acceso a todas las funciones '}
+          {currentPlan === 'BUSINESS' && ' — Tienes acceso a todas las funciones 🎉'}
         </span>
       </div>
 
@@ -227,7 +227,7 @@ export default function PlansPage() {
         <div style={{
           background: 'rgba(248,113,113,0.08)', border: '1px solid rgba(248,113,113,0.2)',
           borderRadius: 10, padding: '12px 16px', marginBottom: 24, fontSize: 13, color: '#f87171',
-        }}> {paymentError}</div>
+        }}>⚠️ {paymentError}</div>
       )}
 
       {/* ── Grid de planes ── */}
@@ -269,7 +269,7 @@ export default function PlansPage() {
                   border: '1px solid rgba(255,255,255,0.2)',
                   borderRadius: 20, padding: '3px 10px',
                   fontSize: 11, fontWeight: 700,
-                }}> Tu plan</div>
+                }}>✓ Tu plan</div>
               )}
 
               {/* Header del plan */}
@@ -302,7 +302,7 @@ export default function PlansPage() {
                   ))}
                   {plan.excluded.map((e, i) => (
                     <div key={i} style={{ display: 'flex', alignItems: 'flex-start', gap: 10, opacity: 0.35 }}>
-                      <span style={{ fontSize: 15, flexShrink: 0, marginTop: 1 }}></span>
+                      <span style={{ fontSize: 15, flexShrink: 0, marginTop: 1 }}>✕</span>
                       <span style={{ fontSize: 13, color: '#9ca3af', lineHeight: 1.5, textDecoration: 'line-through' }}>{e}</span>
                     </div>
                   ))}
@@ -316,7 +316,7 @@ export default function PlansPage() {
                     border: '1px solid rgba(255,255,255,0.08)',
                     borderRadius: 12, fontSize: 13,
                     color: 'var(--text-muted)',
-                  }}> Plan activo</div>
+                  }}>✓ Plan activo</div>
                 ) : plan.key === 'FREE' ? (
                   <div style={{ textAlign: 'center', padding: '12px', background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.08)', borderRadius: 12, fontSize: 13, color: 'var(--text-muted)' }}>Plan base</div>
                 ) : (
@@ -342,7 +342,7 @@ export default function PlansPage() {
                         Redirigiendo...
                       </>
                     ) : (
-                      <> Activar {plan.name} — {plan.key === 'PRO' ? formatProPrice() : formatBusinessPrice()}/mes</>
+                      <>⚡ Activar {plan.name} — {plan.key === 'PRO' ? formatProPrice() : formatBusinessPrice()}/mes</>
                     )}
                   </button>
                 )}
@@ -365,7 +365,7 @@ export default function PlansPage() {
           <div>
             <div style={{ fontSize: 11, color: '#7c83fd', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '1.5px', marginBottom: 8 }}>Oferta especial</div>
             <h3 style={{ fontFamily: "'Fraunces', serif", fontSize: 22, fontWeight: 800, color: 'white', marginBottom: 8 }}>
-              Prueba el Plan Pro gratis por 1 mes 
+              Prueba el Plan Pro gratis por 1 mes 🚀
             </h3>
             <p style={{ fontSize: 14, color: 'var(--text-muted)', lineHeight: 1.6, maxWidth: 440 }}>
               Activa todas las funciones premium sin pagar nada. Al vencer el mes, tu cuenta vuelve al plan Free automáticamente.
@@ -373,7 +373,7 @@ export default function PlansPage() {
           </div>
           {trialUsed ? (
             <div style={{ background: 'rgba(156,163,175,0.1)', border: '1px solid rgba(156,163,175,0.2)', borderRadius: 14, padding: '14px 24px', fontSize: 13, color: '#9ca3af', textAlign: 'center' }}>
-               Ya usaste tu prueba gratuita
+              ✓ Ya usaste tu prueba gratuita
             </div>
           ) : (
             <button onClick={handleTrial} disabled={loadingTrial} style={{
@@ -387,7 +387,7 @@ export default function PlansPage() {
               onMouseEnter={e => { if (!loadingTrial) e.currentTarget.style.transform = 'translateY(-2px)' }}
               onMouseLeave={e => e.currentTarget.style.transform = 'translateY(0)'}
             >
-              {loadingTrial ? 'Activando...' : ' Probar Pro gratis 1 mes'}
+              {loadingTrial ? 'Activando...' : '🎁 Probar Pro gratis 1 mes'}
             </button>
           )}
         </div>
@@ -401,7 +401,7 @@ export default function PlansPage() {
         borderRadius: 14, textAlign: 'center',
       }}>
         <div style={{ fontSize: 13, color: 'var(--text-muted)', marginBottom: 6 }}>
-           Pago seguro con <strong style={{ color: '#00bcff' }}>Mercado Pago</strong>
+          🔒 Pago seguro con <strong style={{ color: '#00bcff' }}>Mercado Pago</strong>
           {currencyInfo?.name && <span style={{ marginLeft: 12, opacity: 0.6 }}>· Precios en {currencyInfo.currency} ({currencyInfo.name})</span>}
         </div>
         <div style={{ fontSize: 12, color: 'var(--text-muted)', opacity: 0.7 }}>

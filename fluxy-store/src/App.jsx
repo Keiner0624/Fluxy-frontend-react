@@ -209,7 +209,7 @@ export default function App(props) {
       height: '100vh', background: '#06060f',
       color: 'var(--text-muted)', gap: 12,
     }}>
-      <div style={{ fontSize: 48 }}></div>
+      <div style={{ fontSize: 48 }}>🏪</div>
       <div style={{ fontSize: 16 }}>No se especificó ninguna tienda</div>
       <code style={{ color: 'var(--primary)', fontSize: 13 }}>?store=nombre-de-tienda</code>
     </div>

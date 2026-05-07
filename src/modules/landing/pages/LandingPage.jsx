@@ -100,7 +100,7 @@ function Navbar() {
         <button className="hide-desktop" onClick={() => setMobileOpen(!mobileOpen)} style={{
           background: 'rgba(255,255,255,0.06)', border: '1px solid rgba(255,255,255,0.1)',
           borderRadius: 8, padding: '8px 12px', color: 'white', fontSize: 18, cursor: 'pointer',
-        }}>Menu</button>
+        }}>☰</button>
       </div>
 
       {/* Mobile menu */}
@@ -155,7 +155,7 @@ function Hero() {
         transition: 'all 0.6s ease 0.1s',
       }}>
         <div style={{ width: 6, height: 6, borderRadius: '50%', background: '#34d399', animation: 'pulse 2s infinite' }}/>
-          <span style={{ fontSize: 13, color: '#7c83fd', fontWeight: 600 }}>Plataforma de tiendas online para toda Latinoamérica</span>
+        <span style={{ fontSize: 13, color: '#7c83fd', fontWeight: 600 }}>Plataforma de tiendas online para toda Latinoamérica 🌎</span>
       </div>
 
       {/* Título */}
@@ -205,7 +205,7 @@ function Hero() {
           onMouseEnter={e => { e.currentTarget.style.transform = 'translateY(-2px)'; e.currentTarget.style.boxShadow = '0 12px 40px rgba(124,131,253,0.5)' }}
           onMouseLeave={e => { e.currentTarget.style.transform = 'translateY(0)'; e.currentTarget.style.boxShadow = '0 8px 32px rgba(124,131,253,0.4)' }}
         >
-          Crear mi tienda gratis
+          🚀 Crear mi tienda gratis
         </Link>
         <a href="#how" style={{
           display: 'inline-flex', alignItems: 'center', gap: 8,
@@ -244,7 +244,7 @@ function Hero() {
           <strong style={{ color: 'white' }}>Negocios crecen</strong> con nosotros
         </div>
         <div style={{ display: 'flex', gap: 2 }}>
-          {[1,2,3,4,5].map(i => <span key={i} style={{ color: '#fbbf24', fontSize: 16 }}></span>)}
+          {[1,2,3,4,5].map(i => <span key={i} style={{ color: '#fbbf24', fontSize: 16 }}>★</span>)}
         </div>
       </div>
 
@@ -287,11 +287,11 @@ function Hero() {
                 <span style={{ fontSize: 12, fontWeight: 600, color: 'white' }}>Mi Negocio</span>
               </div>
               {[
-                { icon: '', label: 'Resumen', active: true },
-                { icon: '', label: 'Productos' },
-                { icon: '', label: 'Pedidos' },
-                { icon: '', label: 'Métricas' },
-                { icon: '', label: 'Config' },
+                { icon: '📊', label: 'Resumen', active: true },
+                { icon: '📦', label: 'Productos' },
+                { icon: '🛒', label: 'Pedidos' },
+                { icon: '📈', label: 'Métricas' },
+                { icon: '⚙️', label: 'Config' },
               ].map(item => (
                 <div key={item.label} style={{
                   display: 'flex', alignItems: 'center', gap: 8,
@@ -310,9 +310,9 @@ function Hero() {
               {/* Stats */}
               <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 12 }}>
                 {[
-                  { label: 'Ventas', value: 'S/ 2,840', color: '#7c83fd', icon: '' },
-                  { label: 'Pedidos', value: '47', color: '#34d399', icon: '' },
-                  { label: 'Productos', value: '23', color: '#fbbf24', icon: '' },
+                  { label: 'Ventas', value: 'S/ 2,840', color: '#7c83fd', icon: '💰' },
+                  { label: 'Pedidos', value: '47', color: '#34d399', icon: '🛒' },
+                  { label: 'Productos', value: '23', color: '#fbbf24', icon: '📦' },
                 ].map(stat => (
                   <div key={stat.label} style={{
                     background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.06)',
@@ -384,12 +384,12 @@ function Features() {
   const [ref, inView] = useInView(0.1)
 
   const features = [
-    { icon: '', title: 'Tienda pública al instante', desc: 'Tu catálogo con URL propia, diseño profesional y optimizado para móvil. Listo para compartir en redes sociales.', color: '#7c83fd' },
-    { icon: '', title: 'WhatsApp automático', desc: 'Cuando un cliente hace un pedido, recibes un mensaje de WhatsApp con todos los detalles al instante. Solo en plan PRO.', color: '#25d366' },
-    { icon: '', title: 'Métricas y estadísticas', desc: 'Visualiza tus ventas, productos más vendidos y evolución del negocio con gráficas en tiempo real.', color: '#34d399' },
-    { icon: '', title: 'Diseño personalizado', desc: 'Elige colores, gradientes y animaciones para que tu tienda refleje la identidad de tu marca.', color: '#a78bfa' },
-    { icon: '', title: 'Métodos de pago', desc: 'Muestra Yape, Plin, transferencia o efectivo. Tus clientes sabrán cómo pagarte antes de hacer el pedido.', color: '#fbbf24' },
-    { icon: '', title: 'Dominio personalizado', desc: 'Conecta tu propio dominio (mitienda.com) y proyecta una imagen 100% profesional. Plan Business.', color: '#38bdf8' },
+    { icon: '🏪', title: 'Tienda pública al instante', desc: 'Tu catálogo con URL propia, diseño profesional y optimizado para móvil. Listo para compartir en redes sociales.', color: '#7c83fd' },
+    { icon: '💬', title: 'WhatsApp automático', desc: 'Cuando un cliente hace un pedido, recibes un mensaje de WhatsApp con todos los detalles al instante. Solo en plan PRO.', color: '#25d366' },
+    { icon: '📊', title: 'Métricas y estadísticas', desc: 'Visualiza tus ventas, productos más vendidos y evolución del negocio con gráficas en tiempo real.', color: '#34d399' },
+    { icon: '🎨', title: 'Diseño personalizado', desc: 'Elige colores, gradientes y animaciones para que tu tienda refleje la identidad de tu marca.', color: '#a78bfa' },
+    { icon: '💳', title: 'Métodos de pago', desc: 'Muestra Yape, Plin, transferencia o efectivo. Tus clientes sabrán cómo pagarte antes de hacer el pedido.', color: '#fbbf24' },
+    { icon: '🌐', title: 'Dominio personalizado', desc: 'Conecta tu propio dominio (mitienda.com) y proyecta una imagen 100% profesional. Plan Business.', color: '#38bdf8' },
   ]
 
   return (
@@ -446,10 +446,10 @@ function HowItWorks() {
   const [ref, inView] = useInView(0.1)
 
   const steps = [
-    { num: '01', title: 'Crea tu cuenta', desc: 'Regístrate gratis en menos de 2 minutos. Solo necesitas tu nombre, negocio y contraseña.', icon: '' },
-    { num: '02', title: 'Agrega tus productos', desc: 'Sube fotos, pone precios y describe tus productos. Tu catálogo queda listo al instante.', icon: '' },
-    { num: '03', title: 'Comparte tu tienda', desc: 'Copia el link de tu tienda y compártelo en WhatsApp, Instagram o Facebook. Ya está.', icon: '' },
-    { num: '04', title: 'Recibe pedidos', desc: 'Tus clientes eligen sus productos y tú recibes el pedido con todos los detalles por WhatsApp y email.', icon: '' },
+    { num: '01', title: 'Crea tu cuenta', desc: 'Regístrate gratis en menos de 2 minutos. Solo necesitas tu nombre, negocio y contraseña.', icon: '✍️' },
+    { num: '02', title: 'Agrega tus productos', desc: 'Sube fotos, pone precios y describe tus productos. Tu catálogo queda listo al instante.', icon: '📦' },
+    { num: '03', title: 'Comparte tu tienda', desc: 'Copia el link de tu tienda y compártelo en WhatsApp, Instagram o Facebook. Ya está.', icon: '🔗' },
+    { num: '04', title: 'Recibe pedidos', desc: 'Tus clientes eligen sus productos y tú recibes el pedido con todos los detalles por WhatsApp y email.', icon: '🛒' },
   ]
 
   return (
@@ -509,9 +509,9 @@ function Testimonials() {
   const [ref, inView] = useInView(0.1)
 
   const testimonials = [
-    { name: 'María G.', business: 'Repostería Dulce', text: 'Antes tomaba pedidos por WhatsApp y se me perdían. Ahora todo llega organizado y mis clientes pueden ver el catálogo completo.', emoji: '', stars: 5 },
-    { name: 'Carlos R.', business: 'Ropa Urbana CR', text: 'Empecé con el plan gratis y en una semana ya tenía ventas. El WhatsApp automático me ahorra mucho tiempo.', emoji: '', stars: 5 },
-    { name: 'Lucía P.', business: 'Cosmética Natural', text: 'Mis clientas pueden ver todos mis productos con fotos y precios. Ya no tengo que mandar catálogos por WhatsApp uno por uno.', emoji: '', stars: 5 },
+    { name: 'María G.', business: 'Repostería Dulce', text: 'Antes tomaba pedidos por WhatsApp y se me perdían. Ahora todo llega organizado y mis clientes pueden ver el catálogo completo.', emoji: '👩🏽', stars: 5 },
+    { name: 'Carlos R.', business: 'Ropa Urbana CR', text: 'Empecé con el plan gratis y en una semana ya tenía ventas. El WhatsApp automático me ahorra mucho tiempo.', emoji: '🧑🏽', stars: 5 },
+    { name: 'Lucía P.', business: 'Cosmética Natural', text: 'Mis clientas pueden ver todos mis productos con fotos y precios. Ya no tengo que mandar catálogos por WhatsApp uno por uno.', emoji: '👩🏻', stars: 5 },
   ]
 
   return (
@@ -535,7 +535,7 @@ function Testimonials() {
               transition: `all 0.6s ease ${i * 0.15}s`,
             }}>
               <div style={{ display: 'flex', gap: 2, marginBottom: 16 }}>
-                {[...Array(t.stars)].map((_, i) => <span key={i} style={{ color: '#fbbf24', fontSize: 16 }}></span>)}
+                {[...Array(t.stars)].map((_, i) => <span key={i} style={{ color: '#fbbf24', fontSize: 16 }}>★</span>)}
               </div>
               <p style={{ fontSize: 15, color: '#e5e7eb', lineHeight: 1.7, marginBottom: 20, fontStyle: 'italic' }}>
                 "{t.text}"
@@ -632,7 +632,7 @@ function Pricing() {
               <div style={{ display: 'flex', flexDirection: 'column', gap: 12, marginBottom: 28 }}>
                 {plan.features.map((f, j) => (
                   <div key={j} style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
-                    <div style={{ width: 18, height: 18, borderRadius: '50%', background: `${plan.color}20`, border: `1px solid ${plan.color}40`, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 10, color: plan.color, flexShrink: 0 }}></div>
+                    <div style={{ width: 18, height: 18, borderRadius: '50%', background: `${plan.color}20`, border: `1px solid ${plan.color}40`, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 10, color: plan.color, flexShrink: 0 }}>✓</div>
                     <span style={{ fontSize: 14, color: '#e5e7eb' }}>{f}</span>
                   </div>
                 ))}
@@ -664,7 +664,7 @@ function Pricing() {
                   }}
                     onMouseEnter={e => e.currentTarget.style.background = 'rgba(52,211,153,0.15)'}
                     onMouseLeave={e => e.currentTarget.style.background = 'rgba(52,211,153,0.08)'}
-                  >Probar gratis 1 mes</Link>
+                  >🎁 Probar gratis 1 mes</Link>
                 )}
               </div>
             </div>
@@ -681,17 +681,17 @@ function CountriesSection() {
   const [ref, inView] = useInView(0.1)
 
   const countries = [
-    { flag: '', name: 'Perú',       currency: 'PEN' },
-    { flag: '', name: 'Colombia',   currency: 'COP' },
-    { flag: '', name: 'México',     currency: 'MXN' },
-    { flag: '', name: 'Argentina',  currency: 'ARS' },
-    { flag: '', name: 'Chile',      currency: 'CLP' },
-    { flag: '', name: 'Brasil',     currency: 'BRL' },
-    { flag: '', name: 'Uruguay',    currency: 'UYU' },
-    { flag: '', name: 'Bolivia',    currency: 'BOB' },
-    { flag: '', name: 'Ecuador',    currency: 'USD' },
-    { flag: '', name: 'Paraguay',   currency: 'PYG' },
-    { flag: '', name: 'Venezuela',  currency: 'USD' },
+    { flag: '🇵🇪', name: 'Perú',       currency: 'PEN' },
+    { flag: '🇨🇴', name: 'Colombia',   currency: 'COP' },
+    { flag: '🇲🇽', name: 'México',     currency: 'MXN' },
+    { flag: '🇦🇷', name: 'Argentina',  currency: 'ARS' },
+    { flag: '🇨🇱', name: 'Chile',      currency: 'CLP' },
+    { flag: '🇧🇷', name: 'Brasil',     currency: 'BRL' },
+    { flag: '🇺🇾', name: 'Uruguay',    currency: 'UYU' },
+    { flag: '🇧🇴', name: 'Bolivia',    currency: 'BOB' },
+    { flag: '🇪🇨', name: 'Ecuador',    currency: 'USD' },
+    { flag: '🇵🇾', name: 'Paraguay',   currency: 'PYG' },
+    { flag: '🇻🇪', name: 'Venezuela',  currency: 'USD' },
   ]
 
   return (
@@ -704,7 +704,7 @@ function CountriesSection() {
             fontSize: 'clamp(26px, 4vw, 42px)', fontWeight: 800,
             color: 'white', marginBottom: 16, letterSpacing: '-1px',
           }}>
-            Disponible en toda Latinoamérica
+            Disponible en toda Latinoamérica 🌎
           </h2>
           <p style={{ fontSize: 16, color: 'var(--text-soft)', maxWidth: 500, margin: '0 auto', lineHeight: 1.7 }}>
             Fluxy detecta tu país automáticamente y muestra los precios en tu moneda local. Paga con Mercado Pago desde cualquier país.
@@ -746,7 +746,7 @@ function CountriesSection() {
             transform: inView ? 'translateY(0)' : 'translateY(20px)',
             transition: `all 0.5s ease ${countries.length * 0.05}s`,
           }}>
-            <div style={{ fontSize: 36, marginBottom: 10 }}></div>
+            <div style={{ fontSize: 36, marginBottom: 10 }}>🌍</div>
             <div style={{ fontSize: 13, fontWeight: 600, color: '#7c83fd', marginBottom: 4 }}>Más países</div>
             <div style={{ fontSize: 11, color: 'var(--text-muted)' }}>Próximamente</div>
           </div>
@@ -755,7 +755,7 @@ function CountriesSection() {
         {/* Badge de Mercado Pago */}
         <div style={{ textAlign: 'center', marginTop: 40 }}>
           <div style={{ display: 'inline-flex', alignItems: 'center', gap: 10, background: 'rgba(0,188,255,0.06)', border: '1px solid rgba(0,188,255,0.15)', borderRadius: 50, padding: '10px 22px' }}>
-            <span style={{ fontSize: 18 }}></span>
+            <span style={{ fontSize: 18 }}>💳</span>
             <span style={{ fontSize: 14, color: 'rgba(255,255,255,0.6)' }}>Pagos procesados con</span>
             <span style={{ fontSize: 14, fontWeight: 700, color: '#00bcff' }}>Mercado Pago</span>
             <span style={{ fontSize: 14, color: 'rgba(255,255,255,0.4)' }}>en todos los países</span>
@@ -785,7 +785,7 @@ function CTASection() {
         <div style={{ position: 'absolute', top: '50%', left: '50%', transform: 'translate(-50%, -50%)', width: 400, height: 400, background: 'radial-gradient(circle, rgba(124,131,253,0.15) 0%, transparent 65%)', pointerEvents: 'none' }}/>
 
         <div style={{ position: 'relative' }}>
-          <div style={{ fontSize: 48, marginBottom: 20 }}></div>
+          <div style={{ fontSize: 48, marginBottom: 20 }}>🚀</div>
           <h2 style={{
             fontFamily: "'Fraunces', serif",
             fontSize: 'clamp(28px, 5vw, 48px)', fontWeight: 800,
@@ -872,10 +872,10 @@ function Footer() {
 
         <div style={{ borderTop: '1px solid rgba(255,255,255,0.04)', paddingTop: 24, display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: 12 }}>
           <div style={{ fontSize: 13, color: 'var(--text-muted)' }}>
-            Copyright {new Date().getFullYear()} Fluxy. Todos los derechos reservados.
+            © {new Date().getFullYear()} Fluxy. Todos los derechos reservados.
           </div>
           <div style={{ fontSize: 13, color: 'var(--text-muted)' }}>
-            Hecho para toda Latinoamérica
+            Hecho con ❤️ para toda Latinoamérica 🌎
           </div>
         </div>
       </div>

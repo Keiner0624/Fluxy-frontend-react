@@ -12,10 +12,10 @@ export default function Header({ company, cartCount, onCartOpen }) {
 
   const phone = company?.phone?.replace(/[^0-9]/g, '')
   const waMsg = encodeURIComponent(
-    `¡Hola!  Vi tu tienda *${company?.name}* y quiero hacer un pedido.`
+    `¡Hola! 👋 Vi tu tienda *${company?.name}* y quiero hacer un pedido.`
   )
 
-  //  Ocultar branding si el plan es BUSINESS
+  // ✅ Ocultar branding si el plan es BUSINESS
   const showBranding = company?.plan !== 'BUSINESS'
 
   return (
@@ -64,7 +64,7 @@ export default function Header({ company, cartCount, onCartOpen }) {
             }}>
               {company?.name || 'Tienda'}
             </div>
-            {/*  Solo muestra "via Fluxy" si NO es BUSINESS */}
+            {/* ✅ Solo muestra "via Fluxy" si NO es BUSINESS */}
             {showBranding && (
               <div style={{ fontSize: 10, color: 'var(--text-muted, #4a4a6a)' }}>via Fluxy</div>
             )}
@@ -73,7 +73,7 @@ export default function Header({ company, cartCount, onCartOpen }) {
 
         {/* Acciones */}
         <div style={{ display: 'flex', alignItems: 'center', gap: 8, flexShrink: 0 }}>
-          {/*  Badge "Verificado" solo si NO es BUSINESS */}
+          {/* ✅ Badge "Verificado" solo si NO es BUSINESS */}
           {showBranding && (
             <div className="hide-mobile" style={{
               display: 'flex', alignItems: 'center', gap: 6,

@@ -86,7 +86,7 @@ export default function ProductDetailModal({ product, onClose, onAddToCart, comp
           }}
             onMouseEnter={e => e.currentTarget.style.background = 'rgba(248,113,113,0.3)'}
             onMouseLeave={e => e.currentTarget.style.background = 'rgba(0,0,0,0.6)'}
-          >x</button>
+          >✕</button>
 
           {/* Stock badge */}
           {isLow && !isOut && (
@@ -95,7 +95,7 @@ export default function ProductDetailModal({ product, onClose, onAddToCart, comp
               background: 'rgba(251,191,36,0.15)', border: '1px solid rgba(251,191,36,0.3)',
               color: '#fbbf24', borderRadius: 50, padding: '4px 12px',
               fontSize: 11, fontWeight: 700, backdropFilter: 'blur(8px)',
-            }}> Solo {product.stock} disponibles</div>
+            }}>⚡ Solo {product.stock} disponibles</div>
           )}
 
           {/* Imagen activa */}
@@ -106,7 +106,7 @@ export default function ProductDetailModal({ product, onClose, onAddToCart, comp
               style={{ width: '100%', height: '100%', objectFit: 'cover', transition: 'opacity 0.2s' }}
             />
           ) : (
-            <div style={{ width: '100%', height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 80 }}></div>
+            <div style={{ width: '100%', height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 80 }}>📦</div>
           )}
 
           {/* Gradient */}
@@ -241,7 +241,7 @@ export default function ProductDetailModal({ product, onClose, onAddToCart, comp
               transition: 'all 0.3s',
               boxShadow: isOut || adding ? 'none' : '0 8px 24px rgba(124,131,253,0.25)',
             }}>
-              {isOut ? 'Sin stock' : adding ? ' ¡Agregado!' : `+ Agregar ${qty > 1 ? `(${qty})` : ''}`}
+              {isOut ? 'Sin stock' : adding ? '✓ ¡Agregado!' : `+ Agregar ${qty > 1 ? `(${qty})` : ''}`}
             </button>
 
             {phone && company?.plan !== 'FREE' && (

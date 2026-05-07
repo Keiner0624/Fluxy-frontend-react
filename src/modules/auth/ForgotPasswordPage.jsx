@@ -78,7 +78,7 @@ export default function ForgotPasswordPage() {
           {sent ? (
             /* ── Estado enviado ── */
             <div style={{ textAlign: 'center' }}>
-              <div style={{ fontSize: 52, marginBottom: 20 }}></div>
+              <div style={{ fontSize: 52, marginBottom: 20 }}>📬</div>
               <h2 style={{ fontFamily: "'Fraunces', serif", fontSize: 24, fontWeight: 700, color: 'white', marginBottom: 12 }}>
                 ¡Correo enviado!
               </h2>
@@ -90,7 +90,7 @@ export default function ForgotPasswordPage() {
                 borderRadius: 12, padding: '14px 16px', marginBottom: 24,
                 fontSize: 13, color: 'var(--text-muted)', lineHeight: 1.6,
               }}>
-                 Revisa también tu carpeta de <strong style={{ color: 'white' }}>spam</strong> por si acaso.
+                📌 Revisa también tu carpeta de <strong style={{ color: 'white' }}>spam</strong> por si acaso.
               </div>
               <Link to="/login" style={{
                 display: 'block', textAlign: 'center', padding: '13px',
@@ -121,7 +121,7 @@ export default function ForgotPasswordPage() {
                     letterSpacing: '0.8px', marginBottom: 8,
                   }}>Correo electrónico</label>
                   <div style={{ position: 'relative' }}>
-                    <span style={{ position: 'absolute', left: 14, top: '50%', transform: 'translateY(-50%)', fontSize: 16, pointerEvents: 'none' }}></span>
+                    <span style={{ position: 'absolute', left: 14, top: '50%', transform: 'translateY(-50%)', fontSize: 16, pointerEvents: 'none' }}>✉️</span>
                     <input
                       type="email" value={email}
                       onChange={e => { setEmail(e.target.value); setError('') }}
@@ -145,7 +145,7 @@ export default function ForgotPasswordPage() {
                     background: 'rgba(248,113,113,0.08)', border: '1px solid rgba(248,113,113,0.2)',
                     borderRadius: 10, padding: '12px 16px', fontSize: 13, color: '#f87171',
                     marginBottom: 16, textAlign: 'center',
-                  }}> {error}</div>
+                  }}>⚠️ {error}</div>
                 )}
 
                 <button type="submit" disabled={loading} style={{
@@ -156,7 +156,7 @@ export default function ForgotPasswordPage() {
                   boxShadow: loading ? 'none' : '0 8px 24px rgba(124,131,253,0.3)',
                   border: 'none', transition: 'all 0.3s',
                 }}>
-                  {loading ? 'Enviando...' : ' Enviar link de recuperación'}
+                  {loading ? 'Enviando...' : '📧 Enviar link de recuperación'}
                 </button>
               </form>
             </>

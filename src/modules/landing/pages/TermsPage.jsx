@@ -266,8 +266,8 @@ export default function TermsPage() {
         {/* Tabs */}
         <div style={{ display: 'flex', gap: 8, marginBottom: 32, background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.06)', borderRadius: 14, padding: 6 }}>
           {[
-            { key: 'terms',   label: ' Términos y condiciones' },
-            { key: 'privacy', label: ' Política de privacidad' },
+            { key: 'terms',   label: '📋 Términos y condiciones' },
+            { key: 'privacy', label: '🔒 Política de privacidad' },
           ].map(t => (
             <button key={t.key} onClick={() => { setTab(t.key); setActive(null) }} style={{
               flex: 1, padding: '10px 16px', borderRadius: 10,
@@ -340,7 +340,7 @@ export default function TermsPage() {
             onMouseEnter={e => e.currentTarget.style.background = 'rgba(124,131,253,0.18)'}
             onMouseLeave={e => e.currentTarget.style.background = 'rgba(124,131,253,0.1)'}
           >
-             pkeinerr.e13@gmail.com
+            ✉️ pkeinerr.e13@gmail.com
           </a>
         </div>
       </div>

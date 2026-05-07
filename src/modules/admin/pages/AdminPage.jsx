@@ -120,7 +120,6 @@ export default function AdminPage() {
   const [saving, setSaving]               = useState(false)
   const [deleting, setDeleting]           = useState(null)
   const [msg, setMsg]                     = useState('')
-  const [msgType, setMsgType]             = useState('success')
 
   useEffect(() => {
     if (!getToken()) { navigate('/admin/login'); return }
@@ -154,8 +153,8 @@ export default function AdminPage() {
         body: JSON.stringify({ plan: newPlan, months }),
       })
       const d = await res.json()
-      setMsg(d.message); setMsgType('success'); setEditingPlan(null); loadAll()
-    } catch { setMsg('Error al actualizar'); setMsgType('error') }
+      setMsg('✅ ' + d.message); setEditingPlan(null); loadAll()
+    } catch { setMsg('⚠️ Error al actualizar') }
     finally { setSaving(false); setTimeout(()=>setMsg(''),3000) }
   }
 
@@ -164,9 +163,9 @@ export default function AdminPage() {
     setDeleting(companyId)
     try {
       await fetch(`${API_URL}/admin/vendors/${companyId}`, { method:'DELETE', headers:{ Authorization:`Bearer ${getToken()}` } })
-      setMsg('Vendedor eliminado.'); setMsgType('success')
+      setMsg('✅ Vendedor eliminado.')
       setVendors(p => Array.isArray(p) ? p.filter(v => v.companyId !== companyId) : [])
-    } catch { setMsg('Error al eliminar'); setMsgType('error') }
+    } catch { setMsg('⚠️ Error al eliminar') }
     finally { setDeleting(null); setTimeout(()=>setMsg(''),3000) }
   }
 
@@ -217,7 +216,7 @@ export default function AdminPage() {
             </div>
           </div>
           <div style={{ display:'flex', gap:8 }}>
-            <button onClick={loadAll} style={{ padding:'6px 11px',borderRadius:8,background:'rgba(255,255,255,0.04)',border:'1px solid rgba(255,255,255,0.07)',color:'rgba(255,255,255,0.35)',fontSize:11,cursor:'pointer' }}>Actualizar</button>
+            <button onClick={loadAll} style={{ padding:'6px 11px',borderRadius:8,background:'rgba(255,255,255,0.04)',border:'1px solid rgba(255,255,255,0.07)',color:'rgba(255,255,255,0.35)',fontSize:11,cursor:'pointer' }}>🔄</button>
             <button onClick={()=>navigate('/dashboard')} style={{ padding:'6px 12px',borderRadius:8,background:'rgba(124,131,253,0.08)',border:'1px solid rgba(124,131,253,0.2)',color:'#7c83fd',fontSize:11,fontWeight:600,cursor:'pointer' }}>Dashboard</button>
             <button onClick={()=>{ localStorage.removeItem('token'); navigate('/admin/login') }} style={{ padding:'6px 12px',borderRadius:8,background:'rgba(248,113,113,0.06)',border:'1px solid rgba(248,113,113,0.15)',color:'#f87171',fontSize:11,fontWeight:600,cursor:'pointer' }}>Salir</button>
           </div>
@@ -231,17 +230,17 @@ export default function AdminPage() {
           <h1 style={{ fontFamily:"'Fraunces', serif", fontSize:30,fontWeight:900,color:'white',letterSpacing:'-0.5px' }}>Dashboard</h1>
         </div>
 
-        {msg && <div style={{ background:msgType === 'success'?'rgba(52,211,153,0.08)':'rgba(248,113,113,0.08)', border:`1px solid ${msgType === 'success'?'rgba(52,211,153,0.25)':'rgba(248,113,113,0.25)'}`, borderRadius:12, padding:'11px 16px', marginBottom:20, fontSize:13, color:msgType === 'success'?'#34d399':'#f87171', animation:'fadeIn 0.3s ease' }}>{msg}</div>}
+        {msg && <div style={{ background:msg.startsWith('✅')?'rgba(52,211,153,0.08)':'rgba(248,113,113,0.08)', border:`1px solid ${msg.startsWith('✅')?'rgba(52,211,153,0.25)':'rgba(248,113,113,0.25)'}`, borderRadius:12, padding:'11px 16px', marginBottom:20, fontSize:13, color:msg.startsWith('✅')?'#34d399':'#f87171', animation:'fadeIn 0.3s ease' }}>{msg}</div>}
 
         {/* Stats */}
         {metrics && (
           <div className="admin-grid" style={{ display:'grid', gridTemplateColumns:'repeat(auto-fit, minmax(180px,1fr))', gap:12, marginBottom:20 }}>
-            <StatCard icon="" label="Vendedores" value={metrics.totalVendedores} sub={`${metrics.nuevosSemana} esta semana`} trend={metrics.nuevosSemana} color="#7c83fd" sparkData={sparkV}/>
-            <StatCard icon="" label="Ingresos estimados" value={`S/ ${metrics.ingresosTotales?.toFixed(0)}`} sub="planes activos" color="#fbbf24" sparkData={sparkR}/>
-            <StatCard icon="" label="Plan Pro" value={metrics.planPro} sub={`S/ ${(metrics.planPro*19).toFixed(0)}/mes`} color="#7c83fd"/>
-            <StatCard icon="" label="Plan Business" value={metrics.planBusiness} sub={`S/ ${(metrics.planBusiness*39).toFixed(0)}/mes`} color="#34d399"/>
-            <StatCard icon="" label="Pedidos totales" value={metrics.totalPedidos} color="#38bdf8"/>
-            <StatCard icon="" label="Plan Free" value={metrics.planFree} color="#9ca3af"/>
+            <StatCard icon="🏪" label="Vendedores" value={metrics.totalVendedores} sub={`${metrics.nuevosSemana} esta semana`} trend={metrics.nuevosSemana} color="#7c83fd" sparkData={sparkV}/>
+            <StatCard icon="💰" label="Ingresos estimados" value={`S/ ${metrics.ingresosTotales?.toFixed(0)}`} sub="planes activos" color="#fbbf24" sparkData={sparkR}/>
+            <StatCard icon="⚡" label="Plan Pro" value={metrics.planPro} sub={`S/ ${(metrics.planPro*19).toFixed(0)}/mes`} color="#7c83fd"/>
+            <StatCard icon="🚀" label="Plan Business" value={metrics.planBusiness} sub={`S/ ${(metrics.planBusiness*39).toFixed(0)}/mes`} color="#34d399"/>
+            <StatCard icon="🛒" label="Pedidos totales" value={metrics.totalPedidos} color="#38bdf8"/>
+            <StatCard icon="🆓" label="Plan Free" value={metrics.planFree} color="#9ca3af"/>
           </div>
         )}
 
@@ -308,7 +307,7 @@ export default function AdminPage() {
               Vendedores <span style={{ fontSize:11,color:'rgba(255,255,255,0.25)',fontWeight:400,marginLeft:6 }}>{filtered.length}/{vendors.length}</span>
             </div>
             <div style={{ display:'flex', gap:7, flexWrap:'wrap' }}>
-              <input value={search} onChange={e=>setSearch(e.target.value)} placeholder="Buscar..."
+              <input value={search} onChange={e=>setSearch(e.target.value)} placeholder="🔍 Buscar..."
                 style={{ background:'rgba(255,255,255,0.04)',border:'1px solid rgba(255,255,255,0.07)',borderRadius:8,padding:'6px 11px',color:'white',fontSize:12,outline:'none',width:170,fontFamily:'DM Sans, sans-serif' }}
                 onFocus={e=>e.target.style.borderColor='rgba(124,131,253,0.4)'}
                 onBlur={e=>e.target.style.borderColor='rgba(255,255,255,0.07)'}
@@ -359,8 +358,8 @@ export default function AdminPage() {
                       <td style={{ padding:'12px 14px',fontSize:11,color:'rgba(255,255,255,0.25)' }}>{fmt(v.createdAt)}</td>
                       <td style={{ padding:'12px 14px' }}>
                         <div style={{ display:'flex',gap:6 }}>
-                          <button onClick={()=>{ setEditingPlan({companyId:v.companyId,name:v.companyName}); setNewPlan(v.plan==='FREE'?'PRO':v.plan) }} style={{ padding:'5px 9px',borderRadius:7,fontSize:10,fontWeight:600,cursor:'pointer',background:'rgba(124,131,253,0.08)',border:'1px solid rgba(124,131,253,0.2)',color:'#7c83fd' }}>Plan</button>
-                          <button onClick={()=>handleDelete(v.companyId,v.companyName)} disabled={deleting===v.companyId} style={{ padding:'5px 9px',borderRadius:7,fontSize:10,cursor:'pointer',background:'rgba(248,113,113,0.06)',border:'1px solid rgba(248,113,113,0.12)',color:'#f87171',opacity:deleting===v.companyId?0.5:1 }}>{deleting===v.companyId?'...':'Eliminar'}</button>
+                          <button onClick={()=>{ setEditingPlan({companyId:v.companyId,name:v.companyName}); setNewPlan(v.plan==='FREE'?'PRO':v.plan) }} style={{ padding:'5px 9px',borderRadius:7,fontSize:10,fontWeight:600,cursor:'pointer',background:'rgba(124,131,253,0.08)',border:'1px solid rgba(124,131,253,0.2)',color:'#7c83fd' }}>✏️ Plan</button>
+                          <button onClick={()=>handleDelete(v.companyId,v.companyName)} disabled={deleting===v.companyId} style={{ padding:'5px 9px',borderRadius:7,fontSize:10,cursor:'pointer',background:'rgba(248,113,113,0.06)',border:'1px solid rgba(248,113,113,0.12)',color:'#f87171',opacity:deleting===v.companyId?0.5:1 }}>{deleting===v.companyId?'...':'🗑️'}</button>
                         </div>
                       </td>
                     </tr>

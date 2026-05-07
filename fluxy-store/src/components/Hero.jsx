@@ -1,7 +1,7 @@
 export default function Hero({ company, loading, cartOpen }) {
   const phone = company?.phone?.replace(/[^0-9]/g, '')
   const waMsg = encodeURIComponent(
-    `¡Hola!  Vi tu tienda *${company?.name}* en Fluxy y quiero hacer un pedido. ¿Me puedes ayudar?`
+    `¡Hola! 👋 Vi tu tienda *${company?.name}* en Fluxy y quiero hacer un pedido. ¿Me puedes ayudar?`
   )
 
   return (
@@ -131,9 +131,9 @@ export default function Hero({ company, loading, cartOpen }) {
             {/* Trust signals */}
             <div style={{ display: 'flex', gap: 20, flexWrap: 'wrap' }}>
               {[
-                { icon: '', label: 'Atención directa' },
-                { icon: '', label: 'Respuesta rápida' },
-                { icon: '',  label: 'Negocio verificado' },
+                { icon: '👤', label: 'Atención directa' },
+                { icon: '⚡', label: 'Respuesta rápida' },
+                { icon: '✓',  label: 'Negocio verificado' },
               ].map(s => (
                 <div key={s.label} style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
                   <span style={{ fontSize: 14 }}>{s.icon}</span>
@@ -163,10 +163,10 @@ export default function Hero({ company, loading, cartOpen }) {
                 Información de contacto
               </div>
               {[
-                company?.address && { icon: '', text: company.address, label: 'Ubicación' },
-                company?.phone   && { icon: '', text: company.phone,   label: 'Teléfono' },
-                { icon: '', text: 'Respuesta inmediata', label: 'Atención' },
-                { icon: '', text: 'Compra 100% segura',  label: 'Seguridad' },
+                company?.address && { icon: '📍', text: company.address, label: 'Ubicación' },
+                company?.phone   && { icon: '📞', text: company.phone,   label: 'Teléfono' },
+                { icon: '🕐', text: 'Respuesta inmediata', label: 'Atención' },
+                { icon: '🔒', text: 'Compra 100% segura',  label: 'Seguridad' },
               ].filter(Boolean).map((item, i, arr) => (
                 <div key={i} style={{
                   display: 'flex', gap: 12, alignItems: 'flex-start',
@@ -197,7 +197,7 @@ export default function Hero({ company, loading, cartOpen }) {
                 Métodos de pago
               </div>
               <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
-                {[' Efectivo', ' Yape', ' Plin', ' Tarjeta'].map(p => (
+                {['💵 Efectivo', '📱 Yape', '🏦 Plin', '💳 Tarjeta'].map(p => (
                   <div key={p} style={{
                     background: 'rgba(255,255,255,0.04)',
                     border: '1px solid rgba(255,255,255,0.08)',
@@ -219,7 +219,7 @@ export default function Hero({ company, loading, cartOpen }) {
         padding: '10px 16px', textAlign: 'center',
         fontSize: 13, color: '#fbbf24', fontWeight: 500,
       }}>
-         Stock limitado — Asegura tu pedido hoy mismo
+        🔥 Stock limitado — Asegura tu pedido hoy mismo
       </div>
 
       {/* WhatsApp flotante — se oculta cuando el carrito está abierto */}

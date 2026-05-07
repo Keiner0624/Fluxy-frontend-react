@@ -59,7 +59,7 @@ export default function Cart({ open, cart, total, onClose, onIncrease, onDecreas
                   color: '#f87171', fontSize: 12, fontWeight: 600,
                 }}
               >
-                 Vaciar
+                🗑️ Vaciar
               </button>
             )}
             <button
@@ -71,7 +71,7 @@ export default function Cart({ open, cart, total, onClose, onIncrease, onDecreas
                 color: 'white', fontSize: 18, fontWeight: 700,
                 display: 'flex', alignItems: 'center', justifyContent: 'center',
               }}
-            >x</button>
+            >✕</button>
           </div>
         </div>
 
@@ -87,7 +87,7 @@ export default function Cart({ open, cart, total, onClose, onIncrease, onDecreas
               alignItems: 'center', justifyContent: 'center',
               height: '100%', color: 'var(--text-muted)', gap: 12,
             }}>
-              <div style={{ fontSize: 48 }}></div>
+              <div style={{ fontSize: 48 }}>🛒</div>
               <div style={{ fontSize: 15 }}>Tu carrito está vacío</div>
               <div style={{ fontSize: 13 }}>Agrega productos para continuar</div>
             </div>
@@ -108,7 +108,7 @@ export default function Cart({ open, cart, total, onClose, onIncrease, onDecreas
                   {item.product.imageUrl
                     ? <img src={item.product.imageUrl} alt={item.product.name}
                         style={{ width: '100%', height: '100%', objectFit: 'cover' }}/>
-                    : <span style={{ fontSize: 22 }}></span>
+                    : <span style={{ fontSize: 22 }}>📦</span>
                   }
                 </div>
 
@@ -198,10 +198,10 @@ export default function Cart({ open, cart, total, onClose, onIncrease, onDecreas
             }}>
               <span style={{ fontSize: 11, color: 'var(--text-muted)' }}>Pagos aceptados</span>
               <div style={{ display: 'flex', gap: 10, fontSize: 18 }}>
-                <span title="Efectivo"></span>
-                <span title="Yape"></span>
-                <span title="Plin"></span>
-                <span title="Tarjeta"></span>
+                <span title="Efectivo">💵</span>
+                <span title="Yape">📱</span>
+                <span title="Plin">🏦</span>
+                <span title="Tarjeta">💳</span>
               </div>
             </div>
 
@@ -225,7 +225,7 @@ export default function Cart({ open, cart, total, onClose, onIncrease, onDecreas
             </button>
 
             <div style={{ textAlign: 'center', fontSize: 12, color: 'var(--text-muted)', marginBottom: 10 }}>
-              También puedes consultar por WhatsApp 
+              También puedes consultar por WhatsApp 💬
             </div>
           </div>
         )}

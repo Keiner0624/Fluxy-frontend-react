@@ -132,38 +132,38 @@ function MetricsContent() {
   }
 
   if (loading) return <div style={{ textAlign: 'center', padding: 80, color: 'var(--text-muted)' }}>Cargando métricas...</div>
-  if (error) return <div style={{ background: 'rgba(248,113,113,0.08)', border: '1px solid rgba(248,113,113,0.2)', borderRadius: 10, padding: '12px 16px', fontSize: 13, color: '#f87171' }}> {error}</div>
+  if (error) return <div style={{ background: 'rgba(248,113,113,0.08)', border: '1px solid rgba(248,113,113,0.2)', borderRadius: 10, padding: '12px 16px', fontSize: 13, color: '#f87171' }}>⚠️ {error}</div>
 
   return (
     <>
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: 16, marginBottom: 24 }}>
-        <StatCard icon="" label="Ventas totales"   value={`S/ ${(metrics?.totalSales || 0).toFixed(2)}`} color="#7c83fd" sub="Pedidos completados"/>
-        <StatCard icon="" label="Total pedidos"    value={metrics?.ordersCount || 0} color="#34d399" sub="Todos los estados"/>
-        <StatCard icon="" label="Productos activos" value={metrics?.totalProducts || 0} color="#f59e0b" sub="En tu catálogo"/>
-        <StatCard icon="" label="Producto top"     value={metrics?.topProduct || '—'} color="#f43f5e" sub="Más vendido"/>
+        <StatCard icon="💰" label="Ventas totales"   value={`S/ ${(metrics?.totalSales || 0).toFixed(2)}`} color="#7c83fd" sub="Pedidos completados"/>
+        <StatCard icon="🛒" label="Total pedidos"    value={metrics?.ordersCount || 0} color="#34d399" sub="Todos los estados"/>
+        <StatCard icon="📦" label="Productos activos" value={metrics?.totalProducts || 0} color="#f59e0b" sub="En tu catálogo"/>
+        <StatCard icon="🏆" label="Producto top"     value={metrics?.topProduct || '—'} color="#f43f5e" sub="Más vendido"/>
       </div>
 
       <div style={{ background: 'rgba(13,13,26,0.9)', border: '1px solid rgba(255,255,255,0.06)', borderRadius: 20, padding: '24px', marginBottom: 20 }}>
-        <div style={{ fontSize: 15, fontWeight: 600, color: 'white', marginBottom: 4 }}> Evolución de ventas</div>
+        <div style={{ fontSize: 15, fontWeight: 600, color: 'white', marginBottom: 4 }}>📈 Evolución de ventas</div>
         <div style={{ fontSize: 12, color: 'var(--text-muted)', marginBottom: 20 }}>Ventas diarias completadas (S/)</div>
         <LineChart data={salesPerDay} color="#7c83fd"/>
       </div>
 
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))', gap: 20, marginBottom: 20 }}>
         <div style={{ background: 'rgba(13,13,26,0.9)', border: '1px solid rgba(255,255,255,0.06)', borderRadius: 20, padding: '24px' }}>
-          <div style={{ fontSize: 15, fontWeight: 600, color: 'white', marginBottom: 4 }}> Top productos del mes</div>
+          <div style={{ fontSize: 15, fontWeight: 600, color: 'white', marginBottom: 4 }}>🏆 Top productos del mes</div>
           <div style={{ fontSize: 12, color: 'var(--text-muted)', marginBottom: 20 }}>Por cantidad vendida</div>
           <BarChart data={topMonth.map(p => ({ label: p.productName, value: p.quantitySold }))} color="#7c83fd"/>
         </div>
         <div style={{ background: 'rgba(13,13,26,0.9)', border: '1px solid rgba(255,255,255,0.06)', borderRadius: 20, padding: '24px' }}>
-          <div style={{ fontSize: 15, fontWeight: 600, color: 'white', marginBottom: 4 }}> Top productos hoy</div>
+          <div style={{ fontSize: 15, fontWeight: 600, color: 'white', marginBottom: 4 }}>🔥 Top productos hoy</div>
           <div style={{ fontSize: 12, color: 'var(--text-muted)', marginBottom: 20 }}>Por cantidad vendida hoy</div>
           <BarChart data={topToday.map(p => ({ label: p.productName, value: p.quantitySold }))} color="#f59e0b"/>
         </div>
       </div>
 
       <div style={{ background: 'rgba(13,13,26,0.9)', border: '1px solid rgba(255,255,255,0.06)', borderRadius: 20, padding: '24px' }}>
-        <div style={{ fontSize: 15, fontWeight: 600, color: 'white', marginBottom: 20 }}> Ranking del mes</div>
+        <div style={{ fontSize: 15, fontWeight: 600, color: 'white', marginBottom: 20 }}>📊 Ranking del mes</div>
         {topMonth.length === 0 ? (
           <div style={{ textAlign: 'center', padding: '32px 0', color: 'var(--text-muted)', fontSize: 13 }}>No hay ventas completadas este mes.</div>
         ) : (
@@ -176,7 +176,7 @@ function MetricsContent() {
                 borderRadius: 12,
               }}>
                 <div style={{ width: 32, height: 32, borderRadius: 9, flexShrink: 0, background: i === 0 ? 'linear-gradient(135deg, #f59e0b, #d97706)' : i === 1 ? 'rgba(148,163,184,0.15)' : i === 2 ? 'rgba(180,120,80,0.15)' : 'rgba(255,255,255,0.05)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 14, fontWeight: 800, color: i === 0 ? '#fff' : 'var(--text-muted)' }}>
-                  {i === 0 ? '' : i === 1 ? '' : i === 2 ? '' : i + 1}
+                  {i === 0 ? '🥇' : i === 1 ? '🥈' : i === 2 ? '🥉' : i + 1}
                 </div>
                 <div style={{ flex: 1, minWidth: 0 }}>
                   <div style={{ fontSize: 14, fontWeight: 600, color: 'white', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{p.productName}</div>

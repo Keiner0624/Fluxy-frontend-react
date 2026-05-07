@@ -9,9 +9,9 @@ function getToken() {
 }
 
 const STATUS_CONFIG = {
-  PENDING:   { label: 'Pendiente',  color: '#fbbf24', bg: 'rgba(251,191,36,0.1)',   border: 'rgba(251,191,36,0.25)',  icon: '' },
-  COMPLETED: { label: 'Completado', color: '#34d399', bg: 'rgba(52,211,153,0.1)',   border: 'rgba(52,211,153,0.25)',  icon: '' },
-  CANCELLED: { label: 'Cancelado',  color: '#f87171', bg: 'rgba(248,113,113,0.1)',  border: 'rgba(248,113,113,0.25)', icon: '' },
+  PENDING:   { label: 'Pendiente',  color: '#fbbf24', bg: 'rgba(251,191,36,0.1)',   border: 'rgba(251,191,36,0.25)',  icon: '⏳' },
+  COMPLETED: { label: 'Completado', color: '#34d399', bg: 'rgba(52,211,153,0.1)',   border: 'rgba(52,211,153,0.25)',  icon: '✅' },
+  CANCELLED: { label: 'Cancelado',  color: '#f87171', bg: 'rgba(248,113,113,0.1)',  border: 'rgba(248,113,113,0.25)', icon: '❌' },
 }
 
 export default function OrdersPage() {
@@ -93,7 +93,7 @@ export default function OrdersPage() {
             <p style={{ fontSize: 13, color: 'var(--text-muted)', marginTop: 4 }}>{orders.length} pedido{orders.length !== 1 ? 's' : ''} en total</p>
           </div>
           <button onClick={loadOrders} style={{ display: 'flex', alignItems: 'center', gap: 8, background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.1)', borderRadius: 11, padding: '9px 16px', color: 'var(--text-soft)', fontSize: 13, cursor: 'pointer' }}>
-             Actualizar
+            🔄 Actualizar
           </button>
         </div>
       </div>
@@ -104,10 +104,10 @@ export default function OrdersPage() {
           [1,2,3,4].map(i => <StatCardSkeleton key={i}/>)
         ) : (
           [
-            { label: 'Total',      value: stats.total,     color: '#7c83fd', icon: '' },
-            { label: 'Pendientes', value: stats.pending,   color: '#fbbf24', icon: '' },
-            { label: 'Completados',value: stats.completed, color: '#34d399', icon: '' },
-            { label: 'Cancelados', value: stats.cancelled, color: '#f87171', icon: '' },
+            { label: 'Total',      value: stats.total,     color: '#7c83fd', icon: '📋' },
+            { label: 'Pendientes', value: stats.pending,   color: '#fbbf24', icon: '⏳' },
+            { label: 'Completados',value: stats.completed, color: '#34d399', icon: '✅' },
+            { label: 'Cancelados', value: stats.cancelled, color: '#f87171', icon: '❌' },
           ].map(stat => (
             <div key={stat.label} style={{ background: 'rgba(13,13,26,0.9)', border: '1px solid rgba(255,255,255,0.06)', borderRadius: 14, padding: '16px' }}>
               <div style={{ fontSize: 20, marginBottom: 8 }}>{stat.icon}</div>
@@ -122,9 +122,9 @@ export default function OrdersPage() {
       <div style={{ display: 'flex', gap: 8, marginBottom: 20, flexWrap: 'wrap' }}>
         {[
           { key: 'ALL', label: 'Todos' },
-          { key: 'PENDING', label: ' Pendientes' },
-          { key: 'COMPLETED', label: ' Completados' },
-          { key: 'CANCELLED', label: ' Cancelados' },
+          { key: 'PENDING', label: '⏳ Pendientes' },
+          { key: 'COMPLETED', label: '✅ Completados' },
+          { key: 'CANCELLED', label: '❌ Cancelados' },
         ].map(f => (
           <button key={f.key} onClick={() => setFilter(f.key)} style={{
             padding: '7px 16px', borderRadius: 50,
@@ -137,7 +137,7 @@ export default function OrdersPage() {
       </div>
 
       {error && (
-        <div style={{ background: 'rgba(248,113,113,0.08)', border: '1px solid rgba(248,113,113,0.2)', borderRadius: 10, padding: '12px 16px', marginBottom: 20, fontSize: 13, color: '#f87171' }}> {error}</div>
+        <div style={{ background: 'rgba(248,113,113,0.08)', border: '1px solid rgba(248,113,113,0.2)', borderRadius: 10, padding: '12px 16px', marginBottom: 20, fontSize: 13, color: '#f87171' }}>⚠️ {error}</div>
       )}
 
       {/* Skeleton rows */}
@@ -150,7 +150,7 @@ export default function OrdersPage() {
       {/* Sin pedidos */}
       {!loading && filtered.length === 0 && (
         <div style={{ textAlign: 'center', padding: '60px 24px', background: 'rgba(13,13,26,0.6)', border: '1px dashed rgba(255,255,255,0.08)', borderRadius: 20 }}>
-          <div style={{ fontSize: 48, marginBottom: 16 }}></div>
+          <div style={{ fontSize: 48, marginBottom: 16 }}>🛒</div>
           <h3 style={{ color: 'white', marginBottom: 8, fontFamily: "'Fraunces', serif" }}>
             {filter === 'ALL' ? 'Sin pedidos aún' : `Sin pedidos ${STATUS_CONFIG[filter]?.label.toLowerCase()}s`}
           </h3>
@@ -183,8 +183,8 @@ export default function OrdersPage() {
                 <div style={{ display: 'flex', alignItems: 'center', gap: 6, background: st.bg, border: `1px solid ${st.border}`, borderRadius: 50, padding: '4px 12px', fontSize: 12, fontWeight: 600, color: st.color, flexShrink: 0 }}>{st.icon} {st.label}</div>
                 {order.status === 'PENDING' && (
                   <div style={{ display: 'flex', gap: 6, flexShrink: 0 }} onClick={e => e.stopPropagation()}>
-                    <button onClick={() => handleComplete(order.id)} disabled={actionLoading === order.id + '_complete'} style={{ padding: '6px 12px', borderRadius: 8, fontSize: 12, fontWeight: 600, background: 'rgba(52,211,153,0.1)', border: '1px solid rgba(52,211,153,0.25)', color: '#34d399', cursor: 'pointer' }}>{actionLoading === order.id + '_complete' ? '...' : 'Completar'}</button>
-                    <button onClick={() => handleCancel(order.id)} disabled={actionLoading === order.id + '_cancel'} style={{ padding: '6px 12px', borderRadius: 8, fontSize: 12, fontWeight: 600, background: 'rgba(248,113,113,0.08)', border: '1px solid rgba(248,113,113,0.2)', color: '#f87171', cursor: 'pointer' }}>{actionLoading === order.id + '_cancel' ? '...' : 'Cancelar'}</button>
+                    <button onClick={() => handleComplete(order.id)} disabled={actionLoading === order.id + '_complete'} style={{ padding: '6px 12px', borderRadius: 8, fontSize: 12, fontWeight: 600, background: 'rgba(52,211,153,0.1)', border: '1px solid rgba(52,211,153,0.25)', color: '#34d399', cursor: 'pointer' }}>{actionLoading === order.id + '_complete' ? '...' : '✅'}</button>
+                    <button onClick={() => handleCancel(order.id)} disabled={actionLoading === order.id + '_cancel'} style={{ padding: '6px 12px', borderRadius: 8, fontSize: 12, fontWeight: 600, background: 'rgba(248,113,113,0.08)', border: '1px solid rgba(248,113,113,0.2)', color: '#f87171', cursor: 'pointer' }}>{actionLoading === order.id + '_cancel' ? '...' : '❌'}</button>
                   </div>
                 )}
               </div>
@@ -202,7 +202,7 @@ export default function OrdersPage() {
                 <h3 style={{ fontFamily: "'Fraunces', serif", fontSize: 20, color: 'white' }}>Pedido #{selectedOrder.id}</h3>
                 <div style={{ fontSize: 12, color: 'var(--text-muted)', marginTop: 2 }}>{formatDate(selectedOrder.createdAt)}</div>
               </div>
-              <button onClick={() => setSelectedOrder(null)} style={{ width: 34, height: 34, borderRadius: 9, background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.1)', color: 'var(--text-muted)', fontSize: 16, cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>x</button>
+              <button onClick={() => setSelectedOrder(null)} style={{ width: 34, height: 34, borderRadius: 9, background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.1)', color: 'var(--text-muted)', fontSize: 16, cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>✕</button>
             </div>
             <div style={{ padding: '24px 26px' }}>
               {(() => {
@@ -213,9 +213,9 @@ export default function OrdersPage() {
               })()}
               <div style={{ background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.06)', borderRadius: 12, padding: '14px 16px', marginBottom: 16 }}>
                 <div style={{ fontSize: 11, color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.8px', marginBottom: 8 }}>Cliente</div>
-                <div style={{ fontSize: 15, fontWeight: 600, color: 'white' }}> {selectedOrder.customerName || 'Sin nombre'}</div>
-                {selectedOrder.customerPhone && <div style={{ fontSize: 13, color: 'var(--text-soft)', marginTop: 6 }}> {selectedOrder.customerPhone}</div>}
-                {selectedOrder.customerAddress && <div style={{ fontSize: 13, color: 'var(--text-soft)', marginTop: 6 }}> {selectedOrder.customerAddress}</div>}
+                <div style={{ fontSize: 15, fontWeight: 600, color: 'white' }}>👤 {selectedOrder.customerName || 'Sin nombre'}</div>
+                {selectedOrder.customerPhone && <div style={{ fontSize: 13, color: 'var(--text-soft)', marginTop: 6 }}>📞 {selectedOrder.customerPhone}</div>}
+                {selectedOrder.customerAddress && <div style={{ fontSize: 13, color: 'var(--text-soft)', marginTop: 6 }}>📍 {selectedOrder.customerAddress}</div>}
               </div>
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '14px 16px', background: 'rgba(124,131,253,0.06)', border: '1px solid rgba(124,131,253,0.15)', borderRadius: 12, marginBottom: 24 }}>
                 <span style={{ fontSize: 14, fontWeight: 600, color: 'var(--text-soft)' }}>Total del pedido</span>
@@ -223,8 +223,8 @@ export default function OrdersPage() {
               </div>
               {selectedOrder.status === 'PENDING' && (
                 <div style={{ display: 'flex', gap: 10 }}>
-                  <button onClick={() => handleComplete(selectedOrder.id)} disabled={!!actionLoading} style={{ flex: 1, padding: '13px', background: 'rgba(52,211,153,0.1)', border: '1px solid rgba(52,211,153,0.25)', borderRadius: 12, fontSize: 14, fontWeight: 600, color: '#34d399', cursor: 'pointer' }}>{actionLoading ? '...' : ' Marcar completado'}</button>
-                  <button onClick={() => handleCancel(selectedOrder.id)} disabled={!!actionLoading} style={{ flex: 1, padding: '13px', background: 'rgba(248,113,113,0.08)', border: '1px solid rgba(248,113,113,0.2)', borderRadius: 12, fontSize: 14, fontWeight: 600, color: '#f87171', cursor: 'pointer' }}>{actionLoading ? '...' : ' Cancelar pedido'}</button>
+                  <button onClick={() => handleComplete(selectedOrder.id)} disabled={!!actionLoading} style={{ flex: 1, padding: '13px', background: 'rgba(52,211,153,0.1)', border: '1px solid rgba(52,211,153,0.25)', borderRadius: 12, fontSize: 14, fontWeight: 600, color: '#34d399', cursor: 'pointer' }}>{actionLoading ? '...' : '✅ Marcar completado'}</button>
+                  <button onClick={() => handleCancel(selectedOrder.id)} disabled={!!actionLoading} style={{ flex: 1, padding: '13px', background: 'rgba(248,113,113,0.08)', border: '1px solid rgba(248,113,113,0.2)', borderRadius: 12, fontSize: 14, fontWeight: 600, color: '#f87171', cursor: 'pointer' }}>{actionLoading ? '...' : '❌ Cancelar pedido'}</button>
                 </div>
               )}
             </div>

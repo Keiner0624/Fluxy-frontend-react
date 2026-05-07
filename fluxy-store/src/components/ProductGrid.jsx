@@ -23,7 +23,7 @@ export default function ProductGrid({ products, loading, error, onAddToCart, onV
 
     if (!products.length) return (
         <section id="products" style={{ padding: '80px 32px', textAlign: 'center', color: 'var(--text-muted)' }}>
-            <div style={{ fontSize: 48, marginBottom: 12 }}></div>
+            <div style={{ fontSize: 48, marginBottom: 12 }}>🏪</div>
             <p>No hay productos disponibles.</p>
         </section>
     )

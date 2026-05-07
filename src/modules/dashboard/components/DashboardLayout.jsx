@@ -15,13 +15,13 @@ const PLAN_COLORS = {
 
 // requiredPlan: undefined = todos, 'PRO' = pro+, 'BUSINESS' = solo business
 const NAV_ITEMS = [
-  { path: '/dashboard',          icon: '', label: 'Resumen' },
-  { path: '/dashboard/products', icon: '', label: 'Productos' },
-  { path: '/dashboard/orders',   icon: '', label: 'Pedidos' },
-  { path: '/dashboard/metrics',  icon: '', label: 'Métricas',      requiredPlan: 'PRO' },
-  { path: '/dashboard/style',    icon: '', label: 'Estilo',        requiredPlan: 'PRO' },
-  { path: '/dashboard/settings', icon: '', label: 'Configuración' },
-  { path: '/dashboard/plans',    icon: '', label: 'Mejorar plan' },
+  { path: '/dashboard',          icon: '📊', label: 'Resumen' },
+  { path: '/dashboard/products', icon: '📦', label: 'Productos' },
+  { path: '/dashboard/orders',   icon: '🛒', label: 'Pedidos' },
+  { path: '/dashboard/metrics',  icon: '📈', label: 'Métricas',      requiredPlan: 'PRO' },
+  { path: '/dashboard/style',    icon: '🎨', label: 'Estilo',        requiredPlan: 'PRO' },
+  { path: '/dashboard/settings', icon: '⚙️', label: 'Configuración' },
+  { path: '/dashboard/plans',    icon: '⚡', label: 'Mejorar plan' },
 ]
 
 export default function DashboardLayout({ children }) {
@@ -106,7 +106,7 @@ export default function DashboardLayout({ children }) {
             borderRadius: 6, padding: '2px 8px',
           }}>
             <span style={{ fontSize: 10, fontWeight: 700, color: planColor.text, textTransform: 'uppercase', letterSpacing: '0.5px' }}>
-              {plan === 'FREE' ? ' Free' : plan === 'PRO' ? ' Pro' : ' Business'}
+              {plan === 'FREE' ? '🔒 Free' : plan === 'PRO' ? '⚡ Pro' : '🚀 Business'}
             </span>
           </div>
         </div>
@@ -163,7 +163,7 @@ export default function DashboardLayout({ children }) {
             color: '#34d399', fontSize: 13, fontWeight: 500,
             textDecoration: 'none',
           }}>
-            <span></span> Ver mi tienda
+            <span>🔗</span> Ver mi tienda
             <svg style={{ marginLeft: 'auto' }} width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
               <path d="M18 13v6a2 2 0 01-2 2H5a2 2 0 01-2-2V8a2 2 0 012-2h6"/>
               <polyline points="15 3 21 3 21 9"/>
@@ -179,7 +179,7 @@ export default function DashboardLayout({ children }) {
           color: '#f87171', fontSize: 13, fontWeight: 500,
           cursor: 'pointer', width: '100%',
         }}>
-          <span></span> Cerrar sesión
+          <span>🚪</span> Cerrar sesión
         </button>
       </div>
     </div>
@@ -207,7 +207,7 @@ export default function DashboardLayout({ children }) {
           background: 'rgba(255,255,255,0.06)',
           border: '1px solid rgba(255,255,255,0.1)',
           borderRadius: 8, padding: '6px 10px', color: 'white', fontSize: 16,
-        }}>Menu</button>
+        }}>☰</button>
       </div>
 
       {/* Mobile sidebar overlay */}

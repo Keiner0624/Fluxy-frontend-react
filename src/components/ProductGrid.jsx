@@ -80,7 +80,7 @@ export default function ProductGrid({ products, loading, error, onAddToCart, onV
                 background: 'rgba(255,255,255,0.1)', border: 'none', width: 22, height: 22,
                 borderRadius: '50%', color: 'rgba(255,255,255,0.5)', fontSize: 12, cursor: 'pointer',
                 display: 'flex', alignItems: 'center', justifyContent: 'center',
-              }}>x</button>
+              }}>✕</button>
             )}
           </div>
         )}
@@ -95,13 +95,13 @@ export default function ProductGrid({ products, loading, error, onAddToCart, onV
 
         {/* Error */}
         {error && (
-          <div style={{ textAlign: 'center', padding: 60, background: 'rgba(248,113,113,0.05)', border: '1px solid rgba(248,113,113,0.15)', borderRadius: 20, color: '#f87171', fontSize: 15 }}> {error}</div>
+          <div style={{ textAlign: 'center', padding: 60, background: 'rgba(248,113,113,0.05)', border: '1px solid rgba(248,113,113,0.15)', borderRadius: 20, color: '#f87171', fontSize: 15 }}>❌ {error}</div>
         )}
 
         {/* Sin productos */}
         {!loading && !error && products.length === 0 && (
           <div style={{ textAlign: 'center', padding: '80px 24px', background: 'rgba(13,13,26,0.6)', border: '1px dashed rgba(255,255,255,0.08)', borderRadius: 24 }}>
-            <div style={{ fontSize: 56, marginBottom: 16 }}></div>
+            <div style={{ fontSize: 56, marginBottom: 16 }}>📭</div>
             <div style={{ fontSize: 18, fontWeight: 600, color: 'white', marginBottom: 8, fontFamily: "'Fraunces', serif" }}>Aún no hay productos</div>
             <div style={{ fontSize: 14, color: 'rgba(255,255,255,0.35)' }}>Vuelve pronto, el catálogo se está preparando.</div>
           </div>
@@ -110,7 +110,7 @@ export default function ProductGrid({ products, loading, error, onAddToCart, onV
         {/* Sin resultados de búsqueda */}
         {!loading && !error && products.length > 0 && filtered.length === 0 && (
           <div style={{ textAlign: 'center', padding: '60px 24px', background: 'rgba(13,13,26,0.4)', border: '1px dashed rgba(255,255,255,0.06)', borderRadius: 20 }}>
-            <div style={{ fontSize: 40, marginBottom: 12 }}></div>
+            <div style={{ fontSize: 40, marginBottom: 12 }}>🔍</div>
             <div style={{ fontSize: 16, fontWeight: 600, color: 'white', marginBottom: 8, fontFamily: "'Fraunces', serif" }}>Sin resultados para "{search}"</div>
             <div style={{ fontSize: 13, color: 'rgba(255,255,255,0.35)', marginBottom: 16 }}>Intenta con otro nombre o limpia la búsqueda.</div>
             <button onClick={() => setSearch('')} style={{ background: `${primary}15`, border: `1px solid ${primary}30`, color: primary, borderRadius: 10, padding: '8px 20px', fontSize: 13, fontWeight: 600, cursor: 'pointer' }}>

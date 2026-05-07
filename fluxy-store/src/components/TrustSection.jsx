@@ -1,8 +1,8 @@
 const items = [
-    { icon: '', title: 'Pago seguro', desc: 'Tus datos están protegidos' },
-    { icon: '', title: 'Envío rápido', desc: 'Recibe tu pedido en casa' },
-    { icon: '', title: 'Devoluciones', desc: 'Fáciles y sin complicaciones' },
-    { icon: '', title: 'Soporte', desc: 'Estamos para ayudarte' },
+    { icon: '🔒', title: 'Pago seguro', desc: 'Tus datos están protegidos' },
+    { icon: '🚚', title: 'Envío rápido', desc: 'Recibe tu pedido en casa' },
+    { icon: '↩️', title: 'Devoluciones', desc: 'Fáciles y sin complicaciones' },
+    { icon: '💬', title: 'Soporte', desc: 'Estamos para ayudarte' },
 ]
 
 export default function TrustSection() {

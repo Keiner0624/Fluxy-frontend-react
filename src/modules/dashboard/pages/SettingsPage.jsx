@@ -11,11 +11,11 @@ const CLOUDINARY_PRESET = 'fluxy_unsigned'
 function getToken() { return localStorage.getItem('token') || '' }
 
 const PAYMENT_METHODS = [
-  { key: 'efectivo',      label: 'Efectivo',      emoji: '' },
-  { key: 'yape',          label: 'Yape',           emoji: '' },
-  { key: 'plin',          label: 'Plin',           emoji: '' },
-  { key: 'tarjeta',       label: 'Tarjeta',        emoji: '' },
-  { key: 'transferencia', label: 'Transferencia',  emoji: '' },
+  { key: 'efectivo',      label: 'Efectivo',      emoji: '💵' },
+  { key: 'yape',          label: 'Yape',           emoji: '📱' },
+  { key: 'plin',          label: 'Plin',           emoji: '🏦' },
+  { key: 'tarjeta',       label: 'Tarjeta',        emoji: '💳' },
+  { key: 'transferencia', label: 'Transferencia',  emoji: '🏧' },
 ]
 
 async function uploadToCloudinary(file) {
@@ -59,7 +59,7 @@ function SettingsPreview({ form, logoPreview }) {
             <div style={{ fontSize: 9, color: 'rgba(255,255,255,0.35)' }}>via Fluxy</div>
           </div>
         </div>
-        <div style={{ background: primary, borderRadius: 8, padding: '4px 10px', fontSize: 9, fontWeight: 700, color: '#fff' }}> 0</div>
+        <div style={{ background: primary, borderRadius: 8, padding: '4px 10px', fontSize: 9, fontWeight: 700, color: '#fff' }}>🛒 0</div>
       </div>
 
       {/* Hero info */}
@@ -83,18 +83,18 @@ function SettingsPreview({ form, logoPreview }) {
           <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
             {form.phone && (
               <div style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
-                <div style={{ width: 22, height: 22, borderRadius: 6, background: 'rgba(124,131,253,0.1)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 10 }}></div>
+                <div style={{ width: 22, height: 22, borderRadius: 6, background: 'rgba(124,131,253,0.1)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 10 }}>📞</div>
                 <span style={{ fontSize: 10, color: 'rgba(255,255,255,0.5)' }}>{form.phone}</span>
               </div>
             )}
             {form.address && (
               <div style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
-                <div style={{ width: 22, height: 22, borderRadius: 6, background: 'rgba(124,131,253,0.1)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 10 }}></div>
+                <div style={{ width: 22, height: 22, borderRadius: 6, background: 'rgba(124,131,253,0.1)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 10 }}>📍</div>
                 <span style={{ fontSize: 10, color: 'rgba(255,255,255,0.5)' }}>{form.address.slice(0, 30)}{form.address.length > 30 ? '...' : ''}</span>
               </div>
             )}
             <div style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
-              <div style={{ width: 22, height: 22, borderRadius: 6, background: 'rgba(124,131,253,0.1)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 10 }}></div>
+              <div style={{ width: 22, height: 22, borderRadius: 6, background: 'rgba(124,131,253,0.1)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 10 }}>⚡</div>
               <span style={{ fontSize: 10, color: 'rgba(255,255,255,0.5)' }}>Respuesta inmediata</span>
             </div>
           </div>
@@ -130,7 +130,6 @@ function CustomDomainSection({ plan }) {
   const [saving, setSaving]               = useState(false)
   const [removing, setRemoving]           = useState(false)
   const [message, setMessage]             = useState('')
-  const [messageType, setMessageType]     = useState('success')
   const [instructions, setInstructions]   = useState(null)
   const isBusiness = plan === 'BUSINESS'
 
@@ -152,8 +151,8 @@ function CustomDomainSection({ plan }) {
       const res  = await fetch(`${API_URL}/domains/add`, { method: 'POST', headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${getToken()}` }, body: JSON.stringify({ domain: domain.trim() }) })
       const data = await res.json()
       if (!res.ok) throw new Error(data.message || 'Error al agregar dominio')
-      setCurrentDomain(data.domain); setDomainStatus('pending'); setInstructions(data.instructions); setMessage(data.message); setMessageType('success'); setDomain('')
-    } catch (err) { setMessage(err.message); setMessageType('error') }
+      setCurrentDomain(data.domain); setDomainStatus('pending'); setInstructions(data.instructions); setMessage('✅ ' + data.message); setDomain('')
+    } catch (err) { setMessage('⚠️ ' + err.message) }
     finally { setSaving(false) }
   }
 
@@ -163,25 +162,25 @@ function CustomDomainSection({ plan }) {
       const res  = await fetch(`${API_URL}/domains/remove`, { method: 'DELETE', headers: { Authorization: `Bearer ${getToken()}` } })
       const data = await res.json()
       if (!res.ok) throw new Error(data.message)
-      setCurrentDomain(''); setDomainStatus('none'); setInstructions(null); setMessage('Dominio eliminado.'); setMessageType('success')
-    } catch (err) { setMessage(err.message); setMessageType('error') }
+      setCurrentDomain(''); setDomainStatus('none'); setInstructions(null); setMessage('✅ Dominio eliminado.')
+    } catch (err) { setMessage('⚠️ ' + err.message) }
     finally { setRemoving(false) }
   }
 
   return (
     <div style={{ background: 'rgba(13,13,26,0.9)', border: `1px solid ${isBusiness ? 'rgba(52,211,153,0.2)' : 'rgba(255,255,255,0.06)'}`, borderRadius: 20, padding: '24px' }}>
       <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 16, paddingBottom: 12, borderBottom: '1px solid rgba(255,255,255,0.06)' }}>
-        <div style={{ fontSize: 13, fontWeight: 600, color: 'white' }}>Dominio personalizado</div>
+        <div style={{ fontSize: 13, fontWeight: 600, color: 'white' }}>🌐 Dominio personalizado</div>
         {!isBusiness && <span style={{ fontSize: 10, fontWeight: 700, color: '#34d399', background: 'rgba(52,211,153,0.15)', border: '1px solid rgba(52,211,153,0.25)', borderRadius: 6, padding: '2px 8px', textTransform: 'uppercase' }}>BUSINESS</span>}
       </div>
 
       {!isBusiness ? (
         <div style={{ textAlign: 'center', padding: '20px 0' }}>
-          <div style={{ fontSize: 36, marginBottom: 12 }}></div>
+          <div style={{ fontSize: 36, marginBottom: 12 }}>🔒</div>
           <div style={{ fontSize: 14, color: 'var(--text-muted)', marginBottom: 16, lineHeight: 1.6 }}>
             Conecta tu propio dominio (ej: <strong style={{ color: 'white' }}>mitienda.com</strong>) y quita el branding de Fluxy.
           </div>
-          <button onClick={() => navigate('/dashboard/plans')} style={{ background: 'linear-gradient(135deg, #34d399, #059669)', color: 'white', border: 'none', borderRadius: 10, padding: '10px 20px', fontSize: 13, fontWeight: 600, cursor: 'pointer' }}>Ver plan Business</button>
+          <button onClick={() => navigate('/dashboard/plans')} style={{ background: 'linear-gradient(135deg, #34d399, #059669)', color: 'white', border: 'none', borderRadius: 10, padding: '10px 20px', fontSize: 13, fontWeight: 600, cursor: 'pointer' }}>🚀 Ver plan Business</button>
         </div>
       ) : (
         <>
@@ -189,19 +188,19 @@ function CustomDomainSection({ plan }) {
             <div style={{ marginBottom: 20 }}>
               <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', background: 'rgba(52,211,153,0.06)', border: '1px solid rgba(52,211,153,0.2)', borderRadius: 12, padding: '12px 16px', flexWrap: 'wrap', gap: 10 }}>
                 <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
-                  <span style={{ fontSize: 16 }}></span>
+                  <span style={{ fontSize: 16 }}>🌐</span>
                   <div>
                     <div style={{ fontSize: 14, fontWeight: 600, color: 'white' }}>{currentDomain}</div>
                     <div style={{ fontSize: 12, marginTop: 2 }}>
-                      {domainStatus === 'verified' && <span style={{ color: '#34d399' }}>Verificado</span>}
-                      {domainStatus === 'pending'  && <span style={{ color: '#fbbf24' }}>Pendiente</span>}
-                      {domainStatus === 'error'    && <span style={{ color: '#f87171' }}>Error</span>}
+                      {domainStatus === 'verified' && <span style={{ color: '#34d399' }}>✅ Verificado</span>}
+                      {domainStatus === 'pending'  && <span style={{ color: '#fbbf24' }}>⏳ Pendiente</span>}
+                      {domainStatus === 'error'    && <span style={{ color: '#f87171' }}>❌ Error</span>}
                     </div>
                   </div>
                 </div>
                 <div style={{ display: 'flex', gap: 8 }}>
-                  <button onClick={loadDomainStatus} style={{ padding: '6px 12px', borderRadius: 8, background: 'rgba(255,255,255,0.06)', border: '1px solid rgba(255,255,255,0.1)', color: 'var(--text-soft)', fontSize: 12, cursor: 'pointer' }}>Actualizar</button>
-                  <button onClick={handleRemoveDomain} disabled={removing} style={{ padding: '6px 12px', borderRadius: 8, background: 'rgba(248,113,113,0.08)', border: '1px solid rgba(248,113,113,0.2)', color: '#f87171', fontSize: 12, cursor: 'pointer' }}>{removing ? '...' : 'Eliminar'}</button>
+                  <button onClick={loadDomainStatus} style={{ padding: '6px 12px', borderRadius: 8, background: 'rgba(255,255,255,0.06)', border: '1px solid rgba(255,255,255,0.1)', color: 'var(--text-soft)', fontSize: 12, cursor: 'pointer' }}>🔄</button>
+                  <button onClick={handleRemoveDomain} disabled={removing} style={{ padding: '6px 12px', borderRadius: 8, background: 'rgba(248,113,113,0.08)', border: '1px solid rgba(248,113,113,0.2)', color: '#f87171', fontSize: 12, cursor: 'pointer' }}>{removing ? '...' : '🗑️'}</button>
                 </div>
               </div>
             </div>
@@ -223,7 +222,7 @@ function CustomDomainSection({ plan }) {
 
           {(instructions || domainStatus === 'pending') && (
             <div style={{ background: 'rgba(251,191,36,0.06)', border: '1px solid rgba(251,191,36,0.2)', borderRadius: 12, padding: '16px' }}>
-              <div style={{ fontSize: 13, fontWeight: 600, color: '#fbbf24', marginBottom: 12 }}>Configura tu DNS</div>
+              <div style={{ fontSize: 13, fontWeight: 600, color: '#fbbf24', marginBottom: 12 }}>📋 Configura tu DNS</div>
               <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
                 {[
                   { label: 'Para www.tudominio.com', code: 'CNAME   www   cname.vercel-dns.com' },
@@ -235,12 +234,12 @@ function CustomDomainSection({ plan }) {
                   </div>
                 ))}
               </div>
-              <div style={{ fontSize: 11, color: 'var(--text-muted)', marginTop: 10 }}>Los cambios de DNS pueden tardar hasta 48 horas.</div>
+              <div style={{ fontSize: 11, color: 'var(--text-muted)', marginTop: 10 }}>⏱️ Los cambios de DNS pueden tardar hasta 48 horas.</div>
             </div>
           )}
 
           {message && (
-            <div style={{ marginTop: 12, padding: '10px 14px', borderRadius: 10, fontSize: 13, background: messageType === 'success' ? 'rgba(52,211,153,0.08)' : 'rgba(248,113,113,0.08)', border: `1px solid ${messageType === 'success' ? 'rgba(52,211,153,0.2)' : 'rgba(248,113,113,0.2)'}`, color: messageType === 'success' ? '#34d399' : '#f87171' }}>{message}</div>
+            <div style={{ marginTop: 12, padding: '10px 14px', borderRadius: 10, fontSize: 13, background: message.startsWith('✅') ? 'rgba(52,211,153,0.08)' : 'rgba(248,113,113,0.08)', border: `1px solid ${message.startsWith('✅') ? 'rgba(52,211,153,0.2)' : 'rgba(248,113,113,0.2)'}`, color: message.startsWith('✅') ? '#34d399' : '#f87171' }}>{message}</div>
           )}
         </>
       )}
@@ -302,7 +301,7 @@ export default function SettingsPage() {
       const updated = await res.json()
       const merged  = { ...company, name: updated.name, slug: updated.slug, logoUrl: updated.logoUrl }
       localStorage.setItem('company', JSON.stringify({ ...merged, storeUrl: getCompanyStoreUrl(merged) }))
-      setSuccess('Configuración guardada.')
+      setSuccess('✅ Configuración guardada.')
       setTimeout(() => setSuccess(''), 3000)
     } catch (err) { setError(err.message) }
     finally { setSaving(false) }
@@ -310,11 +309,11 @@ export default function SettingsPage() {
 
   const inputStyle = { width: '100%', background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.08)', borderRadius: 12, padding: '13px 14px 13px 44px', color: 'white', fontSize: 14, outline: 'none', fontFamily: 'DM Sans, sans-serif', transition: 'all 0.2s' }
   const fields = [
-    { key: 'name',        label: 'Nombre del negocio *', icon: '', placeholder: 'Ej: Cafetería Luna' },
-    { key: 'description', label: 'Descripción',          icon: '', placeholder: 'Describe tu negocio...', type: 'textarea' },
-    { key: 'phone',       label: 'WhatsApp',             icon: '', placeholder: '51999999999' },
-    { key: 'address',     label: 'Dirección',            icon: '', placeholder: 'Av. Ejemplo 123, Lima' },
-    { key: 'email',       label: 'Correo',               icon: '', placeholder: 'tu@negocio.com', type: 'email' },
+    { key: 'name',        label: 'Nombre del negocio *', icon: '🏪', placeholder: 'Ej: Cafetería Luna' },
+    { key: 'description', label: 'Descripción',          icon: '📝', placeholder: 'Describe tu negocio...', type: 'textarea' },
+    { key: 'phone',       label: 'WhatsApp',             icon: '📱', placeholder: '51999999999' },
+    { key: 'address',     label: 'Dirección',            icon: '📍', placeholder: 'Av. Ejemplo 123, Lima' },
+    { key: 'email',       label: 'Correo',               icon: '✉️', placeholder: 'tu@negocio.com', type: 'email' },
   ]
 
   return (
@@ -333,10 +332,10 @@ export default function SettingsPage() {
       {storeUrl && (
         <div style={{ background: 'rgba(52,211,153,0.06)', border: '1px solid rgba(52,211,153,0.2)', borderRadius: 14, padding: '14px 18px', marginBottom: 24, display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: 10 }}>
           <div>
-            <div style={{ fontSize: 11, color: '#34d399', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.8px', marginBottom: 3 }}>Tu tienda pública</div>
+            <div style={{ fontSize: 11, color: '#34d399', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.8px', marginBottom: 3 }}>🔗 Tu tienda pública</div>
             <div style={{ fontSize: 14, color: 'var(--text-soft)' }}>{storeUrl}</div>
           </div>
-          <a href={storeUrl} target="_blank" rel="noreferrer" style={{ display: 'flex', alignItems: 'center', gap: 6, background: 'rgba(52,211,153,0.1)', border: '1px solid rgba(52,211,153,0.25)', borderRadius: 9, padding: '7px 14px', fontSize: 13, fontWeight: 600, color: '#34d399' }}>Ver tienda </a>
+          <a href={storeUrl} target="_blank" rel="noreferrer" style={{ display: 'flex', alignItems: 'center', gap: 6, background: 'rgba(52,211,153,0.1)', border: '1px solid rgba(52,211,153,0.25)', borderRadius: 9, padding: '7px 14px', fontSize: 13, fontWeight: 600, color: '#34d399' }}>Ver tienda ↗</a>
         </div>
       )}
 
@@ -357,14 +356,14 @@ export default function SettingsPage() {
                     onMouseEnter={e => e.currentTarget.style.borderColor = 'rgba(124,131,253,0.6)'}
                     onMouseLeave={e => e.currentTarget.style.borderColor = 'rgba(124,131,253,0.3)'}
                   >
-                    {logoPreview ? <img src={logoPreview} alt="logo" style={{ width: '100%', height: '100%', objectFit: 'cover' }}/> : <span style={{ fontSize: 28 }}></span>}
-                    {uploadingLogo && <div style={{ position: 'absolute', inset: 0, background: 'rgba(0,0,0,0.6)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 12, color: 'white' }}></div>}
+                    {logoPreview ? <img src={logoPreview} alt="logo" style={{ width: '100%', height: '100%', objectFit: 'cover' }}/> : <span style={{ fontSize: 28 }}>🖼️</span>}
+                    {uploadingLogo && <div style={{ position: 'absolute', inset: 0, background: 'rgba(0,0,0,0.6)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 12, color: 'white' }}>⬆️</div>}
                   </div>
                   <div>
-                    <div style={{ fontSize: 14, fontWeight: 600, color: 'white', marginBottom: 6 }}>{logoPreview ? 'Logo cargado ' : 'Sube el logo de tu negocio'}</div>
+                    <div style={{ fontSize: 14, fontWeight: 600, color: 'white', marginBottom: 6 }}>{logoPreview ? 'Logo cargado ✓' : 'Sube el logo de tu negocio'}</div>
                     <div style={{ fontSize: 12, color: 'var(--text-muted)', marginBottom: 12, lineHeight: 1.5 }}>PNG o JPG. Recomendado: 200×200px</div>
                     <button type="button" onClick={() => logoRef.current?.click()} style={{ padding: '8px 16px', borderRadius: 9, background: 'rgba(124,131,253,0.1)', border: '1px solid rgba(124,131,253,0.25)', color: 'var(--primary)', fontSize: 13, fontWeight: 600, cursor: 'pointer' }}>
-                      {uploadingLogo ? 'Subiendo...' : logoPreview ? 'Cambiar' : 'Subir logo'}
+                      {uploadingLogo ? 'Subiendo...' : logoPreview ? '🔄 Cambiar' : '📤 Subir logo'}
                     </button>
                   </div>
                 </div>
@@ -403,7 +402,7 @@ export default function SettingsPage() {
                     const active = form.paymentMethods.includes(pm.key)
                     return (
                       <button key={pm.key} type="button" onClick={() => togglePayment(pm.key)} style={{ display: 'flex', alignItems: 'center', gap: 8, padding: '10px 18px', borderRadius: 12, background: active ? 'rgba(124,131,253,0.15)' : 'rgba(255,255,255,0.04)', border: active ? '1px solid rgba(124,131,253,0.4)' : '1px solid rgba(255,255,255,0.08)', color: active ? 'var(--primary)' : 'var(--text-soft)', fontSize: 14, fontWeight: active ? 600 : 400, cursor: 'pointer', transition: 'all 0.2s' }}>
-                        <span>{pm.emoji}</span> {pm.label} {active && <span style={{ fontSize: 12 }}></span>}
+                        <span>{pm.emoji}</span> {pm.label} {active && <span style={{ fontSize: 12 }}>✓</span>}
                       </button>
                     )
                   })}
@@ -413,11 +412,11 @@ export default function SettingsPage() {
               {/* Dominio */}
               <CustomDomainSection plan={plan} />
 
-              {error   && <div style={{ background: 'rgba(248,113,113,0.08)', border: '1px solid rgba(248,113,113,0.2)', borderRadius: 10, padding: '11px 14px', fontSize: 13, color: '#f87171' }}>{error}</div>}
+              {error   && <div style={{ background: 'rgba(248,113,113,0.08)', border: '1px solid rgba(248,113,113,0.2)', borderRadius: 10, padding: '11px 14px', fontSize: 13, color: '#f87171' }}>⚠️ {error}</div>}
               {success && <div style={{ background: 'rgba(52,211,153,0.08)', border: '1px solid rgba(52,211,153,0.2)', borderRadius: 10, padding: '11px 14px', fontSize: 13, color: '#34d399' }}>{success}</div>}
 
               <button type="submit" disabled={saving || uploadingLogo} style={{ width: '100%', padding: '15px', borderRadius: 14, background: (saving || uploadingLogo) ? 'rgba(124,131,253,0.4)' : 'linear-gradient(135deg, #7c83fd, #4f46e5)', border: 'none', color: 'white', fontSize: 15, fontWeight: 700, cursor: (saving || uploadingLogo) ? 'not-allowed' : 'pointer', boxShadow: (saving || uploadingLogo) ? 'none' : '0 8px 24px rgba(124,131,253,0.25)' }}>
-                {saving ? 'Guardando...' : uploadingLogo ? 'Subiendo logo...' : 'Guardar configuración'}
+                {saving ? 'Guardando...' : uploadingLogo ? 'Subiendo logo...' : '💾 Guardar configuración'}
               </button>
             </div>
           </form>
@@ -427,7 +426,7 @@ export default function SettingsPage() {
             <div style={{ fontSize: 12, fontWeight: 600, color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '1px', marginBottom: 12 }}>Vista previa</div>
             <SettingsPreview form={form} logoPreview={logoPreview} />
             <div style={{ marginTop: 12, background: 'rgba(124,131,253,0.06)', border: '1px solid rgba(124,131,253,0.15)', borderRadius: 12, padding: '12px 16px' }}>
-              <div style={{ fontSize: 11, color: 'var(--primary)', fontWeight: 600, marginBottom: 4 }}>Tip</div>
+              <div style={{ fontSize: 11, color: 'var(--primary)', fontWeight: 600, marginBottom: 4 }}>💡 Tip</div>
               <div style={{ fontSize: 12, color: 'var(--text-muted)', lineHeight: 1.6 }}>
                 Los cambios se reflejan en tiempo real aquí. Guarda para que tus clientes los vean.
               </div>

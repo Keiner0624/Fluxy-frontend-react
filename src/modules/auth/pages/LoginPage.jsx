@@ -104,10 +104,10 @@ export default function LoginPage() {
             Accede a tu panel para administrar productos, pedidos y métricas de tu negocio.
           </p>
           {[
-            { icon: '', text: 'Gestión de productos' },
-            { icon: '', text: 'Control de pedidos' },
-            { icon: '', text: 'Métricas en tiempo real' },
-            { icon: '', text: 'Notificaciones WhatsApp' },
+            { icon: '📦', text: 'Gestión de productos' },
+            { icon: '🛒', text: 'Control de pedidos' },
+            { icon: '📊', text: 'Métricas en tiempo real' },
+            { icon: '💬', text: 'Notificaciones WhatsApp' },
           ].map((f, i) => (
             <div key={i} style={{
               display: 'flex', alignItems: 'center', gap: 12,
@@ -161,7 +161,7 @@ export default function LoginPage() {
                 Correo electrónico
               </label>
               <div style={{ position: 'relative' }}>
-                <span style={{ position: 'absolute', left: 14, top: '50%', transform: 'translateY(-50%)', fontSize: 16, pointerEvents: 'none' }}></span>
+                <span style={{ position: 'absolute', left: 14, top: '50%', transform: 'translateY(-50%)', fontSize: 16, pointerEvents: 'none' }}>✉️</span>
                 <input name="email" type="email" value={form.email} onChange={handleChange}
                   placeholder="tu@negocio.com" autoComplete="email"
                   style={{ width: '100%', background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.08)', borderRadius: 12, padding: '14px 14px 14px 44px', color: 'white', fontSize: 14, outline: 'none', fontFamily: 'DM Sans, sans-serif', transition: 'all 0.2s' }}
@@ -177,7 +177,7 @@ export default function LoginPage() {
                 Contraseña
               </label>
               <div style={{ position: 'relative' }}>
-                <span style={{ position: 'absolute', left: 14, top: '50%', transform: 'translateY(-50%)', fontSize: 16, pointerEvents: 'none' }}></span>
+                <span style={{ position: 'absolute', left: 14, top: '50%', transform: 'translateY(-50%)', fontSize: 16, pointerEvents: 'none' }}>🔒</span>
                 <input name="password" type={showPassword ? 'text' : 'password'} value={form.password} onChange={handleChange}
                   placeholder="Tu contraseña" autoComplete="current-password"
                   style={{ width: '100%', background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.08)', borderRadius: 12, padding: '14px 44px 14px 44px', color: 'white', fontSize: 14, outline: 'none', fontFamily: 'DM Sans, sans-serif', transition: 'all 0.2s' }}
@@ -185,12 +185,12 @@ export default function LoginPage() {
                   onBlur={e => { e.target.style.borderColor = 'rgba(255,255,255,0.08)'; e.target.style.background = 'rgba(255,255,255,0.04)' }}
                 />
                 <button type="button" onClick={() => setShowPassword(!showPassword)} style={{ position: 'absolute', right: 12, top: '50%', transform: 'translateY(-50%)', background: 'transparent', border: 'none', color: 'var(--text-muted)', fontSize: 16, cursor: 'pointer', padding: 4 }}>
-                  {showPassword ? '' : ''}
+                  {showPassword ? '🙈' : '👁️'}
                 </button>
               </div>
             </div>
 
-            {/*  Link funcional a recuperar contraseña */}
+            {/* ✅ Link funcional a recuperar contraseña */}
             <div style={{ textAlign: 'right', marginBottom: 24 }}>
               <Link to="/forgot-password" style={{
                 fontSize: 13, color: 'var(--primary)', transition: 'opacity 0.2s',
@@ -202,7 +202,7 @@ export default function LoginPage() {
 
             {error && (
               <div style={{ background: 'rgba(248,113,113,0.08)', border: '1px solid rgba(248,113,113,0.2)', borderRadius: 10, padding: '12px 16px', fontSize: 13, color: '#f87171', marginBottom: 16, textAlign: 'center', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8 }}>
-                <span></span> {error}
+                <span>⚠️</span> {error}
               </div>
             )}
 

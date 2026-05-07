@@ -13,7 +13,7 @@ export default function Footer({ company }) {
                     {company?.name}
                 </p>
             </div>
-            <p> {new Date().getFullYear()} — Todos los derechos reservados</p>
+            <p>© {new Date().getFullYear()} — Todos los derechos reservados</p>
         </footer>
     )
 }
