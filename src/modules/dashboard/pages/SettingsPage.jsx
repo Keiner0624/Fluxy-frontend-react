@@ -4,19 +4,68 @@ import { useNavigate } from 'react-router-dom'
 import DashboardLayout from '../components/DashboardLayout'
 import usePlan from '../../../hooks/usePlan'
 import { API_URL, getCompanyStoreUrl } from '../../../app/config'
+import { useCurrency } from '../../../hooks/useCurrency'
 
 const CLOUDINARY_CLOUD  = 'dklhbrw7s'
 const CLOUDINARY_PRESET = 'fluxy_unsigned'
 
 function getToken() { return localStorage.getItem('token') || '' }
 
-const PAYMENT_METHODS = [
-  { key: 'efectivo',      label: 'Efectivo',      emoji: '💵' },
-  { key: 'yape',          label: 'Yape',           emoji: '📱' },
-  { key: 'plin',          label: 'Plin',           emoji: '🏦' },
-  { key: 'tarjeta',       label: 'Tarjeta',        emoji: '💳' },
-  { key: 'transferencia', label: 'Transferencia',  emoji: '🏧' },
-]
+const PAYMENT_METHODS_BY_COUNTRY = {
+  PE: [
+    { key: 'efectivo',      label: 'Efectivo',      emoji: '💵' },
+    { key: 'yape',          label: 'Yape',           emoji: '📱' },
+    { key: 'plin',          label: 'Plin',           emoji: '🏦' },
+    { key: 'tarjeta',       label: 'Tarjeta',        emoji: '💳' },
+    { key: 'transferencia', label: 'Transferencia',  emoji: '🏧' },
+  ],
+  CO: [
+    { key: 'efectivo',      label: 'Efectivo',      emoji: '💵' },
+    { key: 'nequi',         label: 'Nequi',          emoji: '📱' },
+    { key: 'daviplata',     label: 'Daviplata',      emoji: '🏦' },
+    { key: 'pse',           label: 'PSE',            emoji: '🔐' },
+    { key: 'tarjeta',       label: 'Tarjeta',        emoji: '💳' },
+    { key: 'transferencia', label: 'Transferencia',  emoji: '🏧' },
+  ],
+  MX: [
+    { key: 'efectivo',      label: 'Efectivo',      emoji: '💵' },
+    { key: 'oxxo',          label: 'OXXO',           emoji: '🏪' },
+    { key: 'codi',          label: 'CoDi',           emoji: '📱' },
+    { key: 'tarjeta',       label: 'Tarjeta',        emoji: '💳' },
+    { key: 'transferencia', label: 'Transferencia',  emoji: '🏧' },
+    { key: 'mercadopago',   label: 'Mercado Pago',   emoji: '💙' },
+  ],
+  AR: [
+    { key: 'efectivo',      label: 'Efectivo',      emoji: '💵' },
+    { key: 'mercadopago',   label: 'Mercado Pago',   emoji: '💙' },
+    { key: 'modo',          label: 'MODO',           emoji: '📱' },
+    { key: 'tarjeta',       label: 'Tarjeta',        emoji: '💳' },
+    { key: 'transferencia', label: 'Transferencia',  emoji: '🏧' },
+  ],
+  CL: [
+    { key: 'efectivo',      label: 'Efectivo',      emoji: '💵' },
+    { key: 'webpay',        label: 'Webpay',         emoji: '💳' },
+    { key: 'tarjeta',       label: 'Tarjeta',        emoji: '💳' },
+    { key: 'transferencia', label: 'Transferencia',  emoji: '🏧' },
+  ],
+  BR: [
+    { key: 'efectivo',      label: 'Dinheiro',      emoji: '💵' },
+    { key: 'pix',           label: 'PIX',            emoji: '📱' },
+    { key: 'boleto',        label: 'Boleto',         emoji: '📄' },
+    { key: 'tarjeta',       label: 'Cartão',         emoji: '💳' },
+    { key: 'transferencia', label: 'Transferência',  emoji: '🏧' },
+  ],
+  DEFAULT: [
+    { key: 'efectivo',      label: 'Efectivo',      emoji: '💵' },
+    { key: 'tarjeta',       label: 'Tarjeta',        emoji: '💳' },
+    { key: 'transferencia', label: 'Transferencia',  emoji: '🏧' },
+    { key: 'mercadopago',   label: 'Mercado Pago',   emoji: '💙' },
+  ],
+}
+
+function getPaymentMethods(countryCode) {
+  return PAYMENT_METHODS_BY_COUNTRY[countryCode] || PAYMENT_METHODS_BY_COUNTRY.DEFAULT
+}
 
 async function uploadToCloudinary(file) {
   const formData = new FormData()
@@ -28,9 +77,9 @@ async function uploadToCloudinary(file) {
 }
 
 // ─── Vista previa de configuración ───────────────────────────────────────────
-function SettingsPreview({ form, logoPreview }) {
+function SettingsPreview({ form, logoPreview, paymentMethods = [] }) {
   const primary = '#7c83fd'
-  const accepted = PAYMENT_METHODS.filter(p => form.paymentMethods.includes(p.key))
+  const accepted = paymentMethods.filter(p => form.paymentMethods.includes(p.key))
 
   return (
     <div style={{ borderRadius: 16, overflow: 'hidden', border: '1px solid rgba(255,255,255,0.08)', boxShadow: '0 20px 60px rgba(0,0,0,0.5)' }}>
@@ -250,6 +299,8 @@ function CustomDomainSection({ plan }) {
 // ─── SettingsPage principal ───────────────────────────────────────────────────
 export default function SettingsPage() {
   const { plan } = usePlan()
+  const { currencyInfo } = useCurrency()
+  const PAYMENT_METHODS = getPaymentMethods(currencyInfo?.countryCode || 'PE')
   const [form, setForm] = useState({ name: '', description: '', phone: '', address: '', email: '', logoUrl: '', paymentMethods: [] })
   const [loading, setLoading]             = useState(true)
   const [saving, setSaving]               = useState(false)
@@ -396,7 +447,10 @@ export default function SettingsPage() {
 
               {/* Pagos */}
               <div style={{ background: 'rgba(13,13,26,0.9)', border: '1px solid rgba(255,255,255,0.06)', borderRadius: 20, padding: '24px' }}>
-                <div style={{ fontSize: 13, fontWeight: 600, color: 'white', marginBottom: 16, paddingBottom: 12, borderBottom: '1px solid rgba(255,255,255,0.06)' }}>Métodos de pago aceptados</div>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 16, paddingBottom: 12, borderBottom: '1px solid rgba(255,255,255,0.06)' }}>
+                  <div style={{ fontSize: 13, fontWeight: 600, color: 'white' }}>Métodos de pago aceptados</div>
+                  {currencyInfo?.name && <div style={{ fontSize: 11, color: 'var(--text-muted)', background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.08)', borderRadius: 6, padding: '2px 8px' }}>📍 {currencyInfo.name}</div>}
+                </div>
                 <div style={{ display: 'flex', flexWrap: 'wrap', gap: 10 }}>
                   {PAYMENT_METHODS.map(pm => {
                     const active = form.paymentMethods.includes(pm.key)
@@ -424,7 +478,7 @@ export default function SettingsPage() {
           {/* ── Vista previa ── */}
           <div className="fluxy-sticky" style={{ position: 'sticky', top: 24 }}>
             <div style={{ fontSize: 12, fontWeight: 600, color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '1px', marginBottom: 12 }}>Vista previa</div>
-            <SettingsPreview form={form} logoPreview={logoPreview} />
+            <SettingsPreview form={form} logoPreview={logoPreview} paymentMethods={PAYMENT_METHODS} />
             <div style={{ marginTop: 12, background: 'rgba(124,131,253,0.06)', border: '1px solid rgba(124,131,253,0.15)', borderRadius: 12, padding: '12px 16px' }}>
               <div style={{ fontSize: 11, color: 'var(--primary)', fontWeight: 600, marginBottom: 4 }}>💡 Tip</div>
               <div style={{ fontSize: 12, color: 'var(--text-muted)', lineHeight: 1.6 }}>
