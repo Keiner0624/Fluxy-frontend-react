@@ -3,7 +3,7 @@ import { useState } from 'react'
 import ProductCard from './ProductCard'
 import { useTranslation } from '../hooks/useTranslation'
 
-export default function ProductGrid({ products, loading, error, onAddToCart, onViewDetail, company }) {
+export default function ProductGrid({ products, loading, error, onAddToCart, onViewDetail, company, selectedCategory }) {
   const [filter, setFilter]   = useState('all')
   const [search, setSearch]   = useState('')
   const [focused, setFocused] = useState(false)
@@ -19,7 +19,11 @@ export default function ProductGrid({ products, loading, error, onAddToCart, onV
     } catch { return '#7c83fd' }
   })()
 
-  const byFilter = filter === 'available' ? available : products
+  const byCategory = selectedCategory
+    ? products.filter(p => p.category?.id === selectedCategory)
+    : products
+  const available2 = byCategory.filter(p => p.stock > 0)
+  const byFilter = filter === 'available' ? available2 : byCategory
   const filtered = search.trim()
     ? byFilter.filter(p =>
         p.name?.toLowerCase().includes(search.toLowerCase()) ||
