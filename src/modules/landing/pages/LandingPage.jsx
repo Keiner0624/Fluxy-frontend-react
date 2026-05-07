@@ -229,7 +229,7 @@ function Hero() {
         opacity: mounted ? 1 : 0, transition: 'all 0.7s ease 0.7s',
       }}>
         <div style={{ display: 'flex' }}>
-          {['', '', '', '', ''].map((e, i) => (
+          {['🧑🏽', '👩🏼', '🧑🏾', '👩🏻', '🧑🏿'].map((e, i) => (
             <div key={i} style={{
               width: 34, height: 34, borderRadius: '50%',
               background: `hsl(${220 + i * 30}, 70%, 45%)`,
