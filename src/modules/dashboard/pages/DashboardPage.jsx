@@ -3,6 +3,7 @@ import { useNavigate, useSearchParams } from 'react-router-dom'
 import { useEffect, useState } from 'react'
 import DashboardLayout from '../components/DashboardLayout'
 import { API_URL, getCompanyStoreUrl } from '../../../app/config'
+import { DashboardCardSkeleton } from '../../../components/Skeleton'
 
 const PLAN_NAMES = { PRO: 'Pro', BUSINESS: 'Business' }
 const PAYMENT_STATUS_MAP = {
@@ -52,6 +53,7 @@ export default function DashboardPage() {
   const [paymentStatus, setPaymentStatus] = useState(null)
   const [plan, setPlan] = useState('FREE')
   const [daysLeft, setDaysLeft] = useState(null)
+  const [loadingPlan, setLoadingPlan] = useState(true)
 
   const company  = JSON.parse(localStorage.getItem('company') || '{}') || {}
   const storeUrl = getCompanyStoreUrl(company)
@@ -71,6 +73,7 @@ export default function DashboardPage() {
         }
       })
       .catch(() => {})
+      .finally(() => setLoadingPlan(false))
 
     // Detectar retorno de Mercado Pago
     const rawPayment = searchParams.get('payment')
@@ -263,7 +266,8 @@ export default function DashboardPage() {
 
       {/* ── Cards rápidas ── */}
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: 16, marginBottom: 28 }}>
-        {[
+        {loadingPlan && [1,2,3,4].map(i => <DashboardCardSkeleton key={i}/>)}
+        {!loadingPlan && [
           { icon: '📦', label: 'Productos',    desc: 'Gestiona tu catálogo',  path: '/dashboard/products', color: '#7c83fd' },
           { icon: '🛒', label: 'Pedidos',      desc: 'Ver pedidos recibidos', path: '/dashboard/orders',   color: '#34d399' },
           { icon: '⚙️', label: 'Configuración', desc: 'Edita tu tienda',      path: '/dashboard/settings', color: '#fbbf24' },

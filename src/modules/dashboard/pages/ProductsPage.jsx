@@ -2,36 +2,11 @@
 import { useState, useEffect, useRef } from 'react'
 import DashboardLayout from '../components/DashboardLayout'
 import { API_URL } from '../../../app/config'
+import { ProductCardSkeleton } from '../../../components/Skeleton'
 
 const CLOUDINARY_CLOUD = import.meta.env.VITE_CLOUDINARY_CLOUD || 'dklhbrw7s'
 const CLOUDINARY_PRESET = import.meta.env.VITE_CLOUDINARY_PRESET || 'fluxy_unsigned'
 const MAX_IMAGE_SIZE = 5 * 1024 * 1024
-const MAX_IMAGES = 5
-
-function getProductImageUrls(product) {
-  if (!product) return []
-
-  let images = []
-
-  if (Array.isArray(product.images)) {
-    images = product.images
-  } else if (typeof product.images === 'string' && product.images.trim()) {
-    try {
-      const parsed = JSON.parse(product.images)
-      images = Array.isArray(parsed) ? parsed : []
-    } catch {
-      images = []
-    }
-  }
-
-  if (product.imageUrl) {
-    images = [product.imageUrl, ...images.filter(url => url !== product.imageUrl)]
-  }
-
-  return images
-    .filter(url => typeof url === 'string' && url.trim())
-    .slice(0, MAX_IMAGES)
-}
 
 function formatPrice(price) {
   const value = Number(price)
@@ -82,13 +57,14 @@ export default function ProductsPage() {
   const [saving, setSaving] = useState(false)
   const [showForm, setShowForm] = useState(false)
   const [editProduct, setEditProduct] = useState(null)
-  const [imageItems, setImageItems] = useState([])
+  const [imageFile, setImageFile] = useState(null)
+  const [imagePreview, setImagePreview] = useState(null)
   const [uploadingImage, setUploadingImage] = useState(false)
   const [error, setError] = useState('')
   const [success, setSuccess] = useState('')
   const [deleteId, setDeleteId] = useState(null)
   const fileRef = useRef()
-  const imagePreviews = imageItems.map(item => item.src)
+  const imagePreviews = imagePreview ? [imagePreview] : []
 
   const [form, setForm] = useState({
     name: '', price: '', stock: '', description: '', imageUrl: '',
@@ -114,7 +90,8 @@ export default function ProductsPage() {
   const openCreate = () => {
     setEditProduct(null)
     setForm({ name: '', price: '', stock: '', description: '', imageUrl: '' })
-    setImageItems([])
+    setImageFile(null)
+    setImagePreview(null)
     if (fileRef.current) fileRef.current.value = ''
     setError('')
     setSuccess('')
@@ -122,8 +99,6 @@ export default function ProductsPage() {
   }
 
   const openEdit = (product) => {
-    const imageUrls = getProductImageUrls(product)
-
     setEditProduct(product)
     setForm({
       name: product.name,
@@ -132,55 +107,40 @@ export default function ProductsPage() {
       description: product.description || '',
       imageUrl: product.imageUrl || '',
     })
-    setImageItems(imageUrls.map((url, index) => ({
-      id: `existing-${index}-${url}`,
-      src: url,
-      file: null,
-    })))
-    if (fileRef.current) fileRef.current.value = ''
+    setImagePreview(product.imageUrl || null)
+    setImageFile(null)
     setError('')
     setSuccess('')
     setShowForm(true)
   }
 
   const handleImageChange = (e) => {
-    const files = Array.from(e.target.files || [])
-    if (files.length === 0) return
+    const file = e.target.files[0]
+    if (!file) return
 
-    const remainingSlots = MAX_IMAGES - imageItems.length
-    if (remainingSlots <= 0 || files.length > remainingSlots) {
-      setError(`Solo puedes agregar hasta ${MAX_IMAGES} imagenes por producto.`)
+    if (!file.type.startsWith('image/')) {
+      setError('Selecciona un archivo de imagen valido.')
       e.target.value = ''
       return
     }
 
-    for (const file of files) {
-      if (!file.type.startsWith('image/')) {
-        setError('Selecciona solo archivos de imagen validos.')
-        e.target.value = ''
-        return
-      }
-
-      if (file.size > MAX_IMAGE_SIZE) {
-        setError('Una de las imagenes supera los 5MB permitidos.')
-        e.target.value = ''
-        return
-      }
+    if (file.size > MAX_IMAGE_SIZE) {
+      setError('La imagen supera los 5MB permitidos.')
+      e.target.value = ''
+      return
     }
 
-    const newItems = files.map((file, index) => ({
-      id: `file-${file.name}-${file.lastModified}-${Date.now()}-${index}`,
-      src: URL.createObjectURL(file),
-      file,
-    }))
-
     setError('')
-    setImageItems(prev => [...prev, ...newItems])
+    setImageFile(file)
+    setImagePreview(URL.createObjectURL(file))
     e.target.value = ''
   }
 
-  const removeImage = (index) => {
-    setImageItems(prev => prev.filter((_, itemIndex) => itemIndex !== index))
+  const removeImage = () => {
+    setImageFile(null)
+    setImagePreview(null)
+    setForm(prev => ({ ...prev, imageUrl: '' }))
+    if (fileRef.current) fileRef.current.value = ''
   }
 
   const handleSubmit = async (e) => {
@@ -190,9 +150,7 @@ export default function ProductsPage() {
       return
     }
 
-    const manualImageUrl = form.imageUrl.trim()
-
-    if (imageItems.length === 0 && manualImageUrl && !/^https?:\/\//i.test(manualImageUrl)) {
+    if (!imageFile && form.imageUrl && !/^https?:\/\//i.test(form.imageUrl.trim())) {
       setError('La URL de la imagen debe empezar con http:// o https://')
       return
     }
@@ -201,27 +159,14 @@ export default function ProductsPage() {
     setError('')
 
     try {
-      let imageUrls = []
-      const hasNewImages = imageItems.some(item => item.file)
+      let imageUrl = form.imageUrl.trim()
 
-      if (imageItems.length > 0) {
-        if (hasNewImages) setUploadingImage(true)
-        imageUrls = []
-
-        for (const item of imageItems) {
-          if (item.file) {
-            imageUrls.push(await uploadToCloudinary(item.file))
-          } else if (item.src) {
-            imageUrls.push(item.src)
-          }
-        }
-
-        if (hasNewImages) setUploadingImage(false)
-      } else if (manualImageUrl) {
-        imageUrls = [manualImageUrl]
+      // Subir imagen si hay una nueva
+      if (imageFile) {
+        setUploadingImage(true)
+        imageUrl = await uploadToCloudinary(imageFile)
+        setUploadingImage(false)
       }
-
-      const imageUrl = imageUrls[0] || ''
 
       const body = {
         name: form.name.trim(),
@@ -229,7 +174,6 @@ export default function ProductsPage() {
         stock: parseInt(form.stock),
         description: form.description.trim(),
         imageUrl,
-        images: JSON.stringify(imageUrls),
       }
 
       const url = editProduct
@@ -322,10 +266,10 @@ export default function ProductsPage() {
         }}>{error}</div>
       )}
 
-      {/* Loading */}
+      {/* Skeleton loader */}
       {loading && (
-        <div style={{ textAlign: 'center', padding: 60, color: 'var(--text-muted)' }}>
-          Cargando productos...
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(260px, 1fr))', gap: 20 }}>
+          {[1,2,3,4,5,6].map(i => <ProductCardSkeleton key={i}/>)}
         </div>
       )}
 
@@ -490,18 +434,18 @@ export default function ProductsPage() {
               {/* Imagen */}
               <div style={{ marginBottom: 20 }}>
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 10 }}>
-                  <label style={{ display: 'block', fontSize: 12, fontWeight: 600, color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.8px' }}>Imágenes del producto</label>
-                  <span style={{ fontSize: 11, color: 'var(--text-muted)' }}>{imagePreviews.length}/{MAX_IMAGES}</span>
+                  <label style={{ display: 'block', fontSize: 12, fontWeight: 600, color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.8px' }}>Imagen del producto</label>
+                  <span style={{ fontSize: 11, color: 'var(--text-muted)' }}>{imagePreviews.length}/1</span>
                 </div>
                 <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(90px, 1fr))', gap: 8, marginBottom: 10 }}>
-                  {imageItems.map((item, idx) => (
-                    <div key={item.id} style={{ position: 'relative', height: 88, borderRadius: 10, overflow: 'hidden', border: idx === 0 ? '2px solid rgba(124,131,253,0.6)' : '1px solid rgba(255,255,255,0.08)' }}>
-                      <img src={item.src} alt={`img-${idx}`} style={{ width: '100%', height: '100%', objectFit: 'cover' }}/>
-                      {idx === 0 && <div style={{ position: 'absolute', bottom: 0, left: 0, right: 0, background: 'rgba(124,131,253,0.85)', fontSize: 9, fontWeight: 700, color: 'white', textAlign: 'center', padding: '2px' }}>PRINCIPAL</div>}
-                      <button type="button" onClick={() => removeImage(idx)} style={{ position: 'absolute', top: 4, right: 4, width: 18, height: 18, borderRadius: '50%', background: 'rgba(248,113,113,0.9)', border: 'none', color: 'white', fontSize: 9, cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 700 }}>✕</button>
+                  {imagePreviews.map((src, idx) => (
+                    <div key={idx} style={{ position: 'relative', height: 88, borderRadius: 10, overflow: 'hidden', border: '2px solid rgba(124,131,253,0.6)' }}>
+                      <img src={src} alt="preview-producto" style={{ width: '100%', height: '100%', objectFit: 'cover' }}/>
+                      <div style={{ position: 'absolute', bottom: 0, left: 0, right: 0, background: 'rgba(124,131,253,0.85)', fontSize: 9, fontWeight: 700, color: 'white', textAlign: 'center', padding: '2px' }}>PRINCIPAL</div>
+                      <button type="button" onClick={removeImage} style={{ position: 'absolute', top: 4, right: 4, width: 18, height: 18, borderRadius: '50%', background: 'rgba(248,113,113,0.9)', border: 'none', color: 'white', fontSize: 9, cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 700 }}>✕</button>
                     </div>
                   ))}
-                  {imageItems.length < MAX_IMAGES && (
+                  {imagePreviews.length < 1 && (
                     <div onClick={() => fileRef.current?.click()} style={{ height: 88, borderRadius: 10, border: '2px dashed rgba(124,131,253,0.25)', background: 'rgba(124,131,253,0.04)', cursor: 'pointer', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: 4, transition: 'all 0.2s' }}
                       onMouseEnter={e => e.currentTarget.style.borderColor = 'rgba(124,131,253,0.5)'}
                       onMouseLeave={e => e.currentTarget.style.borderColor = 'rgba(124,131,253,0.25)'}
@@ -511,8 +455,8 @@ export default function ProductsPage() {
                     </div>
                   )}
                 </div>
-                <input ref={fileRef} type="file" accept="image/*" multiple style={{ display: 'none' }} onChange={handleImageChange}/>
-                <div style={{ fontSize: 11, color: 'var(--text-muted)', lineHeight: 1.5 }}>La primera imagen es la principal. Máximo {MAX_IMAGES} imágenes, PNG/JPG hasta 5MB c/u.</div>
+                <input ref={fileRef} type="file" accept="image/*" style={{ display: 'none' }} onChange={handleImageChange}/>
+                <div style={{ fontSize: 11, color: 'var(--text-muted)', lineHeight: 1.5 }}>PNG/JPG hasta 5MB. Tambien puedes pegar una URL abajo.</div>
               </div>
 
               <div style={{ marginBottom: 20 }}>
