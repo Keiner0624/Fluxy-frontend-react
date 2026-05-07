@@ -1,6 +1,8 @@
 // src/components/Footer.jsx
+import { useTranslation } from '../hooks/useTranslation'
 
 export default function Footer({ company }) {
+  const t = useTranslation()
   // ✅ Ocultar branding si el plan es BUSINESS
   const showBranding = company?.plan !== 'BUSINESS'
 
@@ -33,7 +35,7 @@ export default function Footer({ company }) {
                 </div>
                 {/* ✅ Solo muestra "via Fluxy" si NO es BUSINESS */}
                 {showBranding && (
-                  <div style={{ fontSize: 11, color: 'var(--text-muted, #4a4a6a)' }}>via Fluxy</div>
+                  <div style={{ fontSize: 11, color: 'var(--text-muted, #4a4a6a)' }}>{t.viaFluxy}</div>
                 )}
               </div>
             </div>
@@ -66,12 +68,12 @@ export default function Footer({ company }) {
           alignItems: 'center', flexWrap: 'wrap', gap: 12,
         }}>
           <div style={{ fontSize: 12, color: 'var(--text-muted, #4a4a6a)' }}>
-            © {new Date().getFullYear()} {company?.name}. Todos los derechos reservados.
+            © {new Date().getFullYear()} {company?.name}. {t.allRightsReserved}
           </div>
           {/* ✅ Solo muestra "Powered by Fluxy" si NO es BUSINESS */}
           {showBranding && (
             <div style={{ fontSize: 12, color: 'var(--text-muted, #4a4a6a)' }}>
-              Powered by <strong style={{ color: 'var(--primary, #7c83fd)' }}>Fluxy</strong>
+              {t.poweredBy} <strong style={{ color: 'var(--primary, #7c83fd)' }}>Fluxy</strong>
             </div>
           )}
         </div>

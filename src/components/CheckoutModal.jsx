@@ -2,8 +2,10 @@
 import { useState } from 'react'
 import { createOrder } from '../api/storeApi'
 import toast from 'react-hot-toast'
+import { useTranslation } from '../hooks/useTranslation'
 
 export default function CheckoutModal({ open, cart, total, company, onClose, onSuccess }) {
+  const t = useTranslation()
   const [name, setName]           = useState('')
   const [phone, setPhone]         = useState('')
   const [address, setAddress]     = useState('')
@@ -12,7 +14,7 @@ export default function CheckoutModal({ open, cart, total, company, onClose, onS
   const [whatsappUrl, setWhatsappUrl] = useState(null) // ← URL generada por el backend
 
   const handleConfirm = async () => {
-    if (!name.trim()) { toast.error('Por favor ingresa tu nombre'); return }
+    if (!name.trim()) { toast.error(t.fullName.replace(' *', '')); return }
     setLoading(true)
     try {
       const data = await createOrder(company.id, {
@@ -62,10 +64,10 @@ export default function CheckoutModal({ open, cart, total, company, onClose, onS
           <div style={{ textAlign: 'center', padding: '48px 36px' }}>
             <div style={{ fontSize: 52, marginBottom: 18 }}>🎉</div>
             <h2 style={{ fontFamily: "'Fraunces', serif", fontSize: 26, marginBottom: 12 }}>
-              ¡Pedido Confirmado!
+              {t.orderConfirmed}
             </h2>
             <p style={{ color: 'var(--text-muted, #4a4a6a)', fontSize: 14, marginBottom: 6 }}>
-              El vendedor fue notificado y te contactará pronto.
+              {t.sellerNotified}
             </p>
             <div style={{
               display: 'inline-block',
@@ -88,7 +90,7 @@ export default function CheckoutModal({ open, cart, total, company, onClose, onS
                     fontSize: 14, fontWeight: 600, textDecoration: 'none',
                   }}
                 >
-                  💬 Coordinar por WhatsApp
+                  {t.coordinateWhatsApp}
                 </a>
               )}
 
@@ -98,7 +100,7 @@ export default function CheckoutModal({ open, cart, total, company, onClose, onS
                 border: '1px solid rgba(255,255,255,0.08)',
                 borderRadius: 14, fontSize: 14, fontWeight: 500,
                 color: 'white', cursor: 'pointer',
-              }}>Seguir comprando</button>
+              }}>{t.keepShopping}</button>
             </div>
           </div>
         ) : (
@@ -109,7 +111,7 @@ export default function CheckoutModal({ open, cart, total, company, onClose, onS
               borderBottom: '1px solid rgba(255,255,255,0.06)',
               display: 'flex', justifyContent: 'space-between', alignItems: 'center',
             }}>
-              <h3 style={{ fontFamily: "'Fraunces', serif", fontSize: 20 }}>Confirmar pedido</h3>
+              <h3 style={{ fontFamily: "'Fraunces', serif", fontSize: 20 }}>{t.confirmOrder}</h3>
               <button onClick={handleClose} style={{
                 width: 36, height: 36, borderRadius: 10,
                 background: 'rgba(255,255,255,0.04)',
@@ -141,9 +143,9 @@ export default function CheckoutModal({ open, cart, total, company, onClose, onS
 
               {/* Campos del cliente */}
               {[
-                { label: 'Tu nombre completo *',    value: name,    onChange: setName,    placeholder: 'Ej: Juan Pérez' },
-                { label: 'Tu teléfono',             value: phone,   onChange: setPhone,   placeholder: '+51 999 999 999' },
-                { label: 'Tu dirección de entrega', value: address, onChange: setAddress, placeholder: 'Ej: Av. Ejemplo 123, Lima' },
+                { label: t.fullName,    value: name,    onChange: setName,    placeholder: t.namePlaceholder },
+                { label: t.phoneField,             value: phone,   onChange: setPhone,   placeholder: t.phonePlaceholder },
+                { label: t.deliveryAddress, value: address, onChange: setAddress, placeholder: t.addressPlaceholder },
               ].map(field => (
                 <div key={field.label} style={{ marginBottom: 16 }}>
                   <label style={{
@@ -173,7 +175,7 @@ export default function CheckoutModal({ open, cart, total, company, onClose, onS
                 marginBottom: 20, padding: '16px 0',
                 borderTop: '1px solid rgba(255,255,255,0.06)',
               }}>
-                <span style={{ fontSize: 14, color: 'var(--text-muted, #4a4a6a)' }}>Total a pagar</span>
+                <span style={{ fontSize: 14, color: 'var(--text-muted, #4a4a6a)' }}>{t.totalToPay}</span>
                 <span style={{ fontFamily: "'Fraunces', serif", fontSize: 28, fontWeight: 700 }}>
                   S/ {total.toFixed(2)}
                 </span>
@@ -186,7 +188,7 @@ export default function CheckoutModal({ open, cart, total, company, onClose, onS
                 opacity: loading ? 0.7 : 1,
                 cursor: loading ? 'not-allowed' : 'pointer', border: 'none',
               }}>
-                {loading ? 'Procesando...' : '✅ Confirmar Pedido'}
+                {loading ? t.processing : t.confirmBtn}
               </button>
             </div>
           </>

@@ -1,11 +1,13 @@
 // src/components/ProductGrid.jsx
 import { useState } from 'react'
 import ProductCard from './ProductCard'
+import { useTranslation } from '../hooks/useTranslation'
 
 export default function ProductGrid({ products, loading, error, onAddToCart, onViewDetail, company }) {
   const [filter, setFilter]   = useState('all')
   const [search, setSearch]   = useState('')
   const [focused, setFocused] = useState(false)
+  const t = useTranslation()
 
   const available = products.filter(p => p.stock > 0)
 
@@ -38,8 +40,8 @@ export default function ProductGrid({ products, loading, error, onAddToCart, onV
           {!loading && products.length > 0 && (
             <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
               {[
-                { key: 'all',       label: `Todos (${products.length})` },
-                { key: 'available', label: `Disponibles (${available.length})` },
+                { key: 'all',       label: `${t.all} (${products.length})` },
+                { key: 'available', label: `${t.available} (${available.length})` },
               ].map(f => (
                 <button key={f.key} onClick={() => setFilter(f.key)} style={{
                   padding: '7px 16px', borderRadius: 50, fontSize: 12, fontWeight: 600, cursor: 'pointer', transition: 'all 0.2s',
@@ -124,7 +126,7 @@ export default function ProductGrid({ products, loading, error, onAddToCart, onV
           <>
             {search && (
               <div style={{ fontSize: 13, color: 'rgba(255,255,255,0.3)', marginBottom: 20 }}>
-                {filtered.length} resultado{filtered.length !== 1 ? 's' : ''} para "<span style={{ color: primary }}>{search}</span>"
+                {filtered.length} {filtered.length !== 1 ? t.results_plural : t.results} para "<span style={{ color: primary }}>{search}</span>"
               </div>
             )}
             <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))', gap: 24 }}>
