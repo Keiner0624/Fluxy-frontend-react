@@ -12,6 +12,7 @@ import SettingsPage from '../modules/dashboard/pages/SettingsPage'
 import StylePage from '../modules/dashboard/pages/StylePage'
 import MetricsPage from '../modules/dashboard/pages/MetricsPage'
 import PlansPage from '../modules/dashboard/pages/PlansPage'
+import CouponsPage from '../modules/dashboard/pages/CouponsPage'
 import ForgotPasswordPage from '../modules/auth/ForgotPasswordPage'
 import ResetPasswordPage from '../modules/auth/ResetPasswordPage'
 import AdminPage from '../modules/admin/pages/AdminPage'
@@ -65,22 +66,23 @@ function PaymentReturnPage() {
 const protect = (element) => <ProtectedRoute>{element}</ProtectedRoute>
 
 export const router = createBrowserRouter([
-  { path: '/',                    element: <RootPage /> },
-  { path: '/login',               element: <LoginPage /> },
-  { path: '/register-business',   element: <RegisterBusinessPage /> },
-  { path: '/store/:slug',         element: <StorePage /> },
-  { path: '/dashboard',           element: protect(<DashboardPage />) },
-  { path: '/dashboard/metrics',   element: protect(<MetricsPage />) },
-  { path: '/dashboard/products',  element: protect(<ProductsPage />) },
-  { path: '/dashboard/orders',    element: protect(<OrdersPage />) },
-  { path: '/dashboard/settings',  element: protect(<SettingsPage />) },
-  { path: '/dashboard/style',     element: protect(<StylePage />) },
-  { path: '/payment/:status',     element: protect(<PaymentReturnPage />) },
-  { path: '/payments/:status',    element: protect(<PaymentReturnPage />) },
-  { path: '/dashboard/plans', element: protect(<PlansPage />) },
-  { path: '/forgot-password', element: <ForgotPasswordPage /> },
-  { path: '/reset-password',  element: <ResetPasswordPage /> },
-  { path: '/admin', element: <AdminPage /> },
-  { path: '/admin/login', element: <AdminLoginPage /> },
-  { path: '/terms', element: <TermsPage /> }
+  { path: '/',                      element: <RootPage /> },
+  { path: '/login',                 element: <LoginPage /> },
+  { path: '/register-business',     element: <RegisterBusinessPage /> },
+  { path: '/store/:slug',           element: <StorePage /> },
+  { path: '/dashboard',             element: protect(<DashboardPage />) },
+  { path: '/dashboard/metrics',     element: protect(<MetricsPage />) },
+  { path: '/dashboard/products',    element: protect(<ProductsPage />) },
+  { path: '/dashboard/orders',      element: protect(<OrdersPage />) },
+  { path: '/dashboard/settings',    element: protect(<SettingsPage />) },
+  { path: '/dashboard/style',       element: protect(<StylePage />) },
+  { path: '/dashboard/plans',       element: protect(<PlansPage />) },
+  { path: '/dashboard/coupons',     element: protect(<CouponsPage />) },
+  { path: '/payment/:status',       element: protect(<PaymentReturnPage />) },
+  { path: '/payments/:status',      element: protect(<PaymentReturnPage />) },
+  { path: '/forgot-password',       element: <ForgotPasswordPage /> },
+  { path: '/reset-password',        element: <ResetPasswordPage /> },
+  { path: '/admin',                 element: <AdminPage /> },
+  { path: '/admin/login',           element: <AdminLoginPage /> },
+  { path: '/terms',                 element: <TermsPage /> },
 ])
