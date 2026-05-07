@@ -74,6 +74,117 @@ export default function OrdersPage() {
     })
   }
 
+
+  const exportPDF = () => {
+    const company = JSON.parse(localStorage.getItem('company') || '{}')
+    const now = new Date().toLocaleDateString('es-PE', { day: '2-digit', month: 'long', year: 'numeric' })
+    const totalVentas = orders.filter(o => o.status === 'COMPLETED').reduce((s, o) => s + (o.total || 0), 0)
+
+    const statusLabel = { PENDING: 'Pendiente', COMPLETED: 'Completado', CANCELLED: 'Cancelado' }
+    const statusColor = { PENDING: '#d97706', COMPLETED: '#059669', CANCELLED: '#dc2626' }
+
+    const rows = (filter === 'ALL' ? orders : orders.filter(o => o.status === filter))
+      .map((o, i) => {
+        const total = o.items?.reduce((s, item) => s + item.unitPrice * item.quantity, 0) || o.total || 0
+        const date  = o.createdAt ? new Date(o.createdAt).toLocaleDateString('es-PE', { day: '2-digit', month: 'short', year: 'numeric' }) : '—'
+        const color = statusColor[o.status] || '#374151'
+        const label = statusLabel[o.status] || o.status
+        return `
+          <tr style="background:${i % 2 === 0 ? '#ffffff' : '#f9fafb'}">
+            <td style="padding:10px 14px;border-bottom:1px solid #e5e7eb;font-weight:600;color:#6366f1">#${o.id}</td>
+            <td style="padding:10px 14px;border-bottom:1px solid #e5e7eb;color:#111827;font-weight:500">${o.customerName || 'Sin nombre'}</td>
+            <td style="padding:10px 14px;border-bottom:1px solid #e5e7eb;color:#6b7280;font-size:12px">${date}</td>
+            <td style="padding:10px 14px;border-bottom:1px solid #e5e7eb;color:#374151">${o.items?.length || 0} ítem${(o.items?.length || 0) !== 1 ? 's' : ''}</td>
+            <td style="padding:10px 14px;border-bottom:1px solid #e5e7eb;font-weight:700;color:#111827;font-family:Georgia,serif">S/ ${total.toFixed(2)}</td>
+            <td style="padding:10px 14px;border-bottom:1px solid #e5e7eb">
+              <span style="background:${color}18;color:${color};border:1px solid ${color}40;border-radius:20px;padding:3px 10px;font-size:11px;font-weight:600">${label}</span>
+            </td>
+            ${o.customerPhone ? `<td style="padding:10px 14px;border-bottom:1px solid #e5e7eb;color:#6b7280;font-size:12px">${o.customerPhone}</td>` : '<td style="padding:10px 14px;border-bottom:1px solid #e5e7eb;color:#d1d5db">—</td>'}
+          </tr>
+        `
+      }).join('')
+
+    const html = `<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8"/>
+  <title>Reporte de Pedidos — ${company.name || 'Mi Tienda'}</title>
+  <style>
+    * { margin:0; padding:0; box-sizing:border-box; }
+    body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; color:#111827; background:#fff; }
+    @media print {
+      body { print-color-adjust: exact; -webkit-print-color-adjust: exact; }
+      .no-print { display:none; }
+    }
+  </style>
+</head>
+<body>
+  <!-- Header -->
+  <div style="background:linear-gradient(135deg,#4f46e5,#7c3aed);padding:32px 40px;color:white">
+    <div style="display:flex;justify-content:space-between;align-items:flex-start">
+      <div>
+        <div style="font-size:28px;font-weight:900;letter-spacing:-0.5px;font-family:Georgia,serif">${company.name || 'Mi Tienda'}</div>
+        <div style="font-size:13px;opacity:0.8;margin-top:4px">Reporte de pedidos · Generado el ${now}</div>
+      </div>
+      <div style="text-align:right">
+        <div style="font-size:11px;opacity:0.7;text-transform:uppercase;letter-spacing:1px;margin-bottom:4px">Powered by</div>
+        <div style="font-size:18px;font-weight:900;letter-spacing:2px">FLUXY</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Stats -->
+  <div style="padding:24px 40px;background:#f8fafc;border-bottom:1px solid #e5e7eb;display:flex;gap:24px;flex-wrap:wrap">
+    ${[
+      { label: 'Total pedidos',    value: stats.total,              color: '#4f46e5' },
+      { label: 'Completados',      value: stats.completed,          color: '#059669' },
+      { label: 'Pendientes',       value: stats.pending,            color: '#d97706' },
+      { label: 'Cancelados',       value: stats.cancelled,          color: '#dc2626' },
+      { label: 'Ingresos totales', value: 'S/ ' + totalVentas.toFixed(2), color: '#4f46e5' },
+    ].map(s => `
+      <div style="background:white;border:1px solid #e5e7eb;border-radius:10px;padding:14px 20px;min-width:130px">
+        <div style="font-size:11px;color:#6b7280;text-transform:uppercase;letter-spacing:0.5px;margin-bottom:6px">${s.label}</div>
+        <div style="font-size:22px;font-weight:800;color:${s.color};font-family:Georgia,serif">${s.value}</div>
+      </div>
+    `).join('')}
+  </div>
+
+  <!-- Tabla -->
+  <div style="padding:32px 40px">
+    <div style="font-size:16px;font-weight:700;color:#111827;margin-bottom:16px">
+      Lista de pedidos ${filter !== 'ALL' ? '— ' + (statusLabel[filter] || filter) + 's' : ''}
+    </div>
+    <table style="width:100%;border-collapse:collapse;border:1px solid #e5e7eb;border-radius:12px;overflow:hidden">
+      <thead>
+        <tr style="background:#4f46e5">
+          <th style="padding:12px 14px;text-align:left;font-size:11px;font-weight:700;color:white;text-transform:uppercase;letter-spacing:0.5px">#</th>
+          <th style="padding:12px 14px;text-align:left;font-size:11px;font-weight:700;color:white;text-transform:uppercase;letter-spacing:0.5px">Cliente</th>
+          <th style="padding:12px 14px;text-align:left;font-size:11px;font-weight:700;color:white;text-transform:uppercase;letter-spacing:0.5px">Fecha</th>
+          <th style="padding:12px 14px;text-align:left;font-size:11px;font-weight:700;color:white;text-transform:uppercase;letter-spacing:0.5px">Ítems</th>
+          <th style="padding:12px 14px;text-align:left;font-size:11px;font-weight:700;color:white;text-transform:uppercase;letter-spacing:0.5px">Total</th>
+          <th style="padding:12px 14px;text-align:left;font-size:11px;font-weight:700;color:white;text-transform:uppercase;letter-spacing:0.5px">Estado</th>
+          <th style="padding:12px 14px;text-align:left;font-size:11px;font-weight:700;color:white;text-transform:uppercase;letter-spacing:0.5px">Teléfono</th>
+        </tr>
+      </thead>
+      <tbody>${rows}</tbody>
+    </table>
+  </div>
+
+  <!-- Footer -->
+  <div style="padding:20px 40px;border-top:1px solid #e5e7eb;display:flex;justify-content:space-between;align-items:center;color:#9ca3af;font-size:12px">
+    <span>${company.name || 'Mi Tienda'} · ${now}</span>
+    <span>fluxy.com · Reporte generado automáticamente</span>
+  </div>
+
+  <script>window.onload = () => window.print()</script>
+</body>
+</html>`
+
+    const win = window.open('', '_blank')
+    win.document.write(html)
+    win.document.close()
+  }
+
   const filtered = filter === 'ALL' ? orders : orders.filter(o => o.status === filter)
   const stats = {
     total:     orders.length,
@@ -92,9 +203,17 @@ export default function OrdersPage() {
             <h1 style={{ fontFamily: "'Fraunces', serif", fontSize: 28, fontWeight: 700, color: 'white' }}>Pedidos</h1>
             <p style={{ fontSize: 13, color: 'var(--text-muted)', marginTop: 4 }}>{orders.length} pedido{orders.length !== 1 ? 's' : ''} en total</p>
           </div>
-          <button onClick={loadOrders} style={{ display: 'flex', alignItems: 'center', gap: 8, background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.1)', borderRadius: 11, padding: '9px 16px', color: 'var(--text-soft)', fontSize: 13, cursor: 'pointer' }}>
-            🔄 Actualizar
-          </button>
+          <div style={{ display: 'flex', gap: 8 }}>
+            <button onClick={loadOrders} style={{ display: 'flex', alignItems: 'center', gap: 8, background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.1)', borderRadius: 11, padding: '9px 16px', color: 'var(--text-soft)', fontSize: 13, cursor: 'pointer' }}>
+              🔄 Actualizar
+            </button>
+            <button onClick={exportPDF} disabled={orders.length === 0} style={{ display: 'flex', alignItems: 'center', gap: 8, background: orders.length === 0 ? 'rgba(255,255,255,0.03)' : 'rgba(124,131,253,0.1)', border: '1px solid rgba(124,131,253,0.25)', borderRadius: 11, padding: '9px 16px', color: orders.length === 0 ? 'rgba(255,255,255,0.2)' : '#7c83fd', fontSize: 13, fontWeight: 600, cursor: orders.length === 0 ? 'not-allowed' : 'pointer', transition: 'all 0.2s' }}
+              onMouseEnter={e => { if (orders.length > 0) e.currentTarget.style.background = 'rgba(124,131,253,0.18)' }}
+              onMouseLeave={e => e.currentTarget.style.background = orders.length === 0 ? 'rgba(255,255,255,0.03)' : 'rgba(124,131,253,0.1)'}
+            >
+              📄 Exportar PDF
+            </button>
+          </div>
         </div>
       </div>
 
