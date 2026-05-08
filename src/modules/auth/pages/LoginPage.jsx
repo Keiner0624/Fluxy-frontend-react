@@ -1,11 +1,12 @@
 // src/modules/auth/pages/LoginPage.jsx
 import { useState } from 'react'
-import { useNavigate, Link } from 'react-router-dom'
+import { useNavigate, Link, useSearchParams } from 'react-router-dom'
 import { API_URL, buildStoreUrl } from '../../../app/config'
 import BrandLogo from '../../../components/BrandLogo'
 
 export default function LoginPage() {
   const navigate = useNavigate()
+  const [searchParams] = useSearchParams()
 
   const [form, setForm] = useState({ email: '', password: '' })
   const [loading, setLoading] = useState(false)
@@ -56,7 +57,8 @@ export default function LoginPage() {
         }))
       }
 
-      navigate('/dashboard')
+      const returnTo = searchParams.get('returnTo') || '/dashboard'
+      navigate(returnTo)
     } catch (err) {
       setError(err.message)
     } finally {
