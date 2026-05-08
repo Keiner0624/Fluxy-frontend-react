@@ -200,7 +200,7 @@ export default function ProductsPage() {
       let imageUrl = form.imageUrl.trim()
       if (imageFile) { setUploadingImage(true); imageUrl = await uploadToCloudinary(imageFile); setUploadingImage(false) }
 
-      const body = { name: form.name.trim(), price: parseFloat(form.price), stock: parseInt(form.stock), description: form.description.trim(), imageUrl, categoryId: form.categoryId || null }
+      const body = { name: form.name.trim(), price: parseFloat(form.price), stock: parseInt(form.stock), description: form.description.trim(), imageUrl, category: form.categoryId ? { id: parseInt(form.categoryId) } : null }
 
       const res = await fetch(editProduct ? `${API_URL}/products/${editProduct.id}` : `${API_URL}/products`, {
         method: editProduct ? 'PUT' : 'POST',
