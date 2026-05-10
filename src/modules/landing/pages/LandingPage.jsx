@@ -420,7 +420,7 @@ function Features() {
     { icon: '💬', title: 'WhatsApp automático', desc: 'Cuando un cliente hace un pedido, recibes un mensaje de WhatsApp con todos los detalles al instante. Solo en plan PRO.', color: '#25d366' },
     { icon: '📊', title: 'Métricas y estadísticas', desc: 'Visualiza tus ventas, productos más vendidos y evolución del negocio con gráficas en tiempo real.', color: '#34d399' },
     { icon: '🎨', title: 'Diseño personalizado', desc: 'Elige colores, gradientes y animaciones para que tu tienda refleje la identidad de tu marca.', color: '#a78bfa' },
-    { icon: '💳', title: 'Métodos de pago', desc: 'Muestra Yape, Plin, transferencia o efectivo. Tus clientes sabrán cómo pagarte antes de hacer el pedido.', color: '#fbbf24' },
+    { icon: '💳', title: 'Métodos de pago', desc: 'Muestra tus métodos de pago que aceptas en tu tienda. Tus clientes sabrán cómo pagarte antes de hacer el pedido.', color: '#fbbf24' },
     { icon: '🌐', title: 'Dominio personalizado', desc: 'Conecta tu propio dominio (mitienda.com) y proyecta una imagen 100% profesional. Plan Business.', color: '#38bdf8' },
   ]
 
