@@ -155,7 +155,7 @@ function Hero() {
         transition: 'all 0.6s ease 0.1s',
       }}>
         <div style={{ width: 6, height: 6, borderRadius: '50%', background: '#34d399', animation: 'pulse 2s infinite' }}/>
-        <span style={{ fontSize: 13, color: '#7c83fd', fontWeight: 600 }}>Plataforma de tiendas online para toda Latinoamérica 🌎</span>
+        <span style={{ fontSize: 13, color: '#7c83fd', fontWeight: 600 }}>Nueva plataforma de tiendas online para Latinoamérica 🌎</span>
       </div>
 
       {/* Título */}
@@ -168,12 +168,13 @@ function Hero() {
         opacity: mounted ? 1 : 0, transform: mounted ? 'translateY(0)' : 'translateY(30px)',
         transition: 'all 0.7s ease 0.2s',
       }}>
-        Tu tienda online,{' '}
+        Lleva tu negocio
+        {' '}
         <span style={{
           background: 'linear-gradient(135deg, #7c83fd, #a78bfa, #34d399)',
           WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent',
           backgroundClip: 'text',
-        }}>lista en minutos</span>
+        }}>al siguiente nivel</span>
       </h1>
 
       {/* Subtítulo */}
@@ -184,7 +185,7 @@ function Hero() {
         opacity: mounted ? 1 : 0, transform: mounted ? 'translateY(0)' : 'translateY(30px)',
         transition: 'all 0.7s ease 0.35s',
       }}>
-        Crea tu catálogo, recibe pedidos por WhatsApp y gestiona tu negocio desde un solo lugar. Sin complicaciones, sin código.
+        La plataforma definitiva para emprendedores latinoamericanos. Crea tu tienda online, recibe pedidos y gestiona todo desde un solo lugar. Sin complicaciones, sin código.
       </p>
 
       {/* CTAs */}
@@ -241,7 +242,7 @@ function Hero() {
           ))}
         </div>
         <div style={{ fontSize: 14, color: 'var(--text-muted)' }}>
-          <strong style={{ color: 'white' }}>Negocios crecen</strong> con nosotros
+          <strong style={{ color: 'white' }}>Plataforma nueva</strong> — sé de los primeros
         </div>
         <div style={{ display: 'flex', gap: 2 }}>
           {[1,2,3,4,5].map(i => <span key={i} style={{ color: '#fbbf24', fontSize: 16 }}>★</span>)}
@@ -407,7 +408,7 @@ function Features() {
             Todo lo que necesita tu negocio
           </h2>
           <p style={{ fontSize: 17, color: 'var(--text-soft)', maxWidth: 520, margin: '0 auto', lineHeight: 1.7 }}>
-            Una plataforma completa diseñada para emprendedores peruanos que quieren vender más sin complicaciones.
+            Una plataforma completa y confiable diseñada para emprendedores latinoamericanos que quieren vender más sin complicaciones.
           </p>
         </div>
 
@@ -509,9 +510,9 @@ function Testimonials() {
   const [ref, inView] = useInView(0.1)
 
   const testimonials = [
-    { name: 'María G.', business: 'Repostería Dulce', text: 'Antes tomaba pedidos por WhatsApp y se me perdían. Ahora todo llega organizado y mis clientes pueden ver el catálogo completo.', emoji: '👩🏽', stars: 5 },
-    { name: 'Carlos R.', business: 'Ropa Urbana CR', text: 'Empecé con el plan gratis y en una semana ya tenía ventas. El WhatsApp automático me ahorra mucho tiempo.', emoji: '🧑🏽', stars: 5 },
-    { name: 'Lucía P.', business: 'Cosmética Natural', text: 'Mis clientas pueden ver todos mis productos con fotos y precios. Ya no tengo que mandar catálogos por WhatsApp uno por uno.', emoji: '👩🏻', stars: 5 },
+    { name: 'CAFOTOGRAMA', business: 'Fotografía profesional', text: 'Fluxy me permitió tener mi catálogo online desde el primer día. Mis clientes ya pueden ver mis servicios y contactarme directamente.', emoji: '📸', stars: 5 },
+    { name: 'Zamora Store', business: 'Tienda online', text: 'Me sorprendió lo fácil que fue crear mi tienda. En minutos tenía todo configurado y listo para recibir pedidos.', emoji: '🛍️', stars: 5 },
+    { name: 'Emprendedor', business: 'Primer usuario', text: 'El panel de control es muy intuitivo. Puedo gestionar mis productos y pedidos desde el celular sin ningún problema.', emoji: '🧑🏽', stars: 5 },
   ]
 
   return (
@@ -595,7 +596,7 @@ function Pricing() {
             Elige el plan perfecto para ti
           </h2>
           <p style={{ fontSize: 16, color: 'var(--text-soft)', maxWidth: 480, margin: '0 auto' }}>
-            Empieza gratis y escala cuando tu negocio lo necesite. Sin contratos ni sorpresas.
+            Plataforma nueva con precios justos. Empieza gratis y escala cuando tu negocio lo necesite. Sin contratos ni sorpresas.
           </p>
         </div>
 
@@ -794,7 +795,7 @@ function CTASection() {
             ¿Listo para vender más?
           </h2>
           <p style={{ fontSize: 17, color: 'var(--text-soft)', lineHeight: 1.7, marginBottom: 36, maxWidth: 480, margin: '0 auto 36px' }}>
-            Únete a cientos de negocios peruanos que ya tienen su tienda online con Fluxy. Es gratis para empezar.
+            Fluxy es una plataforma nueva, confiable y en constante crecimiento. Sé parte desde el inicio y lleva tu negocio al siguiente nivel. Es gratis para empezar.
           </p>
           <div style={{ display: 'flex', gap: 14, justifyContent: 'center', flexWrap: 'wrap' }}>
             <Link to="/register-business" style={{
@@ -840,7 +841,7 @@ function Footer() {
           <div>
             <BrandLogo size={32} textSize={17} style={{ marginBottom: 16 }} />
             <p style={{ fontSize: 13, color: 'var(--text-muted)', lineHeight: 1.7, maxWidth: 240 }}>
-              La plataforma de tiendas online para emprendedores latinoamericanos. Disponible en 11 países.
+              Plataforma nueva y confiable para emprendedores latinoamericanos. Disponible en 11 países y en constante crecimiento.
             </p>
           </div>
           <div>
@@ -875,7 +876,7 @@ function Footer() {
             © {new Date().getFullYear()} Fluxy. Todos los derechos reservados.
           </div>
           <div style={{ fontSize: 13, color: 'var(--text-muted)' }}>
-            Hecho con ❤️ para toda Latinoamérica 🌎
+            Hecho con ❤️ para emprendedores latinoamericanos 🌎
           </div>
         </div>
       </div>
