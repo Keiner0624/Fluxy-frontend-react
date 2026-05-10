@@ -276,7 +276,7 @@ function Hero() {
               flex: 1, background: 'rgba(255,255,255,0.04)', borderRadius: 6,
               padding: '4px 12px', fontSize: 11, color: 'var(--text-muted)',
               textAlign: 'center',
-            }}>fluxyweb.vercel.app/dashboard</div>
+            }}>fluxyweb.com/dashboard</div>
           </div>
 
           {/* Dashboard preview */}
@@ -346,9 +346,12 @@ function Hero() {
 // ─── Stats ────────────────────────────────────────────────────────────────────
 function Stats() {
   const [ref, inView] = useInView()
-  const s1 = useCounter(500, 2000, inView)
-  const s2 = useCounter(98, 1500, inView)
-  const s3 = useCounter(3, 1000, inView)
+
+  const stats = [
+    { value: '100%', label: 'Gratis para empezar', sub: 'Sin tarjeta de crédito' },
+    { value: '3 min', label: 'Para crear tu tienda', sub: 'Sin conocimientos técnicos' },
+    { value: '11', label: 'Países disponibles', sub: 'En toda Latinoamérica' },
+  ]
 
   return (
     <section ref={ref} style={{
@@ -357,12 +360,13 @@ function Stats() {
       borderBottom: '1px solid rgba(255,255,255,0.04)',
     }}>
       <div style={{ maxWidth: 1000, margin: '0 auto', display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: 40 }}>
-        {[
-          { value: `+${s1}`, label: 'Negocios activos', sub: 'y creciendo cada día' },
-          { value: `${s2}%`, label: 'Satisfacción', sub: 'de nuestros vendedores' },
-          { value: `${s3} min`, label: 'Para crear tu tienda', sub: 'sin conocimientos técnicos' },
-        ].map((stat, i) => (
-          <div key={i} style={{ textAlign: 'center' }}>
+        {stats.map((stat, i) => (
+          <div key={i} style={{
+            textAlign: 'center',
+            opacity: inView ? 1 : 0,
+            transform: inView ? 'translateY(0)' : 'translateY(20px)',
+            transition: `all 0.6s ease ${i * 0.15}s`,
+          }}>
             <div style={{
               fontFamily: "'Fraunces', serif",
               fontSize: 48, fontWeight: 900,
