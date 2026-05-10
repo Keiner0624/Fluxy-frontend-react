@@ -279,13 +279,21 @@ function Hero() {
             }}>fluxyweb.com/dashboard</div>
           </div>
 
-          {/* Dashboard preview */}
-          <div style={{ padding: '24px', display: 'grid', gridTemplateColumns: '200px 1fr', gap: 20, minHeight: 320 }}>
+          {/* Dashboard preview — responsive */}
+          <style>{`
+            @media (max-width: 600px) {
+              .dash-sidebar { display: none !important; }
+              .dash-grid { grid-template-columns: 1fr !important; padding: 14px !important; }
+              .dash-stat { padding: 10px !important; }
+              .dash-stat-val { font-size: 14px !important; }
+            }
+          `}</style>
+          <div className="dash-grid" style={{ padding: '20px', display: 'grid', gridTemplateColumns: '180px 1fr', gap: 16, minHeight: 280 }}>
             {/* Sidebar */}
-            <div style={{ background: 'rgba(8,8,20,0.8)', borderRadius: 12, padding: '16px 12px', display: 'flex', flexDirection: 'column', gap: 6 }}>
-              <div style={{ padding: '8px 10px', marginBottom: 8, display: 'flex', alignItems: 'center', gap: 8 }}>
-                <div style={{ width: 24, height: 24, borderRadius: 6, background: 'linear-gradient(135deg, #7c83fd, #4f46e5)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 11, fontWeight: 800, color: 'white' }}>F</div>
-                <span style={{ fontSize: 12, fontWeight: 600, color: 'white' }}>Mi Negocio</span>
+            <div className="dash-sidebar" style={{ background: 'rgba(8,8,20,0.8)', borderRadius: 12, padding: '14px 10px', display: 'flex', flexDirection: 'column', gap: 4 }}>
+              <div style={{ padding: '6px 10px', marginBottom: 6, display: 'flex', alignItems: 'center', gap: 8 }}>
+                <div style={{ width: 22, height: 22, borderRadius: 6, background: 'linear-gradient(135deg, #7c83fd, #4f46e5)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 10, fontWeight: 800, color: 'white' }}>F</div>
+                <span style={{ fontSize: 11, fontWeight: 600, color: 'white' }}>Mi Negocio</span>
               </div>
               {[
                 { icon: '📊', label: 'Resumen', active: true },
@@ -296,44 +304,63 @@ function Hero() {
               ].map(item => (
                 <div key={item.label} style={{
                   display: 'flex', alignItems: 'center', gap: 8,
-                  padding: '8px 10px', borderRadius: 8,
+                  padding: '7px 10px', borderRadius: 8,
                   background: item.active ? 'rgba(124,131,253,0.15)' : 'transparent',
                   border: item.active ? '1px solid rgba(124,131,253,0.2)' : '1px solid transparent',
                 }}>
-                  <span style={{ fontSize: 13 }}>{item.icon}</span>
-                  <span style={{ fontSize: 12, color: item.active ? '#7c83fd' : 'rgba(255,255,255,0.4)' }}>{item.label}</span>
+                  <span style={{ fontSize: 12 }}>{item.icon}</span>
+                  <span style={{ fontSize: 11, color: item.active ? '#7c83fd' : 'rgba(255,255,255,0.4)' }}>{item.label}</span>
                 </div>
               ))}
             </div>
 
             {/* Main content */}
-            <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
               {/* Stats */}
-              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 12 }}>
+              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 8 }}>
                 {[
                   { label: 'Ventas', value: 'S/ 2,840', color: '#7c83fd', icon: '💰' },
                   { label: 'Pedidos', value: '47', color: '#34d399', icon: '🛒' },
                   { label: 'Productos', value: '23', color: '#fbbf24', icon: '📦' },
                 ].map(stat => (
-                  <div key={stat.label} style={{
+                  <div className="dash-stat" key={stat.label} style={{
                     background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.06)',
-                    borderRadius: 10, padding: '12px',
+                    borderRadius: 10, padding: '10px 8px',
                   }}>
-                    <div style={{ fontSize: 16, marginBottom: 6 }}>{stat.icon}</div>
-                    <div style={{ fontFamily: "'Fraunces', serif", fontSize: 18, fontWeight: 700, color: stat.color }}>{stat.value}</div>
-                    <div style={{ fontSize: 10, color: 'rgba(255,255,255,0.35)' }}>{stat.label}</div>
+                    <div style={{ fontSize: 14, marginBottom: 4 }}>{stat.icon}</div>
+                    <div className="dash-stat-val" style={{ fontFamily: "'Fraunces', serif", fontSize: 16, fontWeight: 700, color: stat.color }}>{stat.value}</div>
+                    <div style={{ fontSize: 9, color: 'rgba(255,255,255,0.35)' }}>{stat.label}</div>
                   </div>
                 ))}
               </div>
 
               {/* Chart simulado */}
-              <div style={{ background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.06)', borderRadius: 10, padding: '14px', flex: 1 }}>
-                <div style={{ fontSize: 11, color: 'rgba(255,255,255,0.4)', marginBottom: 12 }}>Ventas últimos 7 días</div>
-                <div style={{ display: 'flex', alignItems: 'flex-end', gap: 6, height: 60 }}>
+              <div style={{ background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.06)', borderRadius: 10, padding: '12px', flex: 1 }}>
+                <div style={{ fontSize: 10, color: 'rgba(255,255,255,0.4)', marginBottom: 10 }}>Ventas últimos 7 días</div>
+                <div style={{ display: 'flex', alignItems: 'flex-end', gap: 4, height: 50 }}>
                   {[40, 65, 45, 80, 55, 90, 70].map((h, i) => (
-                    <div key={i} style={{ flex: 1, height: `${h}%`, borderRadius: '4px 4px 0 0', background: `linear-gradient(to top, #7c83fd, #4f46e5)`, opacity: 0.7 + (i * 0.04) }}/>
+                    <div key={i} style={{ flex: 1, height: `${h}%`, borderRadius: '3px 3px 0 0', background: 'linear-gradient(to top, #7c83fd, #4f46e5)', opacity: 0.7 + (i * 0.04) }}/>
                   ))}
                 </div>
+              </div>
+
+              {/* Nav pills móvil — solo visible en mobile */}
+              <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap' }}>
+                {[
+                  { icon: '📊', label: 'Resumen', active: true },
+                  { icon: '📦', label: 'Productos' },
+                  { icon: '🛒', label: 'Pedidos' },
+                ].map(item => (
+                  <div key={item.label} style={{
+                    display: 'flex', alignItems: 'center', gap: 5,
+                    padding: '5px 10px', borderRadius: 20, fontSize: 10,
+                    background: item.active ? 'rgba(124,131,253,0.15)' : 'rgba(255,255,255,0.04)',
+                    border: item.active ? '1px solid rgba(124,131,253,0.3)' : '1px solid rgba(255,255,255,0.06)',
+                    color: item.active ? '#7c83fd' : 'rgba(255,255,255,0.4)',
+                  }}>
+                    <span>{item.icon}</span> {item.label}
+                  </div>
+                ))}
               </div>
             </div>
           </div>
