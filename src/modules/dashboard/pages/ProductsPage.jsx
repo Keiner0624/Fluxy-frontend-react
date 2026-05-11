@@ -27,6 +27,122 @@ function getToken() { return localStorage.getItem('token') || '' }
 
 const EMOJI_OPTIONS = ['📦','🍕','🍔','🍣','☕','🍰','👕','👗','👟','💄','📱','💻','🎮','🛋️','🌸','💊','🏋️','📚','🎵','🧴','🐾','🌿']
 
+function EmojiSelect({ value, onChange, compact = false }) {
+  const [open, setOpen] = useState(false)
+  const wrapRef = useRef(null)
+
+  useEffect(() => {
+    if (!open) return
+
+    const handleClick = (event) => {
+      if (!wrapRef.current?.contains(event.target)) setOpen(false)
+    }
+    const handleKey = (event) => {
+      if (event.key === 'Escape') setOpen(false)
+    }
+
+    document.addEventListener('mousedown', handleClick)
+    document.addEventListener('keydown', handleKey)
+    return () => {
+      document.removeEventListener('mousedown', handleClick)
+      document.removeEventListener('keydown', handleKey)
+    }
+  }, [open])
+
+  return (
+    <div ref={wrapRef} style={{ position: 'relative', flexShrink: 0 }}>
+      <button
+        type="button"
+        onClick={() => setOpen(prev => !prev)}
+        aria-label="Elegir ícono de categoría"
+        aria-expanded={open}
+        style={{
+          width: compact ? 46 : 60,
+          height: compact ? 38 : 44,
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          gap: 5,
+          background: open ? 'rgba(124,131,253,0.14)' : 'rgba(255,255,255,0.04)',
+          border: open ? '1px solid rgba(124,131,253,0.45)' : '1px solid rgba(255,255,255,0.08)',
+          borderRadius: compact ? 9 : 11,
+          color: 'white',
+          cursor: 'pointer',
+          boxShadow: open ? '0 0 0 3px rgba(124,131,253,0.08)' : 'none',
+          transition: 'all 0.18s ease',
+        }}
+      >
+        <span style={{ fontSize: compact ? 17 : 19, lineHeight: 1 }}>{value || '📦'}</span>
+        <span style={{ fontSize: 11, color: 'rgba(255,255,255,0.45)', transform: open ? 'rotate(180deg)' : 'rotate(0)', transition: 'transform 0.18s ease' }}>⌄</span>
+      </button>
+
+      {open && (
+        <div
+          style={{
+            position: 'absolute',
+            top: compact ? 44 : 50,
+            left: 0,
+            zIndex: 20,
+            width: 252,
+            display: 'grid',
+            gridTemplateColumns: 'repeat(6, 1fr)',
+            gap: 6,
+            padding: 10,
+            background: 'rgba(12,12,28,0.98)',
+            border: '1px solid rgba(124,131,253,0.25)',
+            borderRadius: 14,
+            boxShadow: '0 18px 48px rgba(0,0,0,0.55), 0 0 0 1px rgba(255,255,255,0.03) inset',
+            backdropFilter: 'blur(14px)',
+          }}
+        >
+          {EMOJI_OPTIONS.map(emoji => {
+            const selected = emoji === value
+            return (
+              <button
+                key={emoji}
+                type="button"
+                onClick={() => {
+                  onChange(emoji)
+                  setOpen(false)
+                }}
+                aria-label={`Usar ${emoji}`}
+                style={{
+                  width: 32,
+                  height: 32,
+                  borderRadius: 9,
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  background: selected ? 'rgba(124,131,253,0.22)' : 'rgba(255,255,255,0.04)',
+                  border: selected ? '1px solid rgba(124,131,253,0.55)' : '1px solid rgba(255,255,255,0.06)',
+                  color: 'white',
+                  fontSize: 17,
+                  cursor: 'pointer',
+                  transition: 'all 0.14s ease',
+                }}
+                onMouseEnter={e => {
+                  if (!selected) {
+                    e.currentTarget.style.background = 'rgba(255,255,255,0.09)'
+                    e.currentTarget.style.borderColor = 'rgba(255,255,255,0.14)'
+                  }
+                }}
+                onMouseLeave={e => {
+                  if (!selected) {
+                    e.currentTarget.style.background = 'rgba(255,255,255,0.04)'
+                    e.currentTarget.style.borderColor = 'rgba(255,255,255,0.06)'
+                  }
+                }}
+              >
+                {emoji}
+              </button>
+            )
+          })}
+        </div>
+      )}
+    </div>
+  )
+}
+
 // ─── Modal gestión de categorías ─────────────────────────────────────────────
 function CategoriesModal({ onClose, categories, setCategories }) {
   const [newName, setNewName]   = useState('')
@@ -81,9 +197,7 @@ function CategoriesModal({ onClose, categories, setCategories }) {
           <div style={{ marginBottom: 20 }}>
             <div style={{ fontSize: 11, color: 'var(--text-muted)', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.8px', marginBottom: 10 }}>Nueva categoría</div>
             <div style={{ display: 'flex', gap: 8, marginBottom: 10 }}>
-              <select value={newEmoji} onChange={e => setNewEmoji(e.target.value)} style={{ background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.08)', borderRadius: 10, padding: '10px 12px', color: 'white', fontSize: 18, outline: 'none', cursor: 'pointer' }}>
-                {EMOJI_OPTIONS.map(e => <option key={e} value={e}>{e}</option>)}
-              </select>
+              <EmojiSelect value={newEmoji} onChange={setNewEmoji} />
               <input value={newName} onChange={e => setNewName(e.target.value)} placeholder="Nombre de la categoría" style={inputStyle} onKeyDown={e => e.key === 'Enter' && handleCreate()}
                 onFocus={e => e.target.style.borderColor = 'rgba(124,131,253,0.5)'}
                 onBlur={e => e.target.style.borderColor = 'rgba(255,255,255,0.08)'}
@@ -106,9 +220,7 @@ function CategoriesModal({ onClose, categories, setCategories }) {
                 <div key={cat.id} style={{ display: 'flex', alignItems: 'center', gap: 10, background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.06)', borderRadius: 12, padding: '10px 14px' }}>
                   {editId === cat.id ? (
                     <>
-                      <select value={editEmoji} onChange={e => setEditEmoji(e.target.value)} style={{ background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.08)', borderRadius: 8, padding: '6px 8px', color: 'white', fontSize: 16, outline: 'none' }}>
-                        {EMOJI_OPTIONS.map(e => <option key={e} value={e}>{e}</option>)}
-                      </select>
+                      <EmojiSelect value={editEmoji} onChange={setEditEmoji} compact />
                       <input value={editName} onChange={e => setEditName(e.target.value)} style={{ flex: 1, background: 'rgba(255,255,255,0.06)', border: '1px solid rgba(124,131,253,0.4)', borderRadius: 8, padding: '6px 10px', color: 'white', fontSize: 13, outline: 'none', fontFamily: 'DM Sans, sans-serif' }}
                         onKeyDown={e => e.key === 'Enter' && handleEdit(cat.id)}
                       />
