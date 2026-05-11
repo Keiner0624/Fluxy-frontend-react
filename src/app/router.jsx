@@ -19,7 +19,7 @@ import AdminPage from '../modules/admin/pages/AdminPage'
 import AdminLoginPage from '../modules/admin/pages/AdminLoginPage'
 import TermsPage from '../modules/landing/pages/TermsPage'
 import CategoryPanel from '../components/CategoryPanel'
-import NotFoundPage from '../pages/NotFoundPage'
+import NotFoundPage from '../modules/dashboard/pages/NotFoundPage'
 
 const PAYMENT_STATUS_MAP = {
   approved:     'success',
