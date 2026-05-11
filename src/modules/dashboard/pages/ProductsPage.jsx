@@ -34,35 +34,17 @@ function getPlan() {
 
 // ─── Generador de descripción con IA ────────────────────────────────────────
 async function generateDescription({ name, price, category }) {
-  const prompt = `Eres un experto en copywriting para e-commerce latinoamericano.
-Genera una descripción atractiva y profesional para este producto:
-
-- Nombre: ${name}
-- Precio: S/ ${price || ''}
-- Categoría: ${category || 'general'}
-
-Requisitos:
-- Máximo 2 oraciones
-- Tono cercano y persuasivo
-- Resalta beneficios, no características técnicas
-- Sin emojis
-- En español
-
-Responde SOLO con la descripción, sin comillas ni explicaciones.`
-
-  const res = await fetch('https://api.anthropic.com/v1/messages', {
+  const res = await fetch(`${API_URL}/ai/describe`, {
     method:  'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({
-      model:      'claude-sonnet-4-20250514',
-      max_tokens: 150,
-      messages:   [{ role: 'user', content: prompt }],
-    }),
+    headers: {
+      'Content-Type': 'application/json',
+      Authorization:  `Bearer ${getToken()}`,
+    },
+    body: JSON.stringify({ name, price, category }),
   })
-
   const data = await res.json()
-  if (!res.ok) throw new Error(data?.error?.message || 'Error al generar descripción')
-  return data.content?.[0]?.text?.trim() || ''
+  if (!res.ok) throw new Error(data?.message || 'Error al generar descripción')
+  return data.description || ''
 }
 
 const EMOJI_OPTIONS = ['📦','🍕','🍔','🍣','☕','🍰','👕','👗','👟','💄','📱','💻','🎮','🛋️','🌸','💊','🏋️','📚','🎵','🧴','🐾','🌿']
