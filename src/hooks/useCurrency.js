@@ -36,7 +36,8 @@ export function useCurrency() {
       try {
         const { data, timestamp } = JSON.parse(cached)
         if (Date.now() - timestamp < 24 * 60 * 60 * 1000) {
-          setCurrencyInfo(data)
+          const config = CURRENCY_CONFIG[data.countryCode] || CURRENCY_CONFIG[data.currency] || DEFAULT_CURRENCY
+          setCurrencyInfo({ ...config, countryCode: data.countryCode || 'PE' })
           setLoading(false)
           return
         }
@@ -63,13 +64,13 @@ export function useCurrency() {
   }, [])
 
   const formatProPrice = (months = 1) => {
-    if (!currencyInfo) return 'S/ 19'
+    if (!currencyInfo) return 'S/ 39'
     const price = currencyInfo.proPrize * months
     return `${currencyInfo.symbol} ${formatPrice(price, currencyInfo.currency)}`
   }
 
   const formatBusinessPrice = (months = 1) => {
-    if (!currencyInfo) return 'S/ 39'
+    if (!currencyInfo) return 'S/ 59'
     const price = currencyInfo.businessPrice * months
     return `${currencyInfo.symbol} ${formatPrice(price, currencyInfo.currency)}`
   }

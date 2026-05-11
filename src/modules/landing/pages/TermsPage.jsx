@@ -32,8 +32,8 @@ El servicio incluye:
       content: `Fluxy ofrece tres planes de suscripción:
 
 • Plan FREE: Gratuito, con hasta 10 productos y funciones básicas.
-• Plan PRO: S/ 19.00 soles peruanos por mes, con hasta 100 productos y funciones avanzadas.
-• Plan BUSINESS: S/ 39.00 soles peruanos por mes, con productos ilimitados y todas las funciones.
+• Plan PRO: S/ 39.00 soles peruanos por mes, con hasta 100 productos y funciones avanzadas.
+• Plan BUSINESS: S/ 59.00 soles peruanos por mes, con productos ilimitados y todas las funciones.
 
 Los pagos se procesan a través de Mercado Pago. Al completar un pago, acepta los términos y condiciones de Mercado Pago. Fluxy no almacena datos de tarjetas de crédito ni información financiera sensible.
 

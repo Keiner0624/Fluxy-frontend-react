@@ -237,8 +237,8 @@ export default function AdminPage() {
           <div className="admin-grid" style={{ display:'grid', gridTemplateColumns:'repeat(auto-fit, minmax(180px,1fr))', gap:12, marginBottom:20 }}>
             <StatCard icon="🏪" label="Vendedores" value={metrics.totalVendedores} sub={`${metrics.nuevosSemana} esta semana`} trend={metrics.nuevosSemana} color="#7c83fd" sparkData={sparkV}/>
             <StatCard icon="💰" label="Ingresos estimados" value={`S/ ${metrics.ingresosTotales?.toFixed(0)}`} sub="planes activos" color="#fbbf24" sparkData={sparkR}/>
-            <StatCard icon="⚡" label="Plan Pro" value={metrics.planPro} sub={`S/ ${(metrics.planPro*19).toFixed(0)}/mes`} color="#7c83fd"/>
-            <StatCard icon="🚀" label="Plan Business" value={metrics.planBusiness} sub={`S/ ${(metrics.planBusiness*39).toFixed(0)}/mes`} color="#34d399"/>
+            <StatCard icon="⚡" label="Plan Pro" value={metrics.planPro} sub={`S/ ${(metrics.planPro*39).toFixed(0)}/mes`} color="#7c83fd"/>
+            <StatCard icon="🚀" label="Plan Business" value={metrics.planBusiness} sub={`S/ ${(metrics.planBusiness*59).toFixed(0)}/mes`} color="#34d399"/>
             <StatCard icon="🛒" label="Pedidos totales" value={metrics.totalPedidos} color="#38bdf8"/>
             <StatCard icon="🆓" label="Plan Free" value={metrics.planFree} color="#9ca3af"/>
           </div>
@@ -380,7 +380,7 @@ export default function AdminPage() {
             <div style={{ marginBottom:14 }}>
               <label style={{ fontSize:10,fontWeight:700,color:'rgba(255,255,255,0.25)',textTransform:'uppercase',letterSpacing:'1px',display:'block',marginBottom:10 }}>Plan</label>
               <div style={{ display:'flex',flexDirection:'column',gap:7 }}>
-                {[{value:'FREE',label:'FREE',sub:'Gratis',color:'#9ca3af'},{value:'PRO',label:'PRO',sub:'S/19/mes',color:'#7c83fd'},{value:'BUSINESS',label:'BUSINESS',sub:'S/39/mes',color:'#34d399'}].map(p=>(
+                {[{value:'FREE',label:'FREE',sub:'Gratis',color:'#9ca3af'},{value:'PRO',label:'PRO',sub:'S/39/mes',color:'#7c83fd'},{value:'BUSINESS',label:'BUSINESS',sub:'S/59/mes',color:'#34d399'}].map(p=>(
                   <button key={p.value} type="button" onClick={()=>setNewPlan(p.value)} style={{ display:'flex',alignItems:'center',justifyContent:'space-between',padding:'10px 13px',borderRadius:10,cursor:'pointer',transition:'all 0.15s',background:newPlan===p.value?`${p.color}15`:'rgba(255,255,255,0.03)',border:newPlan===p.value?`1px solid ${p.color}45`:'1px solid rgba(255,255,255,0.06)' }}>
                     <div style={{ display:'flex',alignItems:'center',gap:9 }}>
                       <div style={{ width:7,height:7,borderRadius:'50%',background:p.color }}/>
