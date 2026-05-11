@@ -111,6 +111,10 @@ export default function RegisterBusinessPage() {
       })
     } catch (_) {}
     finally {
+      try {
+        const user = JSON.parse(localStorage.getItem('user') || '{}')
+        localStorage.setItem('user', JSON.stringify({ ...user, ...profile }))
+      } catch {}
       setSavingProfile(false)
       navigate('/dashboard')
     }

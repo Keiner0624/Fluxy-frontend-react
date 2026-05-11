@@ -39,6 +39,7 @@ export default function LoginPage() {
 
       const data = await res.json()
       localStorage.setItem('token', data.token)
+      if (data.user) localStorage.setItem('user', JSON.stringify(data.user))
 
       const companyRes = await fetch(`${API_URL}/companies/my-company`, {
         headers: { Authorization: `Bearer ${data.token}` },

@@ -19,6 +19,26 @@ const BIRTHDAY_SHOWN_KEY = 'fluxy_birthday_shown'
 function getToken() { return localStorage.getItem('token') || '' }
 function wait(ms)   { return new Promise(r => setTimeout(r, ms)) }
 
+function readStorage(key) {
+  try { return JSON.parse(localStorage.getItem(key) || '{}') }
+  catch { return {} }
+}
+
+function firstWord(value) {
+  return String(value || '').trim().split(/\s+/)[0] || ''
+}
+
+function getUserFirstName(user) {
+  return user.firstName || firstWord(user.fullName || user.name)
+}
+
+function normalizeCompany(company = {}) {
+  return {
+    ...company,
+    name: company.name || company.companyName || company.businessName || company.businesName || '',
+  }
+}
+
 async function refreshSellerAccount(expectedPlan) {
   for (let attempt = 0; attempt < 4; attempt++) {
     if (attempt > 0) await wait(1200)
@@ -28,8 +48,8 @@ async function refreshSellerAccount(expectedPlan) {
     const planName  = data.planName  || expectedPlan
     const planLimit = data.planLimit
     if (planName || planLimit) {
-      const company  = JSON.parse(localStorage.getItem('company') || '{}')
-      const user     = JSON.parse(localStorage.getItem('user')    || '{}')
+      const company  = readStorage('company')
+      const user     = readStorage('user')
       const planData = {
         ...(planName  ? { planName  } : {}),
         ...(planLimit ? { planLimit } : {}),
@@ -48,10 +68,10 @@ export default function DashboardPage() {
   const [plan,           setPlan]           = useState('FREE')
   const [daysLeft,       setDaysLeft]       = useState(null)
   const [loadingPlan,    setLoadingPlan]    = useState(true)
-  const [firstName,      setFirstName]      = useState('')
+  const [firstName,      setFirstName]      = useState(() => getUserFirstName(readStorage('user')))
+  const [company,        setCompany]        = useState(() => normalizeCompany(readStorage('company')))
   const [showBirthday,   setShowBirthday]   = useState(false)
 
-  const company  = JSON.parse(localStorage.getItem('company') || '{}')
   const storeUrl = getCompanyStoreUrl(company)
 
   useEffect(() => {
@@ -60,7 +80,11 @@ export default function DashboardPage() {
       .then(r => r.json())
       .then(d => {
         if (d.planName)   setPlan(d.planName)
-        if (d.firstName)  setFirstName(d.firstName)
+        const nextFirstName = getUserFirstName(d)
+        if (nextFirstName) {
+          setFirstName(nextFirstName)
+          localStorage.setItem('user', JSON.stringify({ ...readStorage('user'), ...d, firstName: nextFirstName }))
+        }
 
         // Modal de cumpleaños — solo una vez por sesión
         if (d.isBirthday && !sessionStorage.getItem(BIRTHDAY_SHOWN_KEY)) {
@@ -75,6 +99,16 @@ export default function DashboardPage() {
       })
       .catch(() => {})
       .finally(() => setLoadingPlan(false))
+
+    fetch(`${API_URL}/companies/my-company`, { headers: { Authorization: `Bearer ${getToken()}` } })
+      .then(r => (r.ok ? r.json() : null))
+      .then(d => {
+        if (!d) return
+        const nextCompany = normalizeCompany({ ...readStorage('company'), ...d })
+        localStorage.setItem('company', JSON.stringify({ ...nextCompany, storeUrl: getCompanyStoreUrl(nextCompany) }))
+        setCompany(nextCompany)
+      })
+      .catch(() => {})
 
     // Detectar retorno de Mercado Pago
     const rawPayment = searchParams.get('payment')
