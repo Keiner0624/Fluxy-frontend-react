@@ -1,5 +1,4 @@
 // src/app/router.jsx
-import NotFoundPage from '../pages/NotFoundPage'
 import { Navigate, createBrowserRouter, useParams, useSearchParams } from 'react-router-dom'
 import ProtectedRoute from './ProtectedRoute'
 import LandingPage from '../modules/landing/pages/LandingPage'
@@ -20,16 +19,13 @@ import AdminPage from '../modules/admin/pages/AdminPage'
 import AdminLoginPage from '../modules/admin/pages/AdminLoginPage'
 import TermsPage from '../modules/landing/pages/TermsPage'
 import CategoryPanel from '../components/CategoryPanel'
-import { usePushNotifications } from '../../../hooks/usePushNotifications'
-
-usePushNotifications()
-
+import NotFoundPage from '../pages/NotFoundPage'
 
 const PAYMENT_STATUS_MAP = {
-  approved: 'success',
-  rejected: 'failure',
-  cancelled: 'failure',
-  in_process: 'pending',
+  approved:     'success',
+  rejected:     'failure',
+  cancelled:    'failure',
+  in_process:   'pending',
   in_mediation: 'pending',
 }
 
@@ -61,37 +57,32 @@ function PaymentReturnPage() {
   const payment = getNormalizedPaymentStatus(searchParams, status || 'pending')
   const plan = searchParams.get('plan') || localStorage.getItem('fluxy_pending_plan_checkout') || ''
   const params = new URLSearchParams({ payment })
-
-  if (plan) {
-    params.set('plan', plan)
-  }
-
+  if (plan) params.set('plan', plan)
   return <Navigate to={`/dashboard?${params.toString()}`} replace />
 }
 
 const protect = (element) => <ProtectedRoute>{element}</ProtectedRoute>
 
 export const router = createBrowserRouter([
-  { path: '/',                      element: <RootPage /> },
-  { path: '/login',                 element: <LoginPage /> },
-  { path: '/register-business',     element: <RegisterBusinessPage /> },
-  { path: '/store/:slug',           element: <StorePage /> },
-  { path: '/dashboard',             element: protect(<DashboardPage />) },
-  { path: '/dashboard/metrics',     element: protect(<MetricsPage />) },
-  { path: '/dashboard/products',    element: protect(<ProductsPage />) },
-  { path: '/dashboard/orders',      element: protect(<OrdersPage />) },
-  { path: '/dashboard/settings',    element: protect(<SettingsPage />) },
-  { path: '/dashboard/style',       element: protect(<StylePage />) },
-  { path: '/dashboard/plans',       element: protect(<PlansPage />) },
-  { path: '/dashboard/coupons',     element: protect(<CouponsPage />) },
-  { path: '/payment/:status',       element: protect(<PaymentReturnPage />) },
-  { path: '/payments/:status',      element: protect(<PaymentReturnPage />) },
-  { path: '/forgot-password',       element: <ForgotPasswordPage /> },
-  { path: '/reset-password',        element: <ResetPasswordPage /> },
-  { path: '/admin',                 element: <AdminPage /> },
-  { path: '/admin/login',           element: <AdminLoginPage /> },
-  { path: '/terms',                 element: <TermsPage /> },
-  { path: '/categories',            element: <CategoryPanel /> }
-  { path: '/categories', element: <CategoryPanel /> },
-{ path: '*',           element: <NotFoundPage />  }  
+  { path: '/',                   element: <RootPage /> },
+  { path: '/login',              element: <LoginPage /> },
+  { path: '/register-business',  element: <RegisterBusinessPage /> },
+  { path: '/store/:slug',        element: <StorePage /> },
+  { path: '/dashboard',          element: protect(<DashboardPage />) },
+  { path: '/dashboard/metrics',  element: protect(<MetricsPage />) },
+  { path: '/dashboard/products', element: protect(<ProductsPage />) },
+  { path: '/dashboard/orders',   element: protect(<OrdersPage />) },
+  { path: '/dashboard/settings', element: protect(<SettingsPage />) },
+  { path: '/dashboard/style',    element: protect(<StylePage />) },
+  { path: '/dashboard/plans',    element: protect(<PlansPage />) },
+  { path: '/dashboard/coupons',  element: protect(<CouponsPage />) },
+  { path: '/payment/:status',    element: protect(<PaymentReturnPage />) },
+  { path: '/payments/:status',   element: protect(<PaymentReturnPage />) },
+  { path: '/forgot-password',    element: <ForgotPasswordPage /> },
+  { path: '/reset-password',     element: <ResetPasswordPage /> },
+  { path: '/admin',              element: <AdminPage /> },
+  { path: '/admin/login',        element: <AdminLoginPage /> },
+  { path: '/terms',              element: <TermsPage /> },
+  { path: '/categories',         element: <CategoryPanel /> },
+  { path: '*',                   element: <NotFoundPage /> },
 ])
