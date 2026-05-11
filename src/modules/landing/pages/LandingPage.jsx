@@ -420,7 +420,7 @@ function Features() {
     { icon: '💬', title: 'WhatsApp automático', desc: 'Cuando un cliente hace un pedido, recibes un mensaje de WhatsApp con todos los detalles al instante. Solo en plan PRO.', color: '#25d366' },
     { icon: '📊', title: 'Métricas y estadísticas', desc: 'Visualiza tus ventas, productos más vendidos y evolución del negocio con gráficas en tiempo real.', color: '#34d399' },
     { icon: '🎨', title: 'Diseño personalizado', desc: 'Elige colores, gradientes y animaciones para que tu tienda refleje la identidad de tu marca.', color: '#a78bfa' },
-    { icon: '💳', title: 'Métodos de pago', desc: 'Muestra tus métodos de pago que aceptas en tu tienda. Tus clientes sabrán cómo pagarte antes de hacer el pedido.', color: '#fbbf24' },
+    { icon: '💳', title: 'Métodos de pago', desc: 'Muestra Yape, Plin, transferencia o efectivo. Tus clientes sabrán cómo pagarte antes de hacer el pedido.', color: '#fbbf24' },
     { icon: '🌐', title: 'Dominio personalizado', desc: 'Conecta tu propio dominio (mitienda.com) y proyecta una imagen 100% profesional. Plan Business.', color: '#38bdf8' },
   ]
 
@@ -604,14 +604,14 @@ function Pricing() {
       cta: 'Empezar gratis', ctaLink: '/register-business', featured: false,
     },
     {
-      name: 'Pro', price: 'S/ 19', period: '/mes',
+      name: 'Pro', price: 'S/ 39', period: '/mes',
       color: '#7c83fd', border: 'rgba(124,131,253,0.4)',
       badge: 'Más popular',
       features: ['Hasta 100 productos', 'WhatsApp automático', 'Estadísticas completas', 'Personalización avanzada', 'Soporte por email'],
       cta: 'Empezar con Pro', ctaLink: '/register-business', featured: true,
     },
     {
-      name: 'Business', price: 'S/ 39', period: '/mes',
+      name: 'Business', price: 'S/ 59', period: '/mes',
       color: '#34d399', border: 'rgba(52,211,153,0.25)',
       features: ['Productos ilimitados', 'Todo lo del plan Pro', 'Dominio personalizado', 'Sin branding Fluxy', 'Soporte prioritario 24/7'],
       cta: 'Empezar con Business', ctaLink: '/register-business', featured: false,

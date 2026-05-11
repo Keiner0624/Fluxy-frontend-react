@@ -3,7 +3,7 @@ import { useState, useEffect } from 'react'
 
 // Configuración de monedas por país
 const CURRENCY_CONFIG = {
-  PE: { currency: 'PEN', symbol: 'S/',  proPrize: 19,     businessPrice: 39,     name: 'Perú'      },
+  PE: { currency: 'PEN', symbol: 'S/',  proPrize: 39,     businessPrice: 59,     name: 'Perú'      },
   CO: { currency: 'COP', symbol: '$',   proPrize: 75000,  businessPrice: 150000, name: 'Colombia'  },
   MX: { currency: 'MXN', symbol: '$',   proPrize: 350,    businessPrice: 700,    name: 'México'    },
   AR: { currency: 'ARS', symbol: '$',   proPrize: 15000,  businessPrice: 30000,  name: 'Argentina' },

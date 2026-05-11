@@ -36,8 +36,8 @@ const PLANS = [
   {
     key: 'PRO',
     name: 'Pro',
-    price: 19,
-    priceLabel: 'S/ 19',
+    price: 39,
+    priceLabel: 'S/ 39',
     color: '#7c83fd',
     bg: 'rgba(124,131,253,0.08)',
     border: 'rgba(124,131,253,0.30)',
@@ -64,8 +64,8 @@ const PLANS = [
   {
     key: 'BUSINESS',
     name: 'Business',
-    price: 39,
-    priceLabel: 'S/ 39',
+    price: 59,
+    priceLabel: 'S/ 59',
     color: '#34d399',
     bg: 'rgba(52,211,153,0.06)',
     border: 'rgba(52,211,153,0.25)',
