@@ -72,6 +72,8 @@ export default function DashboardPage() {
   const [company,        setCompany]        = useState(() => normalizeCompany(readStorage('company')))
   const [showBirthday,   setShowBirthday]   = useState(false)
 
+  const user        = readStorage('user')
+  const displayName = firstName || user.fullName || company.name || ''
   const storeUrl = getCompanyStoreUrl(company)
 
   useEffect(() => {
@@ -296,7 +298,7 @@ export default function DashboardPage() {
               Panel de control
             </div>
             <h1 style={{ fontFamily: "'Fraunces', serif", fontSize: 28, fontWeight: 700, color: 'white', marginBottom: 6 }}>
-              ¡Bienvenido, {firstName || 'vendedor'}! 👋
+              ¡Bienvenido, {displayName}! 👋
             </h1>
             <p style={{ fontSize: 14, color: 'var(--text-soft)' }}>
               {company.name || ''}
