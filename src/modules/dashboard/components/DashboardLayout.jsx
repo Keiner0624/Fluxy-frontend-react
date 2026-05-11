@@ -3,6 +3,7 @@ import { useState, useEffect } from 'react'
 import { Link, useNavigate, useLocation } from 'react-router-dom'
 import { getCompanyStoreUrl, API_URL } from '../../../app/config'
 import BrandLogo from '../../../components/BrandLogo'
+import { usePushNotifications } from '../../../hooks/usePushNotifications'  // ← import
 
 function getToken() { return localStorage.getItem('token') || '' }
 
@@ -30,7 +31,10 @@ export default function DashboardLayout({ children }) {
   const company  = JSON.parse(localStorage.getItem('company') || '{}') || {}
   const storeUrl = getCompanyStoreUrl(company)
   const [sidebarOpen, setSidebarOpen] = useState(false)
-  const [plan, setPlan] = useState('FREE')
+  const [plan, setPlan]               = useState('FREE')
+
+  // ── Suscribir al vendedor a push notifications ──────────────────────────
+  usePushNotifications()   // ← una sola línea, aquí dentro del componente
 
   useEffect(() => {
     if (sidebarOpen) {

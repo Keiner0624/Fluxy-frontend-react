@@ -1,4 +1,5 @@
 // src/app/router.jsx
+import NotFoundPage from '../pages/NotFoundPage'
 import { Navigate, createBrowserRouter, useParams, useSearchParams } from 'react-router-dom'
 import ProtectedRoute from './ProtectedRoute'
 import LandingPage from '../modules/landing/pages/LandingPage'
@@ -19,6 +20,10 @@ import AdminPage from '../modules/admin/pages/AdminPage'
 import AdminLoginPage from '../modules/admin/pages/AdminLoginPage'
 import TermsPage from '../modules/landing/pages/TermsPage'
 import CategoryPanel from '../components/CategoryPanel'
+import { usePushNotifications } from '../../../hooks/usePushNotifications'
+
+usePushNotifications()
+
 
 const PAYMENT_STATUS_MAP = {
   approved: 'success',
@@ -87,4 +92,6 @@ export const router = createBrowserRouter([
   { path: '/admin/login',           element: <AdminLoginPage /> },
   { path: '/terms',                 element: <TermsPage /> },
   { path: '/categories',            element: <CategoryPanel /> }
+  { path: '/categories', element: <CategoryPanel /> },
+{ path: '*',           element: <NotFoundPage />  }  
 ])
