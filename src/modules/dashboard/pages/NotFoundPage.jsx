@@ -1,7 +1,7 @@
-// src/pages/NotFoundPage.jsx
+// src/modules/dashboard/pages/NotFoundPage.jsx
 import { useNavigate } from 'react-router-dom'
 import { useEffect, useState } from 'react'
-import BrandLogo from '../components/BrandLogo'
+import BrandLogo from '../../../components/BrandLogo'
 
 export default function NotFoundPage() {
   const navigate   = useNavigate()
