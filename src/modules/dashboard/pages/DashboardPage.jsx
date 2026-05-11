@@ -113,9 +113,6 @@ export default function DashboardPage() {
     sessionStorage.setItem(BIRTHDAY_SHOWN_KEY, '1')
   }
 
-  // Nombre para el saludo: primero firstName, luego fullName, luego nombre del negocio
-  const displayName = firstName || company.name || 'vendedor'
-
   // ─── Badge plan ──────────────────────────────────────────────────────────
   const PlanBadge = () => {
     if (plan === 'BUSINESS') return (
@@ -265,10 +262,10 @@ export default function DashboardPage() {
               Panel de control
             </div>
             <h1 style={{ fontFamily: "'Fraunces', serif", fontSize: 28, fontWeight: 700, color: 'white', marginBottom: 6 }}>
-              ¡Bienvenido, {displayName}! 👋
+              ¡Bienvenido, {firstName || 'vendedor'}! 👋
             </h1>
             <p style={{ fontSize: 14, color: 'var(--text-soft)' }}>
-              Desde aquí gestionas todo tu negocio en Fluxy.
+              {company.name || ''}
             </p>
           </div>
           <PlanBadge />
