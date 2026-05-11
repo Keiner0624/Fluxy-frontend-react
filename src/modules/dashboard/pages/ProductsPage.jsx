@@ -25,28 +25,6 @@ async function uploadToCloudinary(file) {
 
 function getToken() { return localStorage.getItem('token') || '' }
 
-function getPlan() {
-  try {
-    const company = JSON.parse(localStorage.getItem('company') || '{}')
-    return company.planName || company.plan || 'FREE'
-  } catch { return 'FREE' }
-}
-
-// ─── Generador de descripción con IA ────────────────────────────────────────
-async function generateDescription({ name, price, category }) {
-  const res = await fetch(`${API_URL}/ai/describe`, {
-    method:  'POST',
-    headers: {
-      'Content-Type': 'application/json',
-      Authorization:  `Bearer ${getToken()}`,
-    },
-    body: JSON.stringify({ name, price, category }),
-  })
-  const data = await res.json()
-  if (!res.ok) throw new Error(data?.message || 'Error al generar descripción')
-  return data.description || ''
-}
-
 const EMOJI_OPTIONS = ['📦','🍕','🍔','🍣','☕','🍰','👕','👗','👟','💄','📱','💻','🎮','🛋️','🌸','💊','🏋️','📚','🎵','🧴','🐾','🌿']
 
 function EmojiSelect({ value, onChange, compact = false }) {
@@ -199,82 +177,34 @@ function CategoriesModal({ onClose, categories, setCategories }) {
 }
 
 // ─── Botón IA ────────────────────────────────────────────────────────────────
-function AIDescriptionButton({ form, categories, onGenerated }) {
-  const [loading,  setLoading]  = useState(false)
-  const [error,    setError]    = useState('')
-  const isBusiness = getPlan() === 'BUSINESS'
-
-  const categoryName = categories.find(c => String(c.id) === String(form.categoryId))?.name || ''
-
-  const handleGenerate = async () => {
-    if (!form.name.trim()) { setError('Escribe el nombre del producto primero.'); return }
-    setLoading(true); setError('')
-    try {
-      const desc = await generateDescription({ name: form.name, price: form.price, category: categoryName })
-      onGenerated(desc)
-    } catch (err) {
-      setError('No se pudo generar. Intenta de nuevo.')
-    } finally {
-      setLoading(false)
-    }
-  }
-
-  if (!isBusiness) {
-    return (
-      <div style={{
-        display: 'flex', alignItems: 'center', gap: 8,
-        background: 'rgba(52,211,153,0.06)',
-        border: '1px solid rgba(52,211,153,0.15)',
-        borderRadius: 10, padding: '8px 12px',
-        marginBottom: 8,
-      }}>
-        <span style={{ fontSize: 13 }}>🔒</span>
-        <span style={{ fontSize: 12, color: 'rgba(255,255,255,0.4)', flex: 1 }}>
-          Generador de descripciones con IA
-        </span>
-        <span style={{ fontSize: 10, fontWeight: 700, color: '#34d399', background: 'rgba(52,211,153,0.12)', border: '1px solid rgba(52,211,153,0.25)', borderRadius: 5, padding: '2px 7px', textTransform: 'uppercase' }}>
-          Business
-        </span>
-      </div>
-    )
-  }
-
+function AIDescriptionButton() {
   return (
-    <div style={{ marginBottom: 8 }}>
-      <button
-        type="button"
-        onClick={handleGenerate}
-        disabled={loading || !form.name.trim()}
-        style={{
-          display: 'flex', alignItems: 'center', gap: 8,
-          width: '100%', padding: '9px 14px',
-          background: loading ? 'rgba(52,211,153,0.06)' : 'rgba(52,211,153,0.08)',
-          border: '1px solid rgba(52,211,153,0.25)',
-          borderRadius: 10, cursor: loading || !form.name.trim() ? 'not-allowed' : 'pointer',
-          opacity: !form.name.trim() ? 0.5 : 1,
-          transition: 'all 0.2s',
-        }}
-        onMouseEnter={e => { if (!loading && form.name.trim()) e.currentTarget.style.background = 'rgba(52,211,153,0.14)' }}
-        onMouseLeave={e => e.currentTarget.style.background = 'rgba(52,211,153,0.08)'}
-      >
-        {loading ? (
-          <>
-            <span style={{ width: 14, height: 14, border: '2px solid rgba(52,211,153,0.3)', borderTopColor: '#34d399', borderRadius: '50%', display: 'inline-block', animation: 'spin 0.8s linear infinite', flexShrink: 0 }}/>
-            <span style={{ fontSize: 13, color: '#34d399' }}>Generando descripción...</span>
-          </>
-        ) : (
-          <>
-            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#34d399" strokeWidth="2" style={{ flexShrink: 0 }}>
-              <path d="M12 2L2 7l10 5 10-5-10-5z"/>
-              <path d="M2 17l10 5 10-5"/>
-              <path d="M2 12l10 5 10-5"/>
-            </svg>
-            <span style={{ fontSize: 13, color: '#34d399', fontWeight: 500 }}>Generar descripción con IA</span>
-            <span style={{ marginLeft: 'auto', fontSize: 10, fontWeight: 700, color: '#34d399', background: 'rgba(52,211,153,0.12)', border: '1px solid rgba(52,211,153,0.2)', borderRadius: 5, padding: '1px 6px' }}>Business</span>
-          </>
-        )}
-      </button>
-      {error && <div style={{ fontSize: 12, color: '#f87171', marginTop: 5 }}>{error}</div>}
+    <div style={{
+      display: 'flex', alignItems: 'center', gap: 8,
+      background: 'rgba(255,255,255,0.03)',
+      border: '1px solid rgba(255,255,255,0.07)',
+      borderRadius: 10, padding: '9px 14px',
+      marginBottom: 8, cursor: 'not-allowed',
+      opacity: 0.6,
+    }}>
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="rgba(255,255,255,0.3)" strokeWidth="2">
+        <path d="M12 2L2 7l10 5 10-5-10-5z"/>
+        <path d="M2 17l10 5 10-5"/>
+        <path d="M2 12l10 5 10-5"/>
+      </svg>
+      <span style={{ fontSize: 13, color: 'rgba(255,255,255,0.3)', flex: 1 }}>
+        Generar descripción con IA
+      </span>
+      <span style={{
+        fontSize: 10, fontWeight: 700,
+        color: '#fbbf24',
+        background: 'rgba(251,191,36,0.1)',
+        border: '1px solid rgba(251,191,36,0.2)',
+        borderRadius: 5, padding: '2px 7px',
+        whiteSpace: 'nowrap',
+      }}>
+        Próximamente
+      </span>
     </div>
   )
 }
