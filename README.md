@@ -1,16 +1,40 @@
-# React + Vite
+# Fluxy Frontend
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+Frontend de **Fluxy**, una plataforma SaaS para crear tiendas online de forma simple.  
+Esta aplicación permite a los clientes visualizar productos, agregar artículos al carrito y realizar pedidos desde una interfaz web moderna.
 
-Currently, two official plugins are available:
+El frontend está desarrollado con **React + Vite**.
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Oxc](https://oxc.rs)
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/)
+## Tecnologías utilizadas
 
-## React Compiler
+- React
+- Vite
+- JavaScript
+- React Router
+- Axios
+- CSS
+- Vercel
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+## Características principales
 
-## Expanding the ESLint configuration
+- Landing page de Fluxy
+- Vista pública de tienda
+- Catálogo de productos
+- Detalle de productos
+- Carrito de compras
+- Creación de pedidos
+- Integración con backend en Spring Boot
+- Soporte para tiendas por `slug`
+- Diseño responsive para móviles y escritorio
 
-If you are developing a production application, we recommend using TypeScript with type-aware lint rules enabled. Check out the [TS template](https://github.com/vitejs/vite/tree/main/packages/create-vite/template-react-ts) for information on how to integrate TypeScript and [`typescript-eslint`](https://typescript-eslint.io) in your project.
+## Estructura general del proyecto
+
+```bash
+src
+├── assets
+├── components
+├── pages
+├── services
+├── routes
+├── styles
+└── main.jsx
