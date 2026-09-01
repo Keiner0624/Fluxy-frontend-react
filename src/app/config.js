@@ -4,7 +4,7 @@ const RUNTIME_ORIGIN = typeof window !== 'undefined'
   ? window.location.origin
   : DEFAULT_SELLER_APP_URL
 
-export const API_URL = import.meta.env.VITE_API_URL || 'https://fluxy-backend-production.up.railway.app'
+export const API_URL = (import.meta.env.VITE_API_URL || 'http://localhost:8080').replace(/\/$/, '')
 export const APP_URL = (import.meta.env.VITE_STORE_APP_URL || RUNTIME_ORIGIN).replace(/\/$/, '')
 export const SELLER_APP_URL = (import.meta.env.VITE_SELLER_APP_URL || RUNTIME_ORIGIN).replace(/\/$/, '')
 

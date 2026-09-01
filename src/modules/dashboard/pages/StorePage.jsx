@@ -13,6 +13,7 @@ import ProductDetailModal from '../../../components/ProductDetailModal'
 import TrustSection from '../../../components/TrustSection'
 import Footer from '../../../components/Footer'
 import CategoryPanel from '../../../components/CategoryPanel'
+import { API_URL } from '../../../app/config'
 
 const DEFAULT_STYLE = {
   primary: '#7c83fd',
@@ -110,8 +111,7 @@ export default function StorePage() {
   // Cargar categorías
   useEffect(() => {
     if (!storeSlug) return
-    const apiUrl = import.meta.env.VITE_API_URL || 'https://fluxy-backend-production.up.railway.app'
-    fetch(`${apiUrl}/store/slug/${storeSlug}/categories`)
+    fetch(`${API_URL}/store/slug/${storeSlug}/categories`)
       .then(r => r.ok ? r.json() : [])
       .then(setCategories)
       .catch(() => {})

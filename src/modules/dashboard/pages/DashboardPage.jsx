@@ -125,12 +125,6 @@ export default function DashboardPage() {
       localStorage.removeItem(PENDING_PLAN_KEY)
 
       if (payment === 'success' && planParam) {
-        fetch(`${API_URL}/companies/plan`, {
-          method:  'PUT',
-          headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${getToken()}` },
-          body:    JSON.stringify({ plan: planParam.toUpperCase(), months: '1' }),
-        }).catch(() => {})
-
         refreshSellerAccount(planParam).catch(() => {})
           .then(() => {
             fetch(`${API_URL}/me`, { headers: { Authorization: `Bearer ${getToken()}` } })

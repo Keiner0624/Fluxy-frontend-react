@@ -1,4 +1,4 @@
-const API_URL = 'https://fluxy-backend-production.up.railway.app';
+const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:8080';
 
 export async function getCompanyInfo(slug) {
     const res = await fetch(`${API_URL}/store/slug/${slug}/info`);
