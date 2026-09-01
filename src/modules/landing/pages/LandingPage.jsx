@@ -1,454 +1,381 @@
-// src/modules/landing/pages/LandingPage.jsx
-import { useState, useEffect, useRef } from 'react'
+import { useState } from 'react'
 import { Link } from 'react-router-dom'
-import BrandLogo from '@/components/BrandLogo'
+import './LandingPage.css'
 
-// ─── Intersection Observer hook ───────────────────────────────────────────────
-function useInView(threshold = 0.2) {
-  const ref = useRef(null)
-  const [inView, setInView] = useState(false)
-  useEffect(() => {
-    const obs = new IntersectionObserver(([e]) => { if (e.isIntersecting) setInView(true) }, { threshold })
-    if (ref.current) obs.observe(ref.current)
-    return () => obs.disconnect()
-  }, [threshold])
-  return [ref, inView]
-}
+const features = [
+  {
+    icon: 'bag',
+    title: 'Pedidos bajo control',
+    description: 'Recibe, organiza y actualiza cada pedido desde un panel simple y centralizado.',
+  },
+  {
+    icon: 'tag',
+    title: 'Catálogo que vende',
+    description: 'Publica productos, precios, stock y promociones sin depender de terceros.',
+  },
+  {
+    icon: 'users',
+    title: 'Clientes más cerca',
+    description: 'Conoce quién te compra y mantén una comunicación clara en cada entrega.',
+  },
+  {
+    icon: 'chart',
+    title: 'Decisiones con datos',
+    description: 'Mide ventas y productos destacados con reportes fáciles de entender.',
+  },
+]
 
-// ─── Navbar ───────────────────────────────────────────────────────────────────
-function Navbar() {
-  const [scrolled, setScrolled] = useState(false)
-  const [mobileOpen, setMobileOpen] = useState(false)
+const plans = [
+  {
+    name: 'Free',
+    price: 'S/ 0',
+    description: 'Para comenzar a vender online.',
+    features: ['Hasta 10 productos', 'Tienda pública', 'Pedidos y métricas básicas'],
+    cta: 'Comenzar gratis',
+  },
+  {
+    name: 'Pro',
+    price: 'S/ 39',
+    description: 'Para negocios que quieren crecer.',
+    features: ['Hasta 100 productos', 'WhatsApp y notificaciones', 'Métricas y personalización avanzada'],
+    cta: 'Elegir Pro',
+    featured: true,
+  },
+  {
+    name: 'Business',
+    price: 'S/ 59',
+    description: 'Para marcas que necesitan más control.',
+    features: ['Productos ilimitados', 'Dominio personalizado', 'Sin branding y soporte prioritario'],
+    cta: 'Elegir Business',
+  },
+]
 
-  useEffect(() => {
-    const onScroll = () => setScrolled(window.scrollY > 40)
-    window.addEventListener('scroll', onScroll)
-    return () => window.removeEventListener('scroll', onScroll)
-  }, [])
+function Icon({ name, size = 22 }) {
+  const paths = {
+    bag: (
+      <>
+        <path d="M6 8h12l1 12H5L6 8Z" />
+        <path d="M9 9V6a3 3 0 0 1 6 0v3" />
+      </>
+    ),
+    tag: (
+      <>
+        <path d="M20 13 13 20l-9-9V4h7l9 9Z" />
+        <path d="M8.5 8.5h.01" />
+      </>
+    ),
+    users: (
+      <>
+        <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2" />
+        <circle cx="9" cy="7" r="4" />
+        <path d="M22 21v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75" />
+      </>
+    ),
+    chart: (
+      <>
+        <path d="M4 19V9M10 19V5M16 19v-7M22 19V3" />
+        <path d="m3 13 7-6 6 3 6-7" />
+      </>
+    ),
+    orders: (
+      <>
+        <rect x="4" y="3" width="16" height="18" rx="2" />
+        <path d="M8 8h8M8 12h8M8 16h5" />
+      </>
+    ),
+    store: (
+      <>
+        <path d="M3 10h18l-2-6H5l-2 6Z" />
+        <path d="M5 10v10h14V10M9 20v-6h6v6" />
+      </>
+    ),
+    check: <path d="m5 12 4 4L19 6" />,
+    play: <path d="m9 7 8 5-8 5V7Z" />,
+    arrow: <path d="M5 12h14m-5-5 5 5-5 5" />,
+    menu: <path d="M4 7h16M4 12h16M4 17h16" />,
+    close: <path d="m6 6 12 12M18 6 6 18" />,
+    spark: (
+      <>
+        <path d="m12 3 1.4 4.1L17.5 8.5l-4.1 1.4L12 14l-1.4-4.1-4.1-1.4 4.1-1.4L12 3Z" />
+        <path d="m18.5 14 .8 2.2 2.2.8-2.2.8-.8 2.2-.8-2.2-2.2-.8 2.2-.8.8-2.2Z" />
+      </>
+    ),
+  }
 
   return (
-    <nav style={{
-      position: 'fixed', top: 0, left: 0, right: 0, zIndex: 1000,
-      padding: '0 24px',
-      background: scrolled ? 'rgba(6,6,15,0.95)' : 'transparent',
-      backdropFilter: scrolled ? 'blur(20px)' : 'none',
-      borderBottom: scrolled ? '1px solid rgba(255,255,255,0.06)' : 'none',
-      transition: 'all 0.3s ease',
-    }}>
-      <div style={{ maxWidth: 1200, margin: '0 auto', display: 'flex', alignItems: 'center', justifyContent: 'space-between', height: 68 }}>
-        <Link to="/" style={{ textDecoration: 'none' }}>
-          <BrandLogo size={34} textSize={18} />
-        </Link>
+    <svg
+      aria-hidden="true"
+      width={size}
+      height={size}
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="1.8"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+    >
+      {paths[name]}
+    </svg>
+  )
+}
 
-        {/* Desktop nav */}
-        <div className="hide-mobile" style={{ display: 'flex', alignItems: 'center', gap: 32 }}>
-          {[
-            { label: 'Características', href: '#features' },
-            { label: 'Cómo funciona', href: '#how' },
-            { label: 'Planes', href: '#pricing' },
-          ].map(item => (
-            <a key={item.href} href={item.href} style={{
-              fontSize: 14, color: 'var(--text-soft)', textDecoration: 'none',
-              transition: 'color 0.2s',
-            }}
-              onMouseEnter={e => e.currentTarget.style.color = 'white'}
-              onMouseLeave={e => e.currentTarget.style.color = 'var(--text-soft)'}
-            >{item.label}</a>
-          ))}
+function BrandMark({ compact = false }) {
+  return (
+    <span className="landing-brand">
+      <span className="landing-brand__icon"><Icon name="bag" size={compact ? 19 : 22} /></span>
+      <span>Fluxy</span>
+    </span>
+  )
+}
+
+function Navbar() {
+  const [open, setOpen] = useState(false)
+  const links = [
+    ['Características', '#features'],
+    ['Cómo funciona', '#how'],
+    ['Beneficios', '#benefits'],
+    ['Precios', '#pricing'],
+  ]
+
+  return (
+    <header className="landing-nav">
+      <div className="landing-shell landing-nav__inner">
+        <Link to="/" aria-label="Fluxy, página principal"><BrandMark /></Link>
+
+        <nav className="landing-nav__links" aria-label="Navegación principal">
+          {links.map(([label, href]) => <a key={href} href={href}>{label}</a>)}
+        </nav>
+
+        <div className="landing-nav__actions">
+          <Link className="landing-login" to="/login">Iniciar sesión</Link>
+          <Link className="landing-button landing-button--small" to="/register-business">
+            Comenzar gratis
+          </Link>
         </div>
 
-        <div className="hide-mobile" style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
-          <Link to="/login" style={{
-            fontSize: 14, color: 'var(--text-soft)', textDecoration: 'none',
-            padding: '9px 20px', borderRadius: 10,
-            border: '1px solid rgba(255,255,255,0.08)',
-            transition: 'all 0.2s',
-          }}
-            onMouseEnter={e => { e.currentTarget.style.color = 'white'; e.currentTarget.style.borderColor = 'rgba(255,255,255,0.2)' }}
-            onMouseLeave={e => { e.currentTarget.style.color = 'var(--text-soft)'; e.currentTarget.style.borderColor = 'rgba(255,255,255,0.08)' }}
-          >Iniciar sesión</Link>
-          <Link to="/register-business" style={{
-            fontSize: 14, fontWeight: 600, color: 'white', textDecoration: 'none',
-            padding: '9px 20px', borderRadius: 10,
-            background: 'linear-gradient(135deg, #7c83fd, #4f46e5)',
-            boxShadow: '0 4px 16px rgba(124,131,253,0.3)',
-            transition: 'all 0.2s',
-          }}
-            onMouseEnter={e => e.currentTarget.style.transform = 'translateY(-1px)'}
-            onMouseLeave={e => e.currentTarget.style.transform = 'translateY(0)'}
-          >Empezar gratis →</Link>
-        </div>
-
-        {/* Mobile menu button */}
-        <button className="hide-desktop" onClick={() => setMobileOpen(!mobileOpen)} style={{
-          background: 'rgba(255,255,255,0.06)', border: '1px solid rgba(255,255,255,0.1)',
-          borderRadius: 8, padding: '8px 12px', color: 'white', fontSize: 18, cursor: 'pointer',
-        }}>☰</button>
+        <button
+          className="landing-menu"
+          type="button"
+          aria-label={open ? 'Cerrar menú' : 'Abrir menú'}
+          aria-expanded={open}
+          onClick={() => setOpen(value => !value)}
+        >
+          <Icon name={open ? 'close' : 'menu'} />
+        </button>
       </div>
 
-      {/* Mobile menu */}
-      {mobileOpen && (
-        <div style={{
-          background: 'rgba(6,6,15,0.98)', backdropFilter: 'blur(20px)',
-          borderTop: '1px solid rgba(255,255,255,0.06)',
-          padding: '20px 24px', display: 'flex', flexDirection: 'column', gap: 16,
-        }}>
-          {[
-            { label: 'Características', href: '#features' },
-            { label: 'Cómo funciona', href: '#how' },
-            { label: 'Planes', href: '#pricing' },
-          ].map(item => (
-            <a key={item.href} href={item.href} onClick={() => setMobileOpen(false)} style={{
-              fontSize: 16, color: 'var(--text-soft)', textDecoration: 'none',
-            }}>{item.label}</a>
+      {open && (
+        <div className="landing-mobile-nav">
+          {links.map(([label, href]) => (
+            <a key={href} href={href} onClick={() => setOpen(false)}>{label}</a>
           ))}
-          <Link to="/login" onClick={() => setMobileOpen(false)} style={{
-            fontSize: 15, color: 'var(--text-soft)', textDecoration: 'none',
-          }}>Iniciar sesión</Link>
-          <Link to="/register-business" onClick={() => setMobileOpen(false)} style={{
-            fontSize: 15, fontWeight: 600, color: 'white', textDecoration: 'none',
-            padding: '13px', borderRadius: 12, textAlign: 'center',
-            background: 'linear-gradient(135deg, #7c83fd, #4f46e5)',
-          }}>Empezar gratis →</Link>
+          <Link to="/login" onClick={() => setOpen(false)}>Iniciar sesión</Link>
+          <Link className="landing-button" to="/register-business" onClick={() => setOpen(false)}>
+            Comenzar gratis
+          </Link>
         </div>
       )}
-    </nav>
+    </header>
   )
 }
 
-// ─── Hero ─────────────────────────────────────────────────────────────────────
+function MetricCard({ label, value, change }) {
+  return (
+    <article className="dashboard-metric">
+      <span>{label}</span>
+      <strong>{value}</strong>
+      <small>{change} <span>↗</span></small>
+    </article>
+  )
+}
+
+function DashboardPreview() {
+  const orders = [
+    ['#FLX-1048', 'Andrea López', 'S/ 120', 'Entregado'],
+    ['#FLX-1047', 'Carlos Ramírez', 'S/ 85', 'En camino'],
+    ['#FLX-1046', 'María García', 'S/ 150', 'Pendiente'],
+    ['#FLX-1045', 'Juan Pérez', 'S/ 60', 'Entregado'],
+  ]
+
+  return (
+    <div className="dashboard-preview" aria-label="Vista previa del panel de Fluxy">
+      <aside className="dashboard-sidebar">
+        <BrandMark compact />
+        <div className="dashboard-sidebar__items">
+          {[
+            ['chart', 'Resumen'],
+            ['orders', 'Pedidos'],
+            ['tag', 'Productos'],
+            ['users', 'Clientes'],
+            ['store', 'Mi tienda'],
+          ].map(([icon, label], index) => (
+            <span className={index === 0 ? 'is-active' : ''} key={label}>
+              <Icon name={icon} size={15} /> {label}
+            </span>
+          ))}
+        </div>
+        <div className="dashboard-sidebar__store">
+          <span>FS</span>
+          <div><strong>Fluxy Store</strong><small>Plan Pro</small></div>
+        </div>
+      </aside>
+
+      <div className="dashboard-content">
+        <div className="dashboard-topbar">
+          <div><strong>Resumen</strong><small>Miércoles, 1 de septiembre</small></div>
+          <span className="dashboard-avatar">KM</span>
+        </div>
+
+        <div className="dashboard-metrics">
+          <MetricCard label="Ventas totales" value="S/ 24,580" change="+12.5%" />
+          <MetricCard label="Pedidos" value="352" change="+8.3%" />
+          <MetricCard label="Clientes" value="1,248" change="+15.2%" />
+        </div>
+
+        <div className="dashboard-panels">
+          <article className="dashboard-chart">
+            <div className="dashboard-panel-heading">
+              <div><strong>Ventas</strong><small>Últimos 30 días</small></div>
+              <span>S/ 8,240</span>
+            </div>
+            <div className="dashboard-chart__body">
+              <span>S/ 4k</span><span>S/ 3k</span><span>S/ 2k</span><span>S/ 1k</span>
+              <svg viewBox="0 0 430 180" preserveAspectRatio="none" aria-hidden="true">
+                <defs>
+                  <linearGradient id="chartArea" x1="0" y1="0" x2="0" y2="1">
+                    <stop offset="0" stopColor="#1769e0" stopOpacity=".2" />
+                    <stop offset="1" stopColor="#1769e0" stopOpacity="0" />
+                  </linearGradient>
+                </defs>
+                <path className="chart-area" d="M0 157 C24 153 33 128 60 132 S87 103 114 112 146 82 173 92 202 36 232 58 260 120 285 81 309 111 333 66 358 91 382 40 430 27 L430 180 L0 180 Z" />
+                <path className="chart-line" d="M0 157 C24 153 33 128 60 132 S87 103 114 112 146 82 173 92 202 36 232 58 260 120 285 81 309 111 333 66 358 91 382 40 430 27" />
+              </svg>
+              <div className="dashboard-chart__dates"><span>01</span><span>05</span><span>10</span><span>15</span><span>20</span><span>25</span><span>30</span></div>
+            </div>
+          </article>
+
+          <article className="dashboard-orders">
+            <div className="dashboard-panel-heading">
+              <div><strong>Pedidos recientes</strong><small>Actualizados ahora</small></div>
+              <button type="button">Ver todos</button>
+            </div>
+            <div>
+              {orders.map(([id, customer, total, status]) => (
+                <div className="dashboard-order" key={id}>
+                  <div><strong>{id}</strong><small>{customer}</small></div>
+                  <span>{total}</span>
+                  <em className={`status-${status.toLowerCase().replace(' ', '-')}`}>{status}</em>
+                </div>
+              ))}
+            </div>
+          </article>
+        </div>
+      </div>
+    </div>
+  )
+}
+
 function Hero() {
-  const [mounted, setMounted] = useState(false)
-  useEffect(() => { setTimeout(() => setMounted(true), 100) }, [])
-
   return (
-    <section style={{
-      minHeight: '100vh', display: 'flex', flexDirection: 'column',
-      alignItems: 'center', justifyContent: 'center',
-      padding: '120px 24px 80px', textAlign: 'center',
-      position: 'relative',
-    }}>
-      {/* Badge */}
-      <div style={{
-        display: 'inline-flex', alignItems: 'center', gap: 8,
-        background: 'rgba(124,131,253,0.1)',
-        border: '1px solid rgba(124,131,253,0.25)',
-        borderRadius: 50, padding: '6px 16px', marginBottom: 32,
-        opacity: mounted ? 1 : 0, transform: mounted ? 'translateY(0)' : 'translateY(20px)',
-        transition: 'all 0.6s ease 0.1s',
-      }}>
-        <div style={{ width: 6, height: 6, borderRadius: '50%', background: '#34d399', animation: 'pulse 2s infinite' }}/>
-        <span style={{ fontSize: 13, color: '#7c83fd', fontWeight: 600 }}>Nueva plataforma de tiendas online para Latinoamérica 🌎</span>
-      </div>
+    <main>
+      <section className="landing-hero">
+        <div className="landing-shell landing-hero__grid">
+          <div className="landing-hero__copy">
+            <div className="landing-eyebrow"><span><Icon name="spark" size={15} /></span> Sistema de ventas para tu negocio</div>
+            <h1>Gestiona tu tienda.<br /><span>Vende más. Fácil.</span></h1>
+            <p>
+              Centraliza tus productos, pedidos y clientes en un solo lugar.
+              Fluxy te ayuda a vender online sin procesos complicados.
+            </p>
+            <div className="landing-hero__actions">
+              <Link className="landing-button landing-button--hero" to="/register-business">
+                Comenzar gratis <Icon name="arrow" size={18} />
+              </Link>
+              <a className="landing-button landing-button--ghost" href="#how">
+                <span className="landing-play"><Icon name="play" size={15} /></span>
+                Ver cómo funciona
+              </a>
+            </div>
+            <div className="landing-assurances">
+              {['Sin tarjeta de crédito', 'Configura en minutos', 'Soporte incluido'].map(item => (
+                <span key={item}><Icon name="check" size={16} /> {item}</span>
+              ))}
+            </div>
+          </div>
+          <div className="landing-hero__visual">
+            <div className="landing-hero__glow" />
+            <DashboardPreview />
+            <div className="floating-card floating-card--order">
+              <span><Icon name="orders" size={18} /></span>
+              <div><small>Nuevo pedido</small><strong>#FLX-1049 · S/ 180</strong></div>
+            </div>
+            <div className="floating-card floating-card--growth">
+              <span>↗</span>
+              <div><small>Ventas este mes</small><strong>+12.5%</strong></div>
+            </div>
+          </div>
+        </div>
+      </section>
 
-      {/* Título */}
-      <h1 style={{
-        fontFamily: "'Fraunces', serif",
-        fontSize: 'clamp(36px, 7vw, 80px)',
-        fontWeight: 900, lineHeight: 1.05,
-        color: 'white', marginBottom: 24,
-        maxWidth: 900, letterSpacing: '-2px',
-        opacity: mounted ? 1 : 0, transform: mounted ? 'translateY(0)' : 'translateY(30px)',
-        transition: 'all 0.7s ease 0.2s',
-      }}>
-        Lleva tu negocio
-        {' '}
-        <span style={{
-          background: 'linear-gradient(135deg, #7c83fd, #a78bfa, #34d399)',
-          WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent',
-          backgroundClip: 'text',
-        }}>al siguiente nivel</span>
-      </h1>
+      <AudienceStrip />
+      <Features />
+      <Benefits />
+      <HowItWorks />
+      <Pricing />
+      <FinalCta />
+    </main>
+  )
+}
 
-      {/* Subtítulo */}
-      <p style={{
-        fontSize: 'clamp(16px, 2.5vw, 20px)',
-        color: 'var(--text-soft)', lineHeight: 1.7,
-        maxWidth: 620, marginBottom: 44,
-        opacity: mounted ? 1 : 0, transform: mounted ? 'translateY(0)' : 'translateY(30px)',
-        transition: 'all 0.7s ease 0.35s',
-      }}>
-        La plataforma definitiva para emprendedores latinoamericanos. Crea tu tienda online, recibe pedidos y gestiona todo desde un solo lugar. Sin complicaciones, sin código.
-      </p>
-
-      {/* CTAs */}
-      <div style={{
-        display: 'flex', gap: 14, flexWrap: 'wrap', justifyContent: 'center',
-        opacity: mounted ? 1 : 0, transform: mounted ? 'translateY(0)' : 'translateY(20px)',
-        transition: 'all 0.7s ease 0.5s',
-      }}>
-        <Link to="/register-business" style={{
-          display: 'inline-flex', alignItems: 'center', gap: 8,
-          background: 'linear-gradient(135deg, #7c83fd, #4f46e5)',
-          color: 'white', textDecoration: 'none',
-          padding: '16px 32px', borderRadius: 14,
-          fontSize: 16, fontWeight: 700,
-          boxShadow: '0 8px 32px rgba(124,131,253,0.4)',
-          transition: 'all 0.2s',
-        }}
-          onMouseEnter={e => { e.currentTarget.style.transform = 'translateY(-2px)'; e.currentTarget.style.boxShadow = '0 12px 40px rgba(124,131,253,0.5)' }}
-          onMouseLeave={e => { e.currentTarget.style.transform = 'translateY(0)'; e.currentTarget.style.boxShadow = '0 8px 32px rgba(124,131,253,0.4)' }}
-        >
-          🚀 Crear mi tienda gratis
-        </Link>
-        <a href="#how" style={{
-          display: 'inline-flex', alignItems: 'center', gap: 8,
-          color: 'var(--text-soft)', textDecoration: 'none',
-          padding: '16px 28px', borderRadius: 14,
-          fontSize: 15, fontWeight: 500,
-          border: '1px solid rgba(255,255,255,0.1)',
-          transition: 'all 0.2s',
-        }}
-          onMouseEnter={e => { e.currentTarget.style.color = 'white'; e.currentTarget.style.borderColor = 'rgba(255,255,255,0.25)' }}
-          onMouseLeave={e => { e.currentTarget.style.color = 'var(--text-soft)'; e.currentTarget.style.borderColor = 'rgba(255,255,255,0.1)' }}
-        >
-          Ver cómo funciona ↓
-        </a>
-      </div>
-
-      {/* Social proof */}
-      <div style={{
-        marginTop: 56, display: 'flex', alignItems: 'center', gap: 16,
-        flexWrap: 'wrap', justifyContent: 'center',
-        opacity: mounted ? 1 : 0, transition: 'all 0.7s ease 0.7s',
-      }}>
-        <div style={{ display: 'flex' }}>
-          {['🧑🏽', '👩🏼', '🧑🏾', '👩🏻', '🧑🏿'].map((e, i) => (
-            <div key={i} style={{
-              width: 34, height: 34, borderRadius: '50%',
-              background: `hsl(${220 + i * 30}, 70%, 45%)`,
-              border: '2px solid #06060f',
-              marginLeft: i > 0 ? -10 : 0,
-              display: 'flex', alignItems: 'center', justifyContent: 'center',
-              fontSize: 16,
-            }}>{e}</div>
+function AudienceStrip() {
+  const audiences = [
+    ['bag', 'Moda y accesorios'],
+    ['spark', 'Belleza'],
+    ['tag', 'Tecnología'],
+    ['store', 'Hogar y diseño'],
+    ['users', 'Servicios'],
+  ]
+  return (
+    <section className="landing-audience" aria-label="Tipos de negocio">
+      <div className="landing-shell">
+        <p>Una plataforma flexible para negocios que venden todos los días</p>
+        <div>
+          {audiences.map(([icon, label]) => (
+            <span key={label}><Icon name={icon} size={20} /> {label}</span>
           ))}
         </div>
-        <div style={{ fontSize: 14, color: 'var(--text-muted)' }}>
-          <strong style={{ color: 'white' }}>Plataforma nueva</strong> — sé de los primeros
-        </div>
-        <div style={{ display: 'flex', gap: 2 }}>
-          {[1,2,3,4,5].map(i => <span key={i} style={{ color: '#fbbf24', fontSize: 16 }}>★</span>)}
-        </div>
-      </div>
-
-      {/* Preview del dashboard */}
-      <div style={{
-        marginTop: 72, width: '100%', maxWidth: 900,
-        opacity: mounted ? 1 : 0, transform: mounted ? 'translateY(0)' : 'translateY(40px)',
-        transition: 'all 0.9s ease 0.8s',
-      }}>
-        <div style={{
-          background: 'rgba(13,13,26,0.9)',
-          border: '1px solid rgba(124,131,253,0.2)',
-          borderRadius: 20, overflow: 'hidden',
-          boxShadow: '0 40px 80px rgba(0,0,0,0.6), 0 0 0 1px rgba(124,131,253,0.1)',
-        }}>
-          {/* Barra de browser */}
-          <div style={{
-            background: 'rgba(8,8,20,0.9)', padding: '10px 16px',
-            display: 'flex', alignItems: 'center', gap: 8,
-            borderBottom: '1px solid rgba(255,255,255,0.06)',
-          }}>
-            <div style={{ display: 'flex', gap: 6 }}>
-              {['#f87171', '#fbbf24', '#34d399'].map(c => (
-                <div key={c} style={{ width: 10, height: 10, borderRadius: '50%', background: c }}/>
-              ))}
-            </div>
-            <div style={{
-              flex: 1, background: 'rgba(255,255,255,0.04)', borderRadius: 6,
-              padding: '4px 12px', fontSize: 11, color: 'var(--text-muted)',
-              textAlign: 'center',
-            }}>fluxyweb.com/dashboard</div>
-          </div>
-
-          {/* Dashboard preview — responsive */}
-          <style>{`
-            @media (max-width: 600px) {
-              .dash-sidebar { display: none !important; }
-              .dash-grid { grid-template-columns: 1fr !important; padding: 14px !important; }
-              .dash-stat { padding: 10px !important; }
-              .dash-stat-val { font-size: 14px !important; }
-            }
-          `}</style>
-          <div className="dash-grid" style={{ padding: '20px', display: 'grid', gridTemplateColumns: '180px 1fr', gap: 16, minHeight: 280 }}>
-            {/* Sidebar */}
-            <div className="dash-sidebar" style={{ background: 'rgba(8,8,20,0.8)', borderRadius: 12, padding: '14px 10px', display: 'flex', flexDirection: 'column', gap: 4 }}>
-              <div style={{ padding: '6px 10px', marginBottom: 6, display: 'flex', alignItems: 'center', gap: 8 }}>
-                <div style={{ width: 22, height: 22, borderRadius: 6, background: 'linear-gradient(135deg, #7c83fd, #4f46e5)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 10, fontWeight: 800, color: 'white' }}>F</div>
-                <span style={{ fontSize: 11, fontWeight: 600, color: 'white' }}>Mi Negocio</span>
-              </div>
-              {[
-                { icon: '📊', label: 'Resumen', active: true },
-                { icon: '📦', label: 'Productos' },
-                { icon: '🛒', label: 'Pedidos' },
-                { icon: '📈', label: 'Métricas' },
-                { icon: '⚙️', label: 'Config' },
-              ].map(item => (
-                <div key={item.label} style={{
-                  display: 'flex', alignItems: 'center', gap: 8,
-                  padding: '7px 10px', borderRadius: 8,
-                  background: item.active ? 'rgba(124,131,253,0.15)' : 'transparent',
-                  border: item.active ? '1px solid rgba(124,131,253,0.2)' : '1px solid transparent',
-                }}>
-                  <span style={{ fontSize: 12 }}>{item.icon}</span>
-                  <span style={{ fontSize: 11, color: item.active ? '#7c83fd' : 'rgba(255,255,255,0.4)' }}>{item.label}</span>
-                </div>
-              ))}
-            </div>
-
-            {/* Main content */}
-            <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
-              {/* Stats */}
-              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 8 }}>
-                {[
-                  { label: 'Ventas', value: 'S/ 2,840', color: '#7c83fd', icon: '💰' },
-                  { label: 'Pedidos', value: '47', color: '#34d399', icon: '🛒' },
-                  { label: 'Productos', value: '23', color: '#fbbf24', icon: '📦' },
-                ].map(stat => (
-                  <div className="dash-stat" key={stat.label} style={{
-                    background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.06)',
-                    borderRadius: 10, padding: '10px 8px',
-                  }}>
-                    <div style={{ fontSize: 14, marginBottom: 4 }}>{stat.icon}</div>
-                    <div className="dash-stat-val" style={{ fontFamily: "'Fraunces', serif", fontSize: 16, fontWeight: 700, color: stat.color }}>{stat.value}</div>
-                    <div style={{ fontSize: 9, color: 'rgba(255,255,255,0.35)' }}>{stat.label}</div>
-                  </div>
-                ))}
-              </div>
-
-              {/* Chart simulado */}
-              <div style={{ background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.06)', borderRadius: 10, padding: '12px', flex: 1 }}>
-                <div style={{ fontSize: 10, color: 'rgba(255,255,255,0.4)', marginBottom: 10 }}>Ventas últimos 7 días</div>
-                <div style={{ display: 'flex', alignItems: 'flex-end', gap: 4, height: 50 }}>
-                  {[40, 65, 45, 80, 55, 90, 70].map((h, i) => (
-                    <div key={i} style={{ flex: 1, height: `${h}%`, borderRadius: '3px 3px 0 0', background: 'linear-gradient(to top, #7c83fd, #4f46e5)', opacity: 0.7 + (i * 0.04) }}/>
-                  ))}
-                </div>
-              </div>
-
-              {/* Nav pills móvil — solo visible en mobile */}
-              <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap' }}>
-                {[
-                  { icon: '📊', label: 'Resumen', active: true },
-                  { icon: '📦', label: 'Productos' },
-                  { icon: '🛒', label: 'Pedidos' },
-                ].map(item => (
-                  <div key={item.label} style={{
-                    display: 'flex', alignItems: 'center', gap: 5,
-                    padding: '5px 10px', borderRadius: 20, fontSize: 10,
-                    background: item.active ? 'rgba(124,131,253,0.15)' : 'rgba(255,255,255,0.04)',
-                    border: item.active ? '1px solid rgba(124,131,253,0.3)' : '1px solid rgba(255,255,255,0.06)',
-                    color: item.active ? '#7c83fd' : 'rgba(255,255,255,0.4)',
-                  }}>
-                    <span>{item.icon}</span> {item.label}
-                  </div>
-                ))}
-              </div>
-            </div>
-          </div>
-        </div>
       </div>
     </section>
   )
 }
 
-// ─── Stats ────────────────────────────────────────────────────────────────────
-function Stats() {
-  const [ref, inView] = useInView()
-
-  const stats = [
-    { value: '100%', label: 'Gratis para empezar', sub: 'Sin tarjeta de crédito' },
-    { value: '3 min', label: 'Para crear tu tienda', sub: 'Sin conocimientos técnicos' },
-    { value: '11', label: 'Países disponibles', sub: 'En toda Latinoamérica' },
-  ]
-
+function SectionHeading({ eyebrow, title, description, align = 'center' }) {
   return (
-    <section ref={ref} style={{
-      padding: '60px 24px',
-      borderTop: '1px solid rgba(255,255,255,0.04)',
-      borderBottom: '1px solid rgba(255,255,255,0.04)',
-    }}>
-      <div style={{ maxWidth: 1000, margin: '0 auto', display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: 40 }}>
-        {stats.map((stat, i) => (
-          <div key={i} style={{
-            textAlign: 'center',
-            opacity: inView ? 1 : 0,
-            transform: inView ? 'translateY(0)' : 'translateY(20px)',
-            transition: `all 0.6s ease ${i * 0.15}s`,
-          }}>
-            <div style={{
-              fontFamily: "'Fraunces', serif",
-              fontSize: 48, fontWeight: 900,
-              background: 'linear-gradient(135deg, #7c83fd, #a78bfa)',
-              WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent',
-              backgroundClip: 'text', lineHeight: 1,
-              marginBottom: 8,
-            }}>{stat.value}</div>
-            <div style={{ fontSize: 16, fontWeight: 600, color: 'white', marginBottom: 4 }}>{stat.label}</div>
-            <div style={{ fontSize: 13, color: 'var(--text-muted)' }}>{stat.sub}</div>
-          </div>
-        ))}
-      </div>
-    </section>
+    <header className={`landing-section-heading landing-section-heading--${align}`}>
+      <span>{eyebrow}</span>
+      <h2>{title}</h2>
+      {description && <p>{description}</p>}
+    </header>
   )
 }
 
-// ─── Features ─────────────────────────────────────────────────────────────────
 function Features() {
-  const [ref, inView] = useInView(0.1)
-
-  const features = [
-    { icon: '🏪', title: 'Tienda pública al instante', desc: 'Tu catálogo con URL propia, diseño profesional y optimizado para móvil. Listo para compartir en redes sociales.', color: '#7c83fd' },
-    { icon: '💬', title: 'WhatsApp automático', desc: 'Cuando un cliente hace un pedido, recibes un mensaje de WhatsApp con todos los detalles al instante. Solo en plan PRO.', color: '#25d366' },
-    { icon: '📊', title: 'Métricas y estadísticas', desc: 'Visualiza tus ventas, productos más vendidos y evolución del negocio con gráficas en tiempo real.', color: '#34d399' },
-    { icon: '🎨', title: 'Diseño personalizado', desc: 'Elige colores, gradientes y animaciones para que tu tienda refleje la identidad de tu marca.', color: '#a78bfa' },
-    { icon: '💳', title: 'Métodos de pago', desc: 'Muestra Yape, Plin, transferencia o efectivo. Tus clientes sabrán cómo pagarte antes de hacer el pedido.', color: '#fbbf24' },
-    { icon: '🌐', title: 'Dominio personalizado', desc: 'Conecta tu propio dominio (mitienda.com) y proyecta una imagen 100% profesional. Plan Business.', color: '#38bdf8' },
-  ]
-
   return (
-    <section id="features" style={{ padding: '100px 24px' }}>
-      <div style={{ maxWidth: 1200, margin: '0 auto' }}>
-        <div style={{ textAlign: 'center', marginBottom: 64 }}>
-          <div style={{ fontSize: 12, fontWeight: 700, color: '#7c83fd', textTransform: 'uppercase', letterSpacing: '2px', marginBottom: 16 }}>
-            Características
-          </div>
-          <h2 style={{
-            fontFamily: "'Fraunces', serif",
-            fontSize: 'clamp(28px, 5vw, 48px)', fontWeight: 800,
-            color: 'white', marginBottom: 16, letterSpacing: '-1px',
-          }}>
-            Todo lo que necesita tu negocio
-          </h2>
-          <p style={{ fontSize: 17, color: 'var(--text-soft)', maxWidth: 520, margin: '0 auto', lineHeight: 1.7 }}>
-            Una plataforma completa y confiable diseñada para emprendedores latinoamericanos que quieren vender más sin complicaciones.
-          </p>
-        </div>
-
-        <div ref={ref} style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(320px, 1fr))', gap: 20 }}>
-          {features.map((f, i) => (
-            <div key={i} style={{
-              background: 'rgba(13,13,26,0.8)',
-              border: '1px solid rgba(255,255,255,0.06)',
-              borderRadius: 20, padding: '28px',
-              transition: 'all 0.3s',
-              opacity: inView ? 1 : 0,
-              transform: inView ? 'translateY(0)' : 'translateY(30px)',
-              transitionDelay: `${i * 0.08}s`,
-            }}
-              onMouseEnter={e => { e.currentTarget.style.borderColor = `${f.color}30`; e.currentTarget.style.transform = 'translateY(-4px)' }}
-              onMouseLeave={e => { e.currentTarget.style.borderColor = 'rgba(255,255,255,0.06)'; e.currentTarget.style.transform = 'translateY(0)' }}
-            >
-              <div style={{
-                width: 52, height: 52, borderRadius: 14,
-                background: `${f.color}15`, border: `1px solid ${f.color}30`,
-                display: 'flex', alignItems: 'center', justifyContent: 'center',
-                fontSize: 24, marginBottom: 20,
-              }}>{f.icon}</div>
-              <h3 style={{ fontSize: 17, fontWeight: 700, color: 'white', marginBottom: 10 }}>{f.title}</h3>
-              <p style={{ fontSize: 14, color: 'var(--text-muted)', lineHeight: 1.7 }}>{f.desc}</p>
-            </div>
+    <section className="landing-section" id="features">
+      <div className="landing-shell">
+        <SectionHeading
+          eyebrow="Todo en un solo lugar"
+          title="Lo que necesitas para gestionar tu tienda"
+          description="Herramientas claras para trabajar mejor hoy y crecer mañana."
+        />
+        <div className="landing-features">
+          {features.map((feature, index) => (
+            <article key={feature.title}>
+              <span className={`feature-icon feature-icon--${index + 1}`}><Icon name={feature.icon} /></span>
+              <h3>{feature.title}</h3>
+              <p>{feature.description}</p>
+              <a href="#benefits">Conocer más <Icon name="arrow" size={15} /></a>
+            </article>
           ))}
         </div>
       </div>
@@ -456,62 +383,120 @@ function Features() {
   )
 }
 
-// ─── Cómo funciona ────────────────────────────────────────────────────────────
+function OrderFlowCard() {
+  return (
+    <div className="benefit-order-card">
+      <div className="benefit-order-card__top">
+        <div><small>Pedidos de hoy</small><strong>24 pedidos</strong></div>
+        <span>En vivo</span>
+      </div>
+      {[
+        ['María García', '2 productos', 'S/ 150', 'Nuevo'],
+        ['Diego Torres', '1 producto', 'S/ 85', 'Preparando'],
+        ['Laura Ríos', '3 productos', 'S/ 240', 'Listo'],
+      ].map(([name, items, price, status], index) => (
+        <div className="benefit-order-row" key={name}>
+          <span>{name.split(' ').map(part => part[0]).join('')}</span>
+          <div><strong>{name}</strong><small>{items}</small></div>
+          <strong>{price}</strong>
+          <em className={`flow-status flow-status--${index + 1}`}>{status}</em>
+        </div>
+      ))}
+      <div className="benefit-order-card__summary">
+        <span><small>Ingresos de hoy</small><strong>S/ 2,840</strong></span>
+        <span><small>Ticket promedio</small><strong>S/ 118</strong></span>
+      </div>
+    </div>
+  )
+}
+
+function StorePhone() {
+  return (
+    <div className="store-phone">
+      <div className="store-phone__speaker" />
+      <div className="store-phone__header">
+        <span>NUA</span><div><i /><i /><i /></div>
+      </div>
+      <div className="store-phone__hero">
+        <small>Nueva colección</small><strong>Esenciales para<br />todos los días.</strong><button type="button">Comprar ahora</button>
+      </div>
+      <div className="store-phone__products">
+        <div><span>01</span><strong>Bolso Nómada</strong><small>S/ 129</small></div>
+        <div><span>02</span><strong>Mini Aura</strong><small>S/ 89</small></div>
+      </div>
+    </div>
+  )
+}
+
+function Benefits() {
+  return (
+    <section className="landing-benefits" id="benefits">
+      <div className="landing-shell">
+        <div className="benefit-row">
+          <div className="benefit-visual benefit-visual--orders"><OrderFlowCard /></div>
+          <div className="benefit-copy">
+            <span className="benefit-number">01</span>
+            <SectionHeading
+              align="left"
+              eyebrow="Operación ordenada"
+              title="Cada pedido, justo donde debe estar"
+              description="Deja de buscar ventas entre chats y hojas de cálculo. Mira el estado, el cliente y el total de cada pedido en segundos."
+            />
+            <ul>
+              <li><Icon name="check" size={17} /> Estados claros y actualizados</li>
+              <li><Icon name="check" size={17} /> Stock sincronizado con tus ventas</li>
+              <li><Icon name="check" size={17} /> Avisos por WhatsApp y notificaciones</li>
+            </ul>
+          </div>
+        </div>
+
+        <div className="benefit-row benefit-row--reverse">
+          <div className="benefit-copy">
+            <span className="benefit-number">02</span>
+            <SectionHeading
+              align="left"
+              eyebrow="Tu marca online"
+              title="Una tienda lista para vender desde cualquier pantalla"
+              description="Crea un catálogo rápido, profesional y adaptable a móvil. Personaliza colores, logo, métodos de pago y dominio."
+            />
+            <ul>
+              <li><Icon name="check" size={17} /> Sin conocimientos técnicos</li>
+              <li><Icon name="check" size={17} /> Diseño responsive y personalizable</li>
+              <li><Icon name="check" size={17} /> Comparte tu tienda con un enlace</li>
+            </ul>
+          </div>
+          <div className="benefit-visual benefit-visual--store">
+            <div className="store-backdrop-card store-backdrop-card--one" />
+            <div className="store-backdrop-card store-backdrop-card--two" />
+            <StorePhone />
+          </div>
+        </div>
+      </div>
+    </section>
+  )
+}
+
 function HowItWorks() {
-  const [ref, inView] = useInView(0.1)
-
   const steps = [
-    { num: '01', title: 'Crea tu cuenta', desc: 'Regístrate gratis en menos de 2 minutos. Solo necesitas tu nombre, negocio y contraseña.', icon: '✍️' },
-    { num: '02', title: 'Agrega tus productos', desc: 'Sube fotos, pone precios y describe tus productos. Tu catálogo queda listo al instante.', icon: '📦' },
-    { num: '03', title: 'Comparte tu tienda', desc: 'Copia el link de tu tienda y compártelo en WhatsApp, Instagram o Facebook. Ya está.', icon: '🔗' },
-    { num: '04', title: 'Recibe pedidos', desc: 'Tus clientes eligen sus productos y tú recibes el pedido con todos los detalles por WhatsApp y email.', icon: '🛒' },
+    ['01', 'Crea tu cuenta', 'Registra tu negocio y elige el nombre de tu tienda.'],
+    ['02', 'Publica tus productos', 'Agrega fotos, precios, stock y métodos de pago.'],
+    ['03', 'Comparte y vende', 'Envía tu enlace y administra todos los pedidos desde Fluxy.'],
   ]
-
   return (
-    <section id="how" style={{ padding: '100px 24px', background: 'rgba(124,131,253,0.03)', borderTop: '1px solid rgba(255,255,255,0.04)', borderBottom: '1px solid rgba(255,255,255,0.04)' }}>
-      <div style={{ maxWidth: 1100, margin: '0 auto' }}>
-        <div style={{ textAlign: 'center', marginBottom: 64 }}>
-          <div style={{ fontSize: 12, fontWeight: 700, color: '#7c83fd', textTransform: 'uppercase', letterSpacing: '2px', marginBottom: 16 }}>
-            Cómo funciona
-          </div>
-          <h2 style={{
-            fontFamily: "'Fraunces', serif",
-            fontSize: 'clamp(28px, 5vw, 48px)', fontWeight: 800,
-            color: 'white', letterSpacing: '-1px',
-          }}>
-            De cero a vendiendo en 4 pasos
-          </h2>
-        </div>
-
-        <div ref={ref} style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(240px, 1fr))', gap: 24 }}>
-          {steps.map((step, i) => (
-            <div key={i} style={{
-              textAlign: 'center', padding: '32px 24px',
-              opacity: inView ? 1 : 0,
-              transform: inView ? 'translateY(0)' : 'translateY(30px)',
-              transition: `all 0.6s ease ${i * 0.15}s`,
-            }}>
-              {/* Número */}
-              <div style={{
-                width: 64, height: 64, borderRadius: '50%', margin: '0 auto 20px',
-                background: 'linear-gradient(135deg, rgba(124,131,253,0.2), rgba(79,70,229,0.1))',
-                border: '1px solid rgba(124,131,253,0.3)',
-                display: 'flex', alignItems: 'center', justifyContent: 'center',
-                position: 'relative',
-              }}>
-                <span style={{ fontSize: 28 }}>{step.icon}</span>
-                <div style={{
-                  position: 'absolute', top: -8, right: -8,
-                  width: 24, height: 24, borderRadius: '50%',
-                  background: 'linear-gradient(135deg, #7c83fd, #4f46e5)',
-                  display: 'flex', alignItems: 'center', justifyContent: 'center',
-                  fontSize: 10, fontWeight: 800, color: 'white',
-                }}>{i + 1}</div>
-              </div>
-              <div style={{ fontSize: 11, color: '#7c83fd', fontWeight: 700, letterSpacing: '1px', marginBottom: 10 }}>{step.num}</div>
-              <h3 style={{ fontSize: 18, fontWeight: 700, color: 'white', marginBottom: 10 }}>{step.title}</h3>
-              <p style={{ fontSize: 14, color: 'var(--text-muted)', lineHeight: 1.7 }}>{step.desc}</p>
-            </div>
+    <section className="landing-section landing-how" id="how">
+      <div className="landing-shell">
+        <SectionHeading
+          eyebrow="Simple desde el inicio"
+          title="Tu tienda online en tres pasos"
+          description="Empieza sin instalaciones, contratos ni configuraciones difíciles."
+        />
+        <div className="landing-steps">
+          {steps.map(([number, title, text], index) => (
+            <article key={number}>
+              <div><span>{number}</span>{index < steps.length - 1 && <i />}</div>
+              <h3>{title}</h3>
+              <p>{text}</p>
+            </article>
           ))}
         </div>
       </div>
@@ -519,442 +504,102 @@ function HowItWorks() {
   )
 }
 
-// ─── Testimonios ──────────────────────────────────────────────────────────────
-function Testimonials() {
-  const [ref, inView] = useInView(0.1)
-
-  const testimonials = [
-    { name: 'CAFOTOGRAMA', business: 'Fotografía profesional', text: 'Fluxy me permitió tener mi catálogo online desde el primer día. Mis clientes ya pueden ver mis servicios y contactarme directamente.', emoji: '📸', stars: 5 },
-    { name: 'Zamora Store', business: 'Tienda online', text: 'Me sorprendió lo fácil que fue crear mi tienda. En minutos tenía todo configurado y listo para recibir pedidos.', emoji: '🛍️', stars: 5 },
-    { name: 'Emprendedor', business: 'Primer usuario', text: 'El panel de control es muy intuitivo. Puedo gestionar mis productos y pedidos desde el celular sin ningún problema.', emoji: '🧑🏽', stars: 5 },
-  ]
-
-  return (
-    <section style={{ padding: '100px 24px' }}>
-      <div style={{ maxWidth: 1100, margin: '0 auto' }}>
-        <div style={{ textAlign: 'center', marginBottom: 64 }}>
-          <div style={{ fontSize: 12, fontWeight: 700, color: '#7c83fd', textTransform: 'uppercase', letterSpacing: '2px', marginBottom: 16 }}>Testimonios</div>
-          <h2 style={{ fontFamily: "'Fraunces', serif", fontSize: 'clamp(28px, 5vw, 44px)', fontWeight: 800, color: 'white', letterSpacing: '-1px' }}>
-            Lo que dicen nuestros vendedores
-          </h2>
-        </div>
-
-        <div ref={ref} style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))', gap: 20 }}>
-          {testimonials.map((t, i) => (
-            <div key={i} style={{
-              background: 'rgba(13,13,26,0.8)',
-              border: '1px solid rgba(255,255,255,0.06)',
-              borderRadius: 20, padding: '28px',
-              opacity: inView ? 1 : 0,
-              transform: inView ? 'translateY(0)' : 'translateY(30px)',
-              transition: `all 0.6s ease ${i * 0.15}s`,
-            }}>
-              <div style={{ display: 'flex', gap: 2, marginBottom: 16 }}>
-                {[...Array(t.stars)].map((_, i) => <span key={i} style={{ color: '#fbbf24', fontSize: 16 }}>★</span>)}
-              </div>
-              <p style={{ fontSize: 15, color: '#e5e7eb', lineHeight: 1.7, marginBottom: 20, fontStyle: 'italic' }}>
-                "{t.text}"
-              </p>
-              <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
-                <div style={{
-                  width: 42, height: 42, borderRadius: '50%',
-                  background: 'linear-gradient(135deg, #7c83fd, #4f46e5)',
-                  display: 'flex', alignItems: 'center', justifyContent: 'center',
-                  fontSize: 22,
-                }}>{t.emoji}</div>
-                <div>
-                  <div style={{ fontSize: 14, fontWeight: 600, color: 'white' }}>{t.name}</div>
-                  <div style={{ fontSize: 12, color: 'var(--text-muted)' }}>{t.business}</div>
-                </div>
-              </div>
-            </div>
-          ))}
-        </div>
-      </div>
-    </section>
-  )
-}
-
-// ─── Pricing ──────────────────────────────────────────────────────────────────
 function Pricing() {
-  const [ref, inView] = useInView(0.1)
-
-  const plans = [
-    {
-      name: 'Free', price: 'S/ 0', period: 'Para siempre',
-      color: '#9ca3af', border: 'rgba(255,255,255,0.08)',
-      features: ['Hasta 10 productos', 'Tienda pública con slug', 'Recepción de pedidos', 'Personalización básica'],
-      cta: 'Empezar gratis', ctaLink: '/register-business', featured: false,
-    },
-    {
-      name: 'Pro', price: 'S/ 39', period: '/mes',
-      color: '#7c83fd', border: 'rgba(124,131,253,0.4)',
-      badge: 'Más popular',
-      features: ['Hasta 100 productos', 'WhatsApp automático', 'Estadísticas completas', 'Personalización avanzada', 'Soporte por email'],
-      cta: 'Empezar con Pro', ctaLink: '/register-business', featured: true,
-    },
-    {
-      name: 'Business', price: 'S/ 59', period: '/mes',
-      color: '#34d399', border: 'rgba(52,211,153,0.25)',
-      features: ['Productos ilimitados', 'Todo lo del plan Pro', 'Dominio personalizado', 'Sin branding Fluxy', 'Soporte prioritario 24/7'],
-      cta: 'Empezar con Business', ctaLink: '/register-business', featured: false,
-    },
-  ]
-
   return (
-    <section id="pricing" style={{ padding: '100px 24px' }}>
-      <div style={{ maxWidth: 1100, margin: '0 auto' }}>
-        <div style={{ textAlign: 'center', marginBottom: 64 }}>
-          <div style={{ fontSize: 12, fontWeight: 700, color: '#7c83fd', textTransform: 'uppercase', letterSpacing: '2px', marginBottom: 16 }}>Planes y precios</div>
-          <h2 style={{ fontFamily: "'Fraunces', serif", fontSize: 'clamp(28px, 5vw, 48px)', fontWeight: 800, color: 'white', marginBottom: 16, letterSpacing: '-1px' }}>
-            Elige el plan perfecto para ti
-          </h2>
-          <p style={{ fontSize: 16, color: 'var(--text-soft)', maxWidth: 480, margin: '0 auto' }}>
-            Plataforma nueva con precios justos. Empieza gratis y escala cuando tu negocio lo necesite. Sin contratos ni sorpresas.
-          </p>
-        </div>
-
-        <div ref={ref} style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))', gap: 20, alignItems: 'start' }}>
-          {plans.map((plan, i) => (
-            <div key={i} style={{
-              background: plan.featured ? 'rgba(124,131,253,0.08)' : 'rgba(13,13,26,0.8)',
-              border: `1px solid ${plan.border}`,
-              borderRadius: 24, padding: '32px',
-              position: 'relative', overflow: 'hidden',
-              boxShadow: plan.featured ? '0 0 0 1px rgba(124,131,253,0.2), 0 20px 60px rgba(124,131,253,0.15)' : 'none',
-              transform: plan.featured ? 'scale(1.03)' : 'scale(1)',
-              opacity: inView ? 1 : 0,
-              transitionDelay: `${i * 0.15}s`,
-              transition: 'opacity 0.6s ease, transform 0.6s ease',
-            }}>
-              {plan.badge && (
-                <div style={{
-                  position: 'absolute', top: 20, right: 20,
-                  background: plan.color, color: 'white',
-                  borderRadius: 20, padding: '3px 12px',
-                  fontSize: 11, fontWeight: 700,
-                }}>{plan.badge}</div>
-              )}
-
-              <div style={{ fontSize: 13, fontWeight: 700, color: plan.color, textTransform: 'uppercase', letterSpacing: '1px', marginBottom: 12 }}>{plan.name}</div>
-              <div style={{ display: 'flex', alignItems: 'baseline', gap: 4, marginBottom: 4 }}>
-                <span style={{ fontFamily: "'Fraunces', serif", fontSize: 42, fontWeight: 900, color: 'white' }}>{plan.price}</span>
-                <span style={{ fontSize: 14, color: 'var(--text-muted)' }}>{plan.period}</span>
-              </div>
-
-              <div style={{ height: 1, background: 'rgba(255,255,255,0.06)', margin: '24px 0' }}/>
-
-              <div style={{ display: 'flex', flexDirection: 'column', gap: 12, marginBottom: 28 }}>
-                {plan.features.map((f, j) => (
-                  <div key={j} style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
-                    <div style={{ width: 18, height: 18, borderRadius: '50%', background: `${plan.color}20`, border: `1px solid ${plan.color}40`, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 10, color: plan.color, flexShrink: 0 }}>✓</div>
-                    <span style={{ fontSize: 14, color: '#e5e7eb' }}>{f}</span>
-                  </div>
-                ))}
-              </div>
-
-              <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
-                <Link to={plan.ctaLink} style={{
-                  display: 'block', textAlign: 'center', padding: '14px',
-                  borderRadius: 12, fontSize: 14, fontWeight: 700, textDecoration: 'none',
-                  background: plan.featured
-                    ? 'linear-gradient(135deg, #7c83fd, #4f46e5)'
-                    : 'rgba(255,255,255,0.06)',
-                  color: 'white',
-                  border: plan.featured ? 'none' : '1px solid rgba(255,255,255,0.1)',
-                  boxShadow: plan.featured ? '0 8px 24px rgba(124,131,253,0.3)' : 'none',
-                  transition: 'all 0.2s',
-                }}
-                  onMouseEnter={e => e.currentTarget.style.transform = 'translateY(-1px)'}
-                  onMouseLeave={e => e.currentTarget.style.transform = 'translateY(0)'}
-                >{plan.cta}</Link>
-                {plan.trial && (
-                  <Link to="/register-business?trial=true" style={{
-                    display: 'block', textAlign: 'center', padding: '11px',
-                    borderRadius: 12, fontSize: 13, fontWeight: 600, textDecoration: 'none',
-                    background: 'rgba(52,211,153,0.08)',
-                    color: '#34d399',
-                    border: '1px solid rgba(52,211,153,0.25)',
-                    transition: 'all 0.2s',
-                  }}
-                    onMouseEnter={e => e.currentTarget.style.background = 'rgba(52,211,153,0.15)'}
-                    onMouseLeave={e => e.currentTarget.style.background = 'rgba(52,211,153,0.08)'}
-                  >🎁 Probar gratis 1 mes</Link>
-                )}
-              </div>
-            </div>
+    <section className="landing-section landing-pricing" id="pricing">
+      <div className="landing-shell">
+        <SectionHeading
+          eyebrow="Planes transparentes"
+          title="Empieza gratis. Crece a tu ritmo."
+          description="Sin costos ocultos. Cambia de plan cuando tu negocio lo necesite."
+        />
+        <div className="pricing-grid">
+          {plans.map(plan => (
+            <article className={plan.featured ? 'is-featured' : ''} key={plan.name}>
+              {plan.featured && <span className="pricing-badge">Más popular</span>}
+              <h3>{plan.name}</h3>
+              <p>{plan.description}</p>
+              <div className="pricing-price"><strong>{plan.price}</strong><span>/ mes</span></div>
+              <ul>
+                {plan.features.map(feature => <li key={feature}><Icon name="check" size={17} /> {feature}</li>)}
+              </ul>
+              <Link className={`landing-button ${plan.featured ? '' : 'landing-button--outline'}`} to="/register-business">
+                {plan.cta}
+              </Link>
+            </article>
           ))}
         </div>
+        <p className="pricing-note">Precios en soles peruanos. Puedes cancelar o cambiar de plan cuando quieras.</p>
       </div>
     </section>
   )
 }
 
-
-// ─── Países disponibles ───────────────────────────────────────────────────────
-function CountriesSection() {
-  const [ref, inView] = useInView(0.1)
-
-  const countries = [
-    { flag: '🇵🇪', name: 'Perú',       currency: 'PEN' },
-    { flag: '🇨🇴', name: 'Colombia',   currency: 'COP' },
-    { flag: '🇲🇽', name: 'México',     currency: 'MXN' },
-    { flag: '🇦🇷', name: 'Argentina',  currency: 'ARS' },
-    { flag: '🇨🇱', name: 'Chile',      currency: 'CLP' },
-    { flag: '🇧🇷', name: 'Brasil',     currency: 'BRL' },
-    { flag: '🇺🇾', name: 'Uruguay',    currency: 'UYU' },
-    { flag: '🇧🇴', name: 'Bolivia',    currency: 'BOB' },
-    { flag: '🇪🇨', name: 'Ecuador',    currency: 'USD' },
-    { flag: '🇵🇾', name: 'Paraguay',   currency: 'PYG' },
-    { flag: '🇻🇪', name: 'Venezuela',  currency: 'USD' },
-  ]
-
+function FinalCta() {
   return (
-    <section style={{ padding: '80px 24px', borderTop: '1px solid rgba(255,255,255,0.04)' }}>
-      <div style={{ maxWidth: 1100, margin: '0 auto' }}>
-        <div style={{ textAlign: 'center', marginBottom: 52 }}>
-          <div style={{ fontSize: 12, fontWeight: 700, color: '#7c83fd', textTransform: 'uppercase', letterSpacing: '2px', marginBottom: 16 }}>Disponibilidad</div>
-          <h2 style={{
-            fontFamily: "'Fraunces', serif",
-            fontSize: 'clamp(26px, 4vw, 42px)', fontWeight: 800,
-            color: 'white', marginBottom: 16, letterSpacing: '-1px',
-          }}>
-            Disponible en toda Latinoamérica 🌎
-          </h2>
-          <p style={{ fontSize: 16, color: 'var(--text-soft)', maxWidth: 500, margin: '0 auto', lineHeight: 1.7 }}>
-            Fluxy detecta tu país automáticamente y muestra los precios en tu moneda local. Paga con Mercado Pago desde cualquier país.
-          </p>
-        </div>
-
-        <div ref={ref} style={{
-          display: 'grid',
-          gridTemplateColumns: 'repeat(auto-fill, minmax(140px, 1fr))',
-          gap: 14,
-        }}>
-          {countries.map((country, i) => (
-            <div key={i} style={{
-              background: 'rgba(13,13,26,0.8)',
-              border: '1px solid rgba(255,255,255,0.06)',
-              borderRadius: 16, padding: '20px 16px',
-              textAlign: 'center',
-              opacity: inView ? 1 : 0,
-              transform: inView ? 'translateY(0)' : 'translateY(20px)',
-              transition: `all 0.5s ease ${i * 0.05}s`,
-              cursor: 'default',
-            }}
-              onMouseEnter={e => { e.currentTarget.style.borderColor = 'rgba(124,131,253,0.3)'; e.currentTarget.style.transform = 'translateY(-4px)' }}
-              onMouseLeave={e => { e.currentTarget.style.borderColor = 'rgba(255,255,255,0.06)'; e.currentTarget.style.transform = 'translateY(0)' }}
-            >
-              <div style={{ fontSize: 36, marginBottom: 10 }}>{country.flag}</div>
-              <div style={{ fontSize: 13, fontWeight: 600, color: 'white', marginBottom: 4 }}>{country.name}</div>
-              <div style={{ fontSize: 11, color: 'var(--text-muted)', background: 'rgba(124,131,253,0.08)', border: '1px solid rgba(124,131,253,0.15)', borderRadius: 6, padding: '2px 8px', display: 'inline-block' }}>{country.currency}</div>
-            </div>
-          ))}
-
-          {/* Próximamente */}
-          <div style={{
-            background: 'rgba(124,131,253,0.04)',
-            border: '1px dashed rgba(124,131,253,0.2)',
-            borderRadius: 16, padding: '20px 16px',
-            textAlign: 'center',
-            opacity: inView ? 1 : 0,
-            transform: inView ? 'translateY(0)' : 'translateY(20px)',
-            transition: `all 0.5s ease ${countries.length * 0.05}s`,
-          }}>
-            <div style={{ fontSize: 36, marginBottom: 10 }}>🌍</div>
-            <div style={{ fontSize: 13, fontWeight: 600, color: '#7c83fd', marginBottom: 4 }}>Más países</div>
-            <div style={{ fontSize: 11, color: 'var(--text-muted)' }}>Próximamente</div>
-          </div>
-        </div>
-
-        {/* Badge de Mercado Pago */}
-        <div style={{ textAlign: 'center', marginTop: 40 }}>
-          <div style={{ display: 'inline-flex', alignItems: 'center', gap: 10, background: 'rgba(0,188,255,0.06)', border: '1px solid rgba(0,188,255,0.15)', borderRadius: 50, padding: '10px 22px' }}>
-            <span style={{ fontSize: 18 }}>💳</span>
-            <span style={{ fontSize: 14, color: 'rgba(255,255,255,0.6)' }}>Pagos procesados con</span>
-            <span style={{ fontSize: 14, fontWeight: 700, color: '#00bcff' }}>Mercado Pago</span>
-            <span style={{ fontSize: 14, color: 'rgba(255,255,255,0.4)' }}>en todos los países</span>
-          </div>
-        </div>
-      </div>
-    </section>
-  )
-}
-
-// ─── CTA Final ────────────────────────────────────────────────────────────────
-function CTASection() {
-  const [ref, inView] = useInView()
-
-  return (
-    <section style={{ padding: '80px 24px 120px' }}>
-      <div ref={ref} style={{
-        maxWidth: 800, margin: '0 auto', textAlign: 'center',
-        background: 'linear-gradient(135deg, rgba(124,131,253,0.12), rgba(79,70,229,0.08))',
-        border: '1px solid rgba(124,131,253,0.2)',
-        borderRadius: 28, padding: 'clamp(40px, 8vw, 72px) clamp(24px, 6vw, 60px)',
-        position: 'relative', overflow: 'hidden',
-        opacity: inView ? 1 : 0, transform: inView ? 'translateY(0)' : 'translateY(30px)',
-        transition: 'all 0.7s ease',
-      }}>
-        {/* Glow */}
-        <div style={{ position: 'absolute', top: '50%', left: '50%', transform: 'translate(-50%, -50%)', width: 400, height: 400, background: 'radial-gradient(circle, rgba(124,131,253,0.15) 0%, transparent 65%)', pointerEvents: 'none' }}/>
-
-        <div style={{ position: 'relative' }}>
-          <div style={{ fontSize: 48, marginBottom: 20 }}>🚀</div>
-          <h2 style={{
-            fontFamily: "'Fraunces', serif",
-            fontSize: 'clamp(28px, 5vw, 48px)', fontWeight: 800,
-            color: 'white', marginBottom: 16, letterSpacing: '-1px',
-          }}>
-            ¿Listo para vender más?
-          </h2>
-          <p style={{ fontSize: 17, color: 'var(--text-soft)', lineHeight: 1.7, marginBottom: 36, maxWidth: 480, margin: '0 auto 36px' }}>
-            Fluxy es una plataforma nueva, confiable y en constante crecimiento. Sé parte desde el inicio y lleva tu negocio al siguiente nivel. Es gratis para empezar.
-          </p>
-          <div style={{ display: 'flex', gap: 14, justifyContent: 'center', flexWrap: 'wrap' }}>
-            <Link to="/register-business" style={{
-              display: 'inline-flex', alignItems: 'center', gap: 8,
-              background: 'linear-gradient(135deg, #7c83fd, #4f46e5)',
-              color: 'white', textDecoration: 'none',
-              padding: '16px 32px', borderRadius: 14,
-              fontSize: 16, fontWeight: 700,
-              boxShadow: '0 8px 32px rgba(124,131,253,0.4)',
-              transition: 'all 0.2s',
-            }}
-              onMouseEnter={e => { e.currentTarget.style.transform = 'translateY(-2px)'; e.currentTarget.style.boxShadow = '0 12px 40px rgba(124,131,253,0.5)' }}
-              onMouseLeave={e => { e.currentTarget.style.transform = 'translateY(0)'; e.currentTarget.style.boxShadow = '0 8px 32px rgba(124,131,253,0.4)' }}
-            >
-              Crear mi tienda gratis →
+    <section className="landing-final-cta">
+      <div className="landing-shell">
+        <div>
+          <span><Icon name="spark" size={18} /> Tu próxima venta puede empezar hoy</span>
+          <h2>Haz que gestionar tu tienda se sienta fácil.</h2>
+          <p>Crea tu cuenta, publica tus productos y comienza a recibir pedidos.</p>
+          <div>
+            <Link className="landing-button landing-button--light" to="/register-business">
+              Crear mi tienda gratis <Icon name="arrow" size={18} />
             </Link>
-            <Link to="/login" style={{
-              display: 'inline-flex', alignItems: 'center',
-              color: 'var(--text-soft)', textDecoration: 'none',
-              padding: '16px 24px', borderRadius: 14,
-              fontSize: 15, border: '1px solid rgba(255,255,255,0.1)',
-              transition: 'all 0.2s',
-            }}
-              onMouseEnter={e => { e.currentTarget.style.color = 'white'; e.currentTarget.style.borderColor = 'rgba(255,255,255,0.25)' }}
-              onMouseLeave={e => { e.currentTarget.style.color = 'var(--text-soft)'; e.currentTarget.style.borderColor = 'rgba(255,255,255,0.1)' }}
-            >Ya tengo cuenta</Link>
+            <Link className="landing-final-login" to="/login">Ya tengo una cuenta</Link>
           </div>
-          <p style={{ fontSize: 13, color: 'var(--text-muted)', marginTop: 20 }}>
-            Sin tarjeta de crédito · Cancela cuando quieras
-          </p>
+        </div>
+        <div className="landing-final-graphic" aria-hidden="true">
+          <span className="graphic-card graphic-card--one"><Icon name="orders" /> <i>12 pedidos nuevos</i></span>
+          <span className="graphic-card graphic-card--two"><b>+28%</b><i>ventas este mes</i></span>
+          <span className="graphic-card graphic-card--three"><Icon name="store" size={28} /></span>
         </div>
       </div>
     </section>
   )
 }
 
-// ─── Footer ───────────────────────────────────────────────────────────────────
 function Footer() {
   return (
-    <footer style={{ borderTop: '1px solid rgba(255,255,255,0.04)', padding: '48px 24px 32px' }}>
-      <div style={{ maxWidth: 1200, margin: '0 auto' }}>
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: 40, marginBottom: 48 }}>
+    <footer className="landing-footer">
+      <div className="landing-shell">
+        <div className="landing-footer__main">
           <div>
-            <BrandLogo size={32} textSize={17} style={{ marginBottom: 16 }} />
-            <p style={{ fontSize: 13, color: 'var(--text-muted)', lineHeight: 1.7, maxWidth: 240 }}>
-              Plataforma nueva y confiable para emprendedores latinoamericanos. Disponible en 11 países y en constante crecimiento.
-            </p>
+            <BrandMark />
+            <p>La forma simple de crear, vender y gestionar tu tienda online.</p>
           </div>
           <div>
-            <div style={{ fontSize: 12, fontWeight: 700, color: 'white', textTransform: 'uppercase', letterSpacing: '1px', marginBottom: 16 }}>Producto</div>
-            {['Características', 'Planes y precios', 'Cómo funciona'].map(item => (
-              <div key={item} style={{ marginBottom: 10 }}>
-                <a href="#" style={{ fontSize: 14, color: 'var(--text-muted)', textDecoration: 'none', transition: 'color 0.2s' }}
-                  onMouseEnter={e => e.currentTarget.style.color = 'white'}
-                  onMouseLeave={e => e.currentTarget.style.color = 'var(--text-muted)'}
-                >{item}</a>
-              </div>
-            ))}
+            <strong>Producto</strong>
+            <a href="#features">Características</a>
+            <a href="#pricing">Planes y precios</a>
+            <a href="#how">Cómo funciona</a>
           </div>
           <div>
-            <div style={{ fontSize: 12, fontWeight: 700, color: 'white', textTransform: 'uppercase', letterSpacing: '1px', marginBottom: 16 }}>Cuenta</div>
-            {[
-              { label: 'Iniciar sesión', to: '/login' },
-              { label: 'Crear tienda gratis', to: '/register-business' },
-            ].map(item => (
-              <div key={item.label} style={{ marginBottom: 10 }}>
-                <Link to={item.to} style={{ fontSize: 14, color: 'var(--text-muted)', textDecoration: 'none', transition: 'color 0.2s' }}
-                  onMouseEnter={e => e.currentTarget.style.color = 'white'}
-                  onMouseLeave={e => e.currentTarget.style.color = 'var(--text-muted)'}
-                >{item.label}</Link>
-              </div>
-            ))}
+            <strong>Cuenta</strong>
+            <Link to="/login">Iniciar sesión</Link>
+            <Link to="/register-business">Crear tienda gratis</Link>
+          </div>
+          <div>
+            <strong>Legal</strong>
+            <Link to="/terms">Términos y condiciones</Link>
+            <Link to="/terms">Privacidad</Link>
           </div>
         </div>
-
-        <div style={{ borderTop: '1px solid rgba(255,255,255,0.04)', paddingTop: 24, display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: 12 }}>
-          <div style={{ fontSize: 13, color: 'var(--text-muted)' }}>
-            © {new Date().getFullYear()} Fluxy. Todos los derechos reservados.
-          </div>
-          <div style={{ fontSize: 13, color: 'var(--text-muted)' }}>
-            Hecho con ❤️ para emprendedores latinoamericanos 🌎
-          </div>
+        <div className="landing-footer__bottom">
+          <span>© {new Date().getFullYear()} Fluxy. Todos los derechos reservados.</span>
+          <span>Hecho para negocios que quieren crecer.</span>
         </div>
       </div>
     </footer>
   )
 }
 
-// ─── Background animado ───────────────────────────────────────────────────────
-function AnimatedBackground() {
-  return (
-    <>
-      <div style={{ position: 'fixed', inset: 0, zIndex: -2, background: '#06060f' }}/>
-      <div style={{
-        position: 'fixed', inset: 0, zIndex: -1,
-        background: `
-          radial-gradient(ellipse 80% 60% at 20% 10%, rgba(124,131,253,0.08) 0%, transparent 55%),
-          radial-gradient(ellipse 60% 50% at 80% 80%, rgba(79,70,229,0.06) 0%, transparent 50%),
-          radial-gradient(ellipse 40% 40% at 50% 50%, rgba(52,211,153,0.04) 0%, transparent 45%)
-        `,
-        animation: 'bgPulse 15s ease infinite alternate',
-      }}/>
-      <div style={{
-        position: 'fixed', inset: 0, zIndex: -1,
-        backgroundImage: `
-          linear-gradient(rgba(124,131,253,0.025) 1px, transparent 1px),
-          linear-gradient(90deg, rgba(124,131,253,0.025) 1px, transparent 1px)
-        `,
-        backgroundSize: '72px 72px',
-        maskImage: 'radial-gradient(ellipse 80% 80% at 50% 30%, black 30%, transparent 100%)',
-      }}/>
-      <style>{`
-        @keyframes bgPulse {
-          0%   { opacity: 0.8; transform: scale(1); }
-          50%  { opacity: 1; transform: scale(1.03); }
-          100% { opacity: 0.8; transform: scale(1); }
-        }
-        @keyframes pulse {
-          0%, 100% { opacity: 1; transform: scale(1); }
-          50%       { opacity: 0.5; transform: scale(0.85); }
-        }
-        @keyframes float {
-          0%, 100% { transform: translateY(0); }
-          50%       { transform: translateY(-12px); }
-        }
-        * { box-sizing: border-box; margin: 0; padding: 0; }
-      `}</style>
-    </>
-  )
-}
-
-// ─── LandingPage principal ────────────────────────────────────────────────────
 export default function LandingPage() {
   return (
-    <div style={{ minHeight: '100vh', color: 'white', fontFamily: 'DM Sans, sans-serif' }}>
-      <AnimatedBackground />
+    <div className="landing-page">
       <Navbar />
       <Hero />
-      <Stats />
-      <Features />
-      <HowItWorks />
-      <Testimonials />
-      <Pricing />
-      <CountriesSection />
-      <CTASection />
       <Footer />
     </div>
   )
