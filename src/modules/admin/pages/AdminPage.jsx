@@ -1,7 +1,7 @@
 // src/modules/admin/pages/AdminPage.jsx
 import { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { API_URL } from '../../../app/config'
+import { API_URL } from '@/app/config'
 
 function getToken() { return localStorage.getItem('token') || '' }
 

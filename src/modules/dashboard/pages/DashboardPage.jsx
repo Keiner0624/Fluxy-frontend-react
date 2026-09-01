@@ -1,9 +1,9 @@
 // src/modules/dashboard/pages/DashboardPage.jsx
 import { useNavigate, useSearchParams } from 'react-router-dom'
 import { useEffect, useState } from 'react'
-import DashboardLayout from '../components/DashboardLayout'
-import { API_URL, getCompanyStoreUrl } from '../../../app/config'
-import { DashboardCardSkeleton } from '../../../components/Skeleton'
+import DashboardLayout from '@/modules/dashboard/components/DashboardLayout'
+import { API_URL, getCompanyStoreUrl } from '@/app/config'
+import { DashboardCardSkeleton } from '@/components/Skeleton'
 
 const PLAN_NAMES = { PRO: 'Pro', BUSINESS: 'Business' }
 const PAYMENT_STATUS_MAP = {

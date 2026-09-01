@@ -1,9 +1,9 @@
 // src/modules/dashboard/pages/MetricsPage.jsx
 import { useState, useEffect } from 'react'
-import DashboardLayout from '../components/DashboardLayout'
-import PlanGate from '../../../components/PlanGate'
-import usePlan from '../../../hooks/usePlan'
-import { API_URL } from '../../../app/config'
+import DashboardLayout from '@/modules/dashboard/components/DashboardLayout'
+import PlanGate from '@/components/PlanGate'
+import usePlan from '@/hooks/usePlan'
+import { API_URL } from '@/app/config'
 
 function getToken() { return localStorage.getItem('token') || '' }
 

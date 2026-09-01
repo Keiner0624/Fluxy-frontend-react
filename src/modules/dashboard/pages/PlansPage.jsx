@@ -1,8 +1,8 @@
 // src/modules/dashboard/pages/PlansPage.jsx
 import { useState, useEffect } from 'react'
-import DashboardLayout from '../components/DashboardLayout'
-import { API_URL } from '../../../app/config'
-import { useCurrency } from '../../../hooks/useCurrency'
+import DashboardLayout from '@/modules/dashboard/components/DashboardLayout'
+import { API_URL } from '@/app/config'
+import { useCurrency } from '@/hooks/useCurrency'
 
 function getToken() {
   return localStorage.getItem('token') || ''

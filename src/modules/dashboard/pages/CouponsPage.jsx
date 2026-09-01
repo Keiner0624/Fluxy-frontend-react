@@ -1,7 +1,7 @@
 // src/modules/dashboard/pages/CouponsPage.jsx
 import { useState, useEffect } from 'react'
-import DashboardLayout from '../components/DashboardLayout'
-import { API_URL } from '../../../app/config'
+import DashboardLayout from '@/modules/dashboard/components/DashboardLayout'
+import { API_URL } from '@/app/config'
 
 function getToken() { return localStorage.getItem('token') || '' }
 

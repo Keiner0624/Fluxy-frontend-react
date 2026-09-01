@@ -1,9 +1,9 @@
 // src/modules/dashboard/components/DashboardLayout.jsx
 import { useState, useEffect } from 'react'
 import { Link, useNavigate, useLocation } from 'react-router-dom'
-import { getCompanyStoreUrl, API_URL } from '../../../app/config'
-import BrandLogo from '../../../components/BrandLogo'
-import { usePushNotifications } from '../../../hooks/usePushNotifications'  // ← import
+import { getCompanyStoreUrl, API_URL } from '@/app/config'
+import BrandLogo from '@/components/BrandLogo'
+import { usePushNotifications } from '@/hooks/usePushNotifications'  // ← import
 
 function getToken() { return localStorage.getItem('token') || '' }
 

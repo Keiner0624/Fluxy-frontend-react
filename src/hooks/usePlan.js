@@ -1,6 +1,6 @@
 // src/hooks/usePlan.js
 import { useState, useEffect } from 'react'
-import { API_URL } from '../app/config'
+import { API_URL } from '@/app/config'
 
 function getToken() {
   return localStorage.getItem('token') || ''

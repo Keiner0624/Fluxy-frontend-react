@@ -1,8 +1,8 @@
 // src/modules/dashboard/pages/OrdersPage.jsx
 import { useState, useEffect } from 'react'
-import DashboardLayout from '../components/DashboardLayout'
-import { API_URL } from '../../../app/config'
-import { OrderRowSkeleton, StatCardSkeleton } from '../../../components/Skeleton'
+import DashboardLayout from '@/modules/dashboard/components/DashboardLayout'
+import { API_URL } from '@/app/config'
+import { OrderRowSkeleton, StatCardSkeleton } from '@/components/Skeleton'
 
 function getToken() {
   return localStorage.getItem('token') || ''

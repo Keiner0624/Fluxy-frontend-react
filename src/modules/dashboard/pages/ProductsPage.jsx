@@ -1,8 +1,8 @@
 // src/modules/dashboard/pages/ProductsPage.jsx
 import { useState, useEffect, useRef } from 'react'
-import DashboardLayout from '../components/DashboardLayout'
-import { API_URL } from '../../../app/config'
-import { ProductCardSkeleton } from '../../../components/Skeleton'
+import DashboardLayout from '@/modules/dashboard/components/DashboardLayout'
+import { API_URL } from '@/app/config'
+import { ProductCardSkeleton } from '@/components/Skeleton'
 
 const CLOUDINARY_CLOUD  = import.meta.env.VITE_CLOUDINARY_CLOUD  || 'dklhbrw7s'
 const CLOUDINARY_PRESET = import.meta.env.VITE_CLOUDINARY_PRESET || 'fluxy_unsigned'

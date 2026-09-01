@@ -1,8 +1,8 @@
 // src/modules/auth/pages/LoginPage.jsx
 import { useState } from 'react'
 import { useNavigate, Link, useSearchParams } from 'react-router-dom'
-import { API_URL, buildStoreUrl } from '../../../app/config'
-import BrandLogo from '../../../components/BrandLogo'
+import { API_URL, buildStoreUrl } from '@/app/config'
+import BrandLogo from '@/components/BrandLogo'
 
 export default function LoginPage() {
   const navigate = useNavigate()

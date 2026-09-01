@@ -1,10 +1,10 @@
 // src/modules/dashboard/pages/SettingsPage.jsx
 import { useState, useEffect, useRef } from 'react'
 import { useNavigate } from 'react-router-dom'
-import DashboardLayout from '../components/DashboardLayout'
-import usePlan from '../../../hooks/usePlan'
-import { API_URL, getCompanyStoreUrl } from '../../../app/config'
-import { useCurrency } from '../../../hooks/useCurrency'
+import DashboardLayout from '@/modules/dashboard/components/DashboardLayout'
+import usePlan from '@/hooks/usePlan'
+import { API_URL, getCompanyStoreUrl } from '@/app/config'
+import { useCurrency } from '@/hooks/useCurrency'
 
 const CLOUDINARY_CLOUD  = 'dklhbrw7s'
 const CLOUDINARY_PRESET = 'fluxy_unsigned'

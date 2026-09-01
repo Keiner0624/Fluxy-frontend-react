@@ -1,7 +1,7 @@
 // src/modules/landing/pages/LandingPage.jsx
 import { useState, useEffect, useRef } from 'react'
 import { Link } from 'react-router-dom'
-import BrandLogo from '../../../components/BrandLogo'
+import BrandLogo from '@/components/BrandLogo'
 
 // ─── Animación de contador ────────────────────────────────────────────────────
 function useCounter(target, duration = 2000, start = false) {

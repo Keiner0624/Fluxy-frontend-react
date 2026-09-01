@@ -1,6 +1,6 @@
 // src/hooks/usePushNotifications.js
 import { useEffect } from 'react'
-import { API_URL } from '../app/config'
+import { API_URL } from '@/app/config'
 
 const VAPID_PUBLIC_KEY = import.meta.env.VITE_VAPID_PUBLIC_KEY || 'BA-Zyy_5D3tqkl5M0IZY38Obs3RpAxGBe0I6qszh6W0T6APXzVrf7BVkjfURgp4F2MCgmlutNeZ4Xq4ufggTCxY'
 
