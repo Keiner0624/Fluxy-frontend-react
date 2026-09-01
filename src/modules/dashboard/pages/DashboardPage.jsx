@@ -142,6 +142,8 @@ export default function DashboardPage() {
       const timer = setTimeout(() => setPaymentStatus(null), 6000)
       return () => clearTimeout(timer)
     }
+    // Solo al montar: lee los params de pago una unica vez
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
 
   const closeBirthdayModal = () => {

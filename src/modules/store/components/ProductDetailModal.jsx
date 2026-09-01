@@ -12,7 +12,7 @@ export default function ProductDetailModal({ product, onClose, onAddToCart, comp
   const getImages = () => {
     let imgs = []
     if (product.images) {
-      try { imgs = JSON.parse(product.images) } catch {}
+      try { imgs = JSON.parse(product.images) } catch { /* images no es JSON: se ignora */ }
     }
     if (product.imageUrl && !imgs.includes(product.imageUrl)) {
       imgs = [product.imageUrl, ...imgs]

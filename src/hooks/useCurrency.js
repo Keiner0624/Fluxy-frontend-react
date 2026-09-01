@@ -41,7 +41,7 @@ export function useCurrency() {
           setLoading(false)
           return
         }
-      } catch {}
+      } catch { /* config guardada invalida: se cae a deteccion por IP */ }
     }
 
     // Detectar país por IP

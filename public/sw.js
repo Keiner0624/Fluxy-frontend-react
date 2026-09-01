@@ -1,6 +1,6 @@
 // public/sw.js  ← va en la raíz de /public (NO en /src)
 
-self.addEventListener('install',  e => self.skipWaiting())
+self.addEventListener('install',  () => self.skipWaiting())
 self.addEventListener('activate', e => e.waitUntil(self.clients.claim()))
 
 // ── Recibir push del backend ──────────────────────────────────────────────
@@ -9,7 +9,7 @@ self.addEventListener('push', event => {
 
   try {
     if (event.data) data = event.data.json()
-  } catch (_) {}
+  } catch { /* payload sin JSON valido: se usa el mensaje por defecto */ }
 
   event.waitUntil(
     self.registration.showNotification(data.title, {

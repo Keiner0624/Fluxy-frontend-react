@@ -124,6 +124,8 @@ export default function AdminPage() {
   useEffect(() => {
     if (!getToken()) { navigate('/admin/login'); return }
     loadAll()
+    // Solo al montar: incluir loadAll re-ejecutaria en cada render
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
 
   const loadAll = async () => {
@@ -329,7 +331,7 @@ export default function AdminPage() {
               <tbody>
                 {filtered.length===0 ? (
                   <tr><td colSpan={7} style={{ padding:'36px',textAlign:'center',color:'rgba(255,255,255,0.15)',fontSize:13 }}>No hay vendedores</td></tr>
-                ) : filtered.map((v,i)=>{
+                ) : filtered.map((v)=>{
                   const pc   = PLAN_COLORS[v.plan]||PLAN_COLORS.FREE
                   const days = daysLeft(v.planExpiresAt)
                   const isExp = days!==null && days<=3

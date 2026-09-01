@@ -1,5 +1,4 @@
 // src/modules/store/components/CategoryPanel.jsx
-import { useState, useEffect } from 'react'
 
 // ─── Panel lateral desktop ────────────────────────────────────────────────────
 function DesktopPanel({ categories, selected, onSelect, primary, bgColors }) {

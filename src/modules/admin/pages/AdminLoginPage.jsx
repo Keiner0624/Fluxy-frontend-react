@@ -1,7 +1,7 @@
 // src/modules/admin/pages/AdminLoginPage.jsx
 import { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { API_URL, buildStoreUrl } from '@/app/config'
+import { API_URL } from '@/app/config'
 
 function getToken() { return localStorage.getItem('token') || '' }
 
@@ -23,6 +23,8 @@ export default function AdminLoginPage() {
         .then(r => { if (r.ok) navigate('/admin') })
         .catch(() => {})
     }
+    // Solo al montar: la redireccion inicial no debe repetirse
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
 
   const handleSubmit = async (e) => {

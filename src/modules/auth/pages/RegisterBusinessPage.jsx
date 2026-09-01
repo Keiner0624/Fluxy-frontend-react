@@ -109,12 +109,12 @@ export default function RegisterBusinessPage() {
         headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${getToken()}` },
         body:    JSON.stringify(profile),
       })
-    } catch (_) {}
+    } catch { /* si falla el PUT, el perfil igual se persiste en local */ }
     finally {
       try {
         const user = JSON.parse(localStorage.getItem('user') || '{}')
         localStorage.setItem('user', JSON.stringify({ ...user, ...profile }))
-      } catch {}
+      } catch { /* localStorage no disponible o con datos corruptos */ }
       setSavingProfile(false)
       navigate('/dashboard')
     }

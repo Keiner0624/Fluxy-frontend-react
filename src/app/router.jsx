@@ -18,7 +18,6 @@ import ResetPasswordPage from '@/modules/auth/pages/ResetPasswordPage'
 import AdminPage from '@/modules/admin/pages/AdminPage'
 import AdminLoginPage from '@/modules/admin/pages/AdminLoginPage'
 import TermsPage from '@/modules/landing/pages/TermsPage'
-import CategoryPanel from '@/modules/store/components/CategoryPanel'
 import NotFoundPage from '@/app/NotFoundPage'
 
 const PAYMENT_STATUS_MAP = {
@@ -83,6 +82,5 @@ export const router = createBrowserRouter([
   { path: '/admin',              element: <AdminPage /> },
   { path: '/admin/login',        element: <AdminLoginPage /> },
   { path: '/terms',              element: <TermsPage /> },
-  { path: '/categories',         element: <CategoryPanel /> },
   { path: '*',                   element: <NotFoundPage /> },
 ])
