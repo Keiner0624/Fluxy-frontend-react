@@ -24,7 +24,7 @@ export default function ProtectedRoute({ children }) {
     const warningTime = Math.max(0, ms - 30_000)
     const warningTimer = setTimeout(() => {
       const confirmed = window.confirm(
-        '⏰ Tu sesión expirará en 30 segundos. ¿Deseas continuar?\n\nHaz clic en Aceptar para renovar tu sesión.'
+        'Tu sesión expirará en 30 segundos.\n\nAceptá para volver a iniciar sesión.'
       )
       if (confirmed) {
         // Redirigir al login para que vuelva a autenticarse

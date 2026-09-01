@@ -3,16 +3,24 @@ import { useState, useEffect } from 'react'
 import DashboardLayout from '@/modules/dashboard/components/DashboardLayout'
 import { API_URL } from '@/app/config'
 import { OrderRowSkeleton, StatCardSkeleton } from '@/components/Skeleton'
+import Icon from '@/components/Icon'
 
 function getToken() {
   return localStorage.getItem('token') || ''
 }
 
 const STATUS_CONFIG = {
-  PENDING:   { label: 'Pendiente',  color: '#fbbf24', bg: 'rgba(251,191,36,0.1)',   border: 'rgba(251,191,36,0.25)',  icon: '⏳' },
-  COMPLETED: { label: 'Completado', color: '#34d399', bg: 'rgba(52,211,153,0.1)',   border: 'rgba(52,211,153,0.25)',  icon: '✅' },
-  CANCELLED: { label: 'Cancelado',  color: '#f87171', bg: 'rgba(248,113,113,0.1)',  border: 'rgba(248,113,113,0.25)', icon: '❌' },
+  PENDING:   { label: 'Pendiente',  badge: 'fx-badge--warn',   icon: 'clock' },
+  COMPLETED: { label: 'Completado', badge: 'fx-badge--ok',     icon: 'checkCircle' },
+  CANCELLED: { label: 'Cancelado',  badge: 'fx-badge--danger', icon: 'close' },
 }
+
+const FILTERS = [
+  { key: 'ALL',       label: 'Todos' },
+  { key: 'PENDING',   label: 'Pendientes' },
+  { key: 'COMPLETED', label: 'Completados' },
+  { key: 'CANCELLED', label: 'Cancelados' },
+]
 
 export default function OrdersPage() {
   const [orders, setOrders] = useState([])
@@ -73,7 +81,6 @@ export default function OrdersPage() {
       day: '2-digit', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit',
     })
   }
-
 
   const exportPDF = () => {
     const company = JSON.parse(localStorage.getItem('company') || '{}')
@@ -186,170 +193,208 @@ export default function OrdersPage() {
   }
 
   const filtered = filter === 'ALL' ? orders : orders.filter(o => o.status === filter)
-  const stats = {
-    total:     orders.length,
-    pending:   orders.filter(o => o.status === 'PENDING').length,
-    completed: orders.filter(o => o.status === 'COMPLETED').length,
-    cancelled: orders.filter(o => o.status === 'CANCELLED').length,
-  }
+
+  const orderTotal = (o) =>
+    o.items?.reduce((s, item) => s + item.unitPrice * item.quantity, 0) || o.total || 0
+
+  const stats = [
+    { label: 'Pedidos totales', value: orders.length, icon: 'inbox' },
+    { label: 'Pendientes',      value: orders.filter(o => o.status === 'PENDING').length, icon: 'clock' },
+    { label: 'Completados',     value: orders.filter(o => o.status === 'COMPLETED').length, icon: 'checkCircle' },
+    {
+      label: 'Ventas confirmadas',
+      value: `S/ ${orders.filter(o => o.status === 'COMPLETED').reduce((s, o) => s + orderTotal(o), 0).toFixed(2)}`,
+      icon: 'money',
+    },
+  ]
 
   return (
     <DashboardLayout>
-      {/* Header */}
-      <div style={{ marginBottom: 28 }}>
-        <div style={{ fontSize: 11, color: 'var(--primary)', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '1.5px', marginBottom: 6 }}>Panel de vendedor</div>
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', flexWrap: 'wrap', gap: 12 }}>
-          <div>
-            <h1 style={{ fontFamily: "'Fraunces', serif", fontSize: 28, fontWeight: 700, color: 'white' }}>Pedidos</h1>
-            <p style={{ fontSize: 13, color: 'var(--text-muted)', marginTop: 4 }}>{orders.length} pedido{orders.length !== 1 ? 's' : ''} en total</p>
-          </div>
-          <div style={{ display: 'flex', gap: 8 }}>
-            <button onClick={loadOrders} style={{ display: 'flex', alignItems: 'center', gap: 8, background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.1)', borderRadius: 11, padding: '9px 16px', color: 'var(--text-soft)', fontSize: 13, cursor: 'pointer' }}>
-              🔄 Actualizar
-            </button>
-            <button onClick={exportPDF} disabled={orders.length === 0} style={{ display: 'flex', alignItems: 'center', gap: 8, background: orders.length === 0 ? 'rgba(255,255,255,0.03)' : 'rgba(124,131,253,0.1)', border: '1px solid rgba(124,131,253,0.25)', borderRadius: 11, padding: '9px 16px', color: orders.length === 0 ? 'rgba(255,255,255,0.2)' : '#7c83fd', fontSize: 13, fontWeight: 600, cursor: orders.length === 0 ? 'not-allowed' : 'pointer', transition: 'all 0.2s' }}
-              onMouseEnter={e => { if (orders.length > 0) e.currentTarget.style.background = 'rgba(124,131,253,0.18)' }}
-              onMouseLeave={e => e.currentTarget.style.background = orders.length === 0 ? 'rgba(255,255,255,0.03)' : 'rgba(124,131,253,0.1)'}
-            >
-              📄 Exportar PDF
-            </button>
-          </div>
+      <div className="fx-page-head">
+        <div>
+          <h1>Pedidos</h1>
+          <p>{loading ? 'Cargando…' : `${orders.length} ${orders.length === 1 ? 'pedido' : 'pedidos'} en total`}</p>
+        </div>
+        <div className="fx-page-head__actions">
+          <button className="fx-btn fx-btn--secondary" onClick={loadOrders} disabled={loading}>
+            <Icon name="refresh" size={15} />
+            Actualizar
+          </button>
+          <button className="fx-btn fx-btn--secondary" onClick={exportPDF} disabled={orders.length === 0}>
+            <Icon name="download" size={15} />
+            Exportar
+          </button>
         </div>
       </div>
 
-      {/* Stats skeleton o reales */}
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(140px, 1fr))', gap: 12, marginBottom: 24 }}>
-        {loading ? (
-          [1,2,3,4].map(i => <StatCardSkeleton key={i}/>)
-        ) : (
-          [
-            { label: 'Total',      value: stats.total,     color: '#7c83fd', icon: '📋' },
-            { label: 'Pendientes', value: stats.pending,   color: '#fbbf24', icon: '⏳' },
-            { label: 'Completados',value: stats.completed, color: '#34d399', icon: '✅' },
-            { label: 'Cancelados', value: stats.cancelled, color: '#f87171', icon: '❌' },
-          ].map(stat => (
-            <div key={stat.label} style={{ background: 'rgba(13,13,26,0.9)', border: '1px solid rgba(255,255,255,0.06)', borderRadius: 14, padding: '16px' }}>
-              <div style={{ fontSize: 20, marginBottom: 8 }}>{stat.icon}</div>
-              <div style={{ fontFamily: "'Fraunces', serif", fontSize: 26, fontWeight: 700, color: stat.color, marginBottom: 4 }}>{stat.value}</div>
-              <div style={{ fontSize: 12, color: 'var(--text-muted)' }}>{stat.label}</div>
+      <div className="fx-stats" style={{ marginBottom: 20 }}>
+        {loading
+          ? Array.from({ length: 4 }).map((_, i) => <StatCardSkeleton key={i} />)
+          : stats.map((s) => (
+            <div key={s.label} className="fx-stat">
+              <span className="fx-stat__label"><Icon name={s.icon} size={14} />{s.label}</span>
+              <p className="fx-stat__value">{s.value}</p>
             </div>
-          ))
-        )}
-      </div>
-
-      {/* Filtros */}
-      <div style={{ display: 'flex', gap: 8, marginBottom: 20, flexWrap: 'wrap' }}>
-        {[
-          { key: 'ALL', label: 'Todos' },
-          { key: 'PENDING', label: '⏳ Pendientes' },
-          { key: 'COMPLETED', label: '✅ Completados' },
-          { key: 'CANCELLED', label: '❌ Cancelados' },
-        ].map(f => (
-          <button key={f.key} onClick={() => setFilter(f.key)} style={{
-            padding: '7px 16px', borderRadius: 50,
-            background: filter === f.key ? 'rgba(124,131,253,0.15)' : 'rgba(255,255,255,0.04)',
-            border: filter === f.key ? '1px solid rgba(124,131,253,0.35)' : '1px solid rgba(255,255,255,0.08)',
-            color: filter === f.key ? 'var(--primary)' : 'var(--text-muted)',
-            fontSize: 13, fontWeight: filter === f.key ? 600 : 400, cursor: 'pointer', transition: 'all 0.2s',
-          }}>{f.label}</button>
-        ))}
+          ))}
       </div>
 
       {error && (
-        <div style={{ background: 'rgba(248,113,113,0.08)', border: '1px solid rgba(248,113,113,0.2)', borderRadius: 10, padding: '12px 16px', marginBottom: 20, fontSize: 13, color: '#f87171' }}>⚠️ {error}</div>
-      )}
-
-      {/* Skeleton rows */}
-      {loading && (
-        <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
-          {[1,2,3,4,5].map(i => <OrderRowSkeleton key={i}/>)}
+        <div className="fx-alert fx-alert--error" style={{ marginBottom: 16 }}>
+          <Icon name="alert" size={16} /><span>{error}</span>
         </div>
       )}
 
-      {/* Sin pedidos */}
-      {!loading && filtered.length === 0 && (
-        <div style={{ textAlign: 'center', padding: '60px 24px', background: 'rgba(13,13,26,0.6)', border: '1px dashed rgba(255,255,255,0.08)', borderRadius: 20 }}>
-          <div style={{ fontSize: 48, marginBottom: 16 }}>🛒</div>
-          <h3 style={{ color: 'white', marginBottom: 8, fontFamily: "'Fraunces', serif" }}>
-            {filter === 'ALL' ? 'Sin pedidos aún' : `Sin pedidos ${STATUS_CONFIG[filter]?.label.toLowerCase()}s`}
-          </h3>
-          <p style={{ color: 'var(--text-muted)', fontSize: 14 }}>Cuando tus clientes hagan pedidos aparecerán aquí.</p>
-        </div>
-      )}
+      <div className="fx-tabs" style={{ marginBottom: 16 }}>
+        {FILTERS.map((f) => (
+          <button
+            key={f.key}
+            className={`fx-tab${filter === f.key ? ' fx-tab--on' : ''}`}
+            onClick={() => setFilter(f.key)}
+          >
+            {f.label}
+            <span className="fx-tab__count">
+              {f.key === 'ALL' ? orders.length : orders.filter(o => o.status === f.key).length}
+            </span>
+          </button>
+        ))}
+      </div>
 
-      {/* Lista de pedidos */}
-      {!loading && filtered.length > 0 && (
-        <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
-          {filtered.map(order => {
-            const st = STATUS_CONFIG[order.status] || STATUS_CONFIG.PENDING
-            const total = order.items?.reduce((s, i) => s + (i.unitPrice * i.quantity), 0) || order.total || 0
-            return (
-              <div key={order.id} onClick={() => setSelectedOrder(order)} style={{
-                background: 'rgba(13,13,26,0.9)', border: '1px solid rgba(255,255,255,0.06)',
-                borderRadius: 16, padding: '16px 20px', cursor: 'pointer', transition: 'all 0.2s',
-                display: 'flex', alignItems: 'center', gap: 16, flexWrap: 'wrap',
-              }}
-                onMouseEnter={e => { e.currentTarget.style.borderColor = 'rgba(124,131,253,0.25)'; e.currentTarget.style.transform = 'translateX(2px)' }}
-                onMouseLeave={e => { e.currentTarget.style.borderColor = 'rgba(255,255,255,0.06)'; e.currentTarget.style.transform = 'translateX(0)' }}
-              >
-                <div style={{ width: 44, height: 44, borderRadius: 12, flexShrink: 0, background: 'rgba(124,131,253,0.1)', border: '1px solid rgba(124,131,253,0.2)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontFamily: "'Fraunces', serif", fontSize: 14, fontWeight: 700, color: 'var(--primary)' }}>#{order.id}</div>
-                <div style={{ flex: 1, minWidth: 120 }}>
-                  <div style={{ fontSize: 14, fontWeight: 600, color: 'white', marginBottom: 3 }}>{order.customerName || 'Cliente'}</div>
-                  <div style={{ fontSize: 12, color: 'var(--text-muted)' }}>{formatDate(order.createdAt)}</div>
+      <div className="fx-card">
+        {loading ? (
+          <table className="fx-table">
+            <tbody>{Array.from({ length: 5 }).map((_, i) => <OrderRowSkeleton key={i} />)}</tbody>
+          </table>
+        ) : filtered.length === 0 ? (
+          <div className="fx-empty">
+            <div className="fx-empty__icon"><Icon name="inbox" size={20} /></div>
+            <p className="fx-empty__title">
+              {filter === 'ALL' ? 'Todavía no recibiste pedidos' : 'No hay pedidos con este estado'}
+            </p>
+            <p className="fx-empty__text">
+              {filter === 'ALL'
+                ? 'Cuando alguien compre en tu tienda, el pedido va a aparecer acá.'
+                : 'Probá con otro filtro para ver el resto de tus pedidos.'}
+            </p>
+          </div>
+        ) : (
+          <div className="fx-table-wrap">
+            <table className="fx-table">
+              <thead>
+                <tr>
+                  <th>Pedido</th>
+                  <th>Cliente</th>
+                  <th>Fecha</th>
+                  <th className="fx-table__num">Ítems</th>
+                  <th className="fx-table__num">Total</th>
+                  <th>Estado</th>
+                  <th style={{ width: 40 }} />
+                </tr>
+              </thead>
+              <tbody>
+                {filtered.map((order) => {
+                  const st = STATUS_CONFIG[order.status] || STATUS_CONFIG.PENDING
+                  return (
+                    <tr key={order.id} style={{ cursor: 'pointer' }} onClick={() => setSelectedOrder(order)}>
+                      <td className="fx-table__strong">#{order.id}</td>
+                      <td>{order.customerName || 'Sin nombre'}</td>
+                      <td style={{ fontSize: 13 }}>{formatDate(order.createdAt)}</td>
+                      <td className="fx-table__num">{order.items?.length || 0}</td>
+                      <td className="fx-table__num fx-table__strong">S/ {orderTotal(order).toFixed(2)}</td>
+                      <td>
+                        <span className={`fx-badge ${st.badge}`}>
+                          <Icon name={st.icon} size={12} />
+                          {st.label}
+                        </span>
+                      </td>
+                      <td><Icon name="chevronRight" size={15} style={{ color: 'var(--fx-muted)' }} /></td>
+                    </tr>
+                  )
+                })}
+              </tbody>
+            </table>
+          </div>
+        )}
+      </div>
+
+      {selectedOrder && (() => {
+        const st = STATUS_CONFIG[selectedOrder.status] || STATUS_CONFIG.PENDING
+        return (
+          <div className="fx-modal" role="dialog" aria-modal="true" onClick={() => setSelectedOrder(null)}>
+            <div className="fx-modal__panel" onClick={(e) => e.stopPropagation()}>
+              <div className="fx-modal__head">
+                <div>
+                  <h2 className="fx-h2">Pedido #{selectedOrder.id}</h2>
+                  <p className="fx-hint" style={{ marginTop: 2 }}>{formatDate(selectedOrder.createdAt)}</p>
                 </div>
-                <div style={{ fontSize: 12, color: 'var(--text-muted)', minWidth: 100 }}>{order.items?.length || 0} producto{(order.items?.length || 0) !== 1 ? 's' : ''}</div>
-                <div style={{ fontFamily: "'Fraunces', serif", fontSize: 18, fontWeight: 700, color: 'white', minWidth: 80 }}>S/ {total.toFixed(2)}</div>
-                <div style={{ display: 'flex', alignItems: 'center', gap: 6, background: st.bg, border: `1px solid ${st.border}`, borderRadius: 50, padding: '4px 12px', fontSize: 12, fontWeight: 600, color: st.color, flexShrink: 0 }}>{st.icon} {st.label}</div>
-                {order.status === 'PENDING' && (
-                  <div style={{ display: 'flex', gap: 6, flexShrink: 0 }} onClick={e => e.stopPropagation()}>
-                    <button onClick={() => handleComplete(order.id)} disabled={actionLoading === order.id + '_complete'} style={{ padding: '6px 12px', borderRadius: 8, fontSize: 12, fontWeight: 600, background: 'rgba(52,211,153,0.1)', border: '1px solid rgba(52,211,153,0.25)', color: '#34d399', cursor: 'pointer' }}>{actionLoading === order.id + '_complete' ? '...' : '✅'}</button>
-                    <button onClick={() => handleCancel(order.id)} disabled={actionLoading === order.id + '_cancel'} style={{ padding: '6px 12px', borderRadius: 8, fontSize: 12, fontWeight: 600, background: 'rgba(248,113,113,0.08)', border: '1px solid rgba(248,113,113,0.2)', color: '#f87171', cursor: 'pointer' }}>{actionLoading === order.id + '_cancel' ? '...' : '❌'}</button>
-                  </div>
+                <button className="fx-btn fx-btn--ghost fx-btn--icon" onClick={() => setSelectedOrder(null)} aria-label="Cerrar">
+                  <Icon name="close" size={17} />
+                </button>
+              </div>
+
+              <div className="fx-modal__body">
+                <div className="fx-row fx-row--between" style={{ marginBottom: 20 }}>
+                  <span className={`fx-badge ${st.badge}`}>
+                    <Icon name={st.icon} size={12} />
+                    {st.label}
+                  </span>
+                  <span style={{ fontSize: 19, fontWeight: 700 }}>S/ {orderTotal(selectedOrder).toFixed(2)}</span>
+                </div>
+
+                <p className="fx-eyebrow" style={{ marginBottom: 9 }}>Cliente</p>
+                <dl className="fx-deflist">
+                  <div><dt>Nombre</dt><dd>{selectedOrder.customerName || '—'}</dd></div>
+                  <div><dt>Teléfono</dt><dd>{selectedOrder.customerPhone || '—'}</dd></div>
+                  {selectedOrder.customerAddress && (
+                    <div><dt>Dirección</dt><dd>{selectedOrder.customerAddress}</dd></div>
+                  )}
+                </dl>
+
+                <p className="fx-eyebrow" style={{ margin: '20px 0 9px' }}>Productos</p>
+                {selectedOrder.items?.length ? (
+                  <table className="fx-table" style={{ border: '1px solid var(--fx-line)', borderRadius: 'var(--fx-r)' }}>
+                    <tbody>
+                      {selectedOrder.items.map((item, i) => (
+                        <tr key={i}>
+                          <td className="fx-table__strong">{item.productName || item.product?.name || 'Producto'}</td>
+                          <td className="fx-table__num">×{item.quantity}</td>
+                          <td className="fx-table__num">S/ {(item.unitPrice * item.quantity).toFixed(2)}</td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                ) : (
+                  <p className="fx-hint">Este pedido no tiene ítems registrados.</p>
                 )}
               </div>
-            )
-          })}
-        </div>
-      )}
 
-      {/* Modal detalle */}
-      {selectedOrder && (
-        <div style={{ position: 'fixed', inset: 0, zIndex: 500, background: 'rgba(0,0,0,0.8)', backdropFilter: 'blur(8px)', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 20 }} onClick={() => setSelectedOrder(null)}>
-          <div onClick={e => e.stopPropagation()} style={{ background: '#0a0a18', border: '1px solid rgba(255,255,255,0.08)', borderRadius: 24, width: '100%', maxWidth: 500, boxShadow: '0 40px 80px rgba(0,0,0,0.6)', maxHeight: '90vh', overflowY: 'auto' }}>
-            <div style={{ padding: '22px 26px', borderBottom: '1px solid rgba(255,255,255,0.06)', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-              <div>
-                <h3 style={{ fontFamily: "'Fraunces', serif", fontSize: 20, color: 'white' }}>Pedido #{selectedOrder.id}</h3>
-                <div style={{ fontSize: 12, color: 'var(--text-muted)', marginTop: 2 }}>{formatDate(selectedOrder.createdAt)}</div>
-              </div>
-              <button onClick={() => setSelectedOrder(null)} style={{ width: 34, height: 34, borderRadius: 9, background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.1)', color: 'var(--text-muted)', fontSize: 16, cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>✕</button>
-            </div>
-            <div style={{ padding: '24px 26px' }}>
-              {(() => {
-                const st = STATUS_CONFIG[selectedOrder.status] || STATUS_CONFIG.PENDING
-                return (
-                  <div style={{ display: 'inline-flex', alignItems: 'center', gap: 6, background: st.bg, border: `1px solid ${st.border}`, borderRadius: 50, padding: '5px 14px', fontSize: 13, fontWeight: 600, color: st.color, marginBottom: 20 }}>{st.icon} {st.label}</div>
-                )
-              })()}
-              <div style={{ background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.06)', borderRadius: 12, padding: '14px 16px', marginBottom: 16 }}>
-                <div style={{ fontSize: 11, color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.8px', marginBottom: 8 }}>Cliente</div>
-                <div style={{ fontSize: 15, fontWeight: 600, color: 'white' }}>👤 {selectedOrder.customerName || 'Sin nombre'}</div>
-                {selectedOrder.customerPhone && <div style={{ fontSize: 13, color: 'var(--text-soft)', marginTop: 6 }}>📞 {selectedOrder.customerPhone}</div>}
-                {selectedOrder.customerAddress && <div style={{ fontSize: 13, color: 'var(--text-soft)', marginTop: 6 }}>📍 {selectedOrder.customerAddress}</div>}
-              </div>
-              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '14px 16px', background: 'rgba(124,131,253,0.06)', border: '1px solid rgba(124,131,253,0.15)', borderRadius: 12, marginBottom: 24 }}>
-                <span style={{ fontSize: 14, fontWeight: 600, color: 'var(--text-soft)' }}>Total del pedido</span>
-                <span style={{ fontFamily: "'Fraunces', serif", fontSize: 22, fontWeight: 700, color: 'white' }}>S/ {(selectedOrder.items?.reduce((s, i) => s + i.unitPrice * i.quantity, 0) || selectedOrder.total || 0).toFixed(2)}</span>
-              </div>
               {selectedOrder.status === 'PENDING' && (
-                <div style={{ display: 'flex', gap: 10 }}>
-                  <button onClick={() => handleComplete(selectedOrder.id)} disabled={!!actionLoading} style={{ flex: 1, padding: '13px', background: 'rgba(52,211,153,0.1)', border: '1px solid rgba(52,211,153,0.25)', borderRadius: 12, fontSize: 14, fontWeight: 600, color: '#34d399', cursor: 'pointer' }}>{actionLoading ? '...' : '✅ Marcar completado'}</button>
-                  <button onClick={() => handleCancel(selectedOrder.id)} disabled={!!actionLoading} style={{ flex: 1, padding: '13px', background: 'rgba(248,113,113,0.08)', border: '1px solid rgba(248,113,113,0.2)', borderRadius: 12, fontSize: 14, fontWeight: 600, color: '#f87171', cursor: 'pointer' }}>{actionLoading ? '...' : '❌ Cancelar pedido'}</button>
+                <div className="fx-modal__foot">
+                  <button
+                    className="fx-btn fx-btn--danger"
+                    onClick={() => handleCancel(selectedOrder.id)}
+                    disabled={actionLoading === selectedOrder.id + '_cancel'}
+                  >
+                    {actionLoading === selectedOrder.id + '_cancel'
+                      ? <><span className="fx-spinner" /> Cancelando…</>
+                      : 'Cancelar pedido'}
+                  </button>
+                  <button
+                    className="fx-btn fx-btn--primary"
+                    onClick={() => handleComplete(selectedOrder.id)}
+                    disabled={actionLoading === selectedOrder.id + '_complete'}
+                  >
+                    {actionLoading === selectedOrder.id + '_complete'
+                      ? <><span className="fx-spinner" /> Guardando…</>
+                      : <><Icon name="check" size={15} /> Marcar completado</>}
+                  </button>
                 </div>
               )}
             </div>
           </div>
-        </div>
-      )}
+        )
+      })()}
     </DashboardLayout>
   )
 }
+
+

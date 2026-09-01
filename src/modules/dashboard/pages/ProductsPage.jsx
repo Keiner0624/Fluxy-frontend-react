@@ -3,6 +3,7 @@ import { useState, useEffect, useRef } from 'react'
 import DashboardLayout from '@/modules/dashboard/components/DashboardLayout'
 import { API_URL } from '@/app/config'
 import { ProductCardSkeleton } from '@/components/Skeleton'
+import Icon from '@/components/Icon'
 
 const CLOUDINARY_CLOUD  = import.meta.env.VITE_CLOUDINARY_CLOUD  || 'dklhbrw7s'
 const CLOUDINARY_PRESET = import.meta.env.VITE_CLOUDINARY_PRESET || 'fluxy_unsigned'
@@ -25,9 +26,11 @@ async function uploadToCloudinary(file) {
 
 function getToken() { return localStorage.getItem('token') || '' }
 
+// El emoji de la categoría es un dato que se muestra en la tienda pública,
+// así que se conserva; sólo cambia la presentación del selector.
 const EMOJI_OPTIONS = ['📦','🍕','🍔','🍣','☕','🍰','👕','👗','👟','💄','📱','💻','🎮','🛋️','🌸','💊','🏋️','📚','🎵','🧴','🐾','🌿']
 
-function EmojiSelect({ value, onChange, compact = false }) {
+function EmojiSelect({ value, onChange }) {
   const [open, setOpen] = useState(false)
   const wrapRef = useRef(null)
 
@@ -45,39 +48,29 @@ function EmojiSelect({ value, onChange, compact = false }) {
 
   return (
     <div ref={wrapRef} style={{ position: 'relative', flexShrink: 0 }}>
-      <button type="button" onClick={() => setOpen(prev => !prev)} style={{
-        width: compact ? 46 : 60, height: compact ? 38 : 44,
-        display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 5,
-        background: open ? 'rgba(124,131,253,0.14)' : 'rgba(255,255,255,0.04)',
-        border: open ? '1px solid rgba(124,131,253,0.45)' : '1px solid rgba(255,255,255,0.08)',
-        borderRadius: compact ? 9 : 11, color: 'white', cursor: 'pointer', transition: 'all 0.18s ease',
-      }}>
-        <span style={{ fontSize: compact ? 17 : 19 }}>{value || '📦'}</span>
-        <span style={{ fontSize: 11, color: 'rgba(255,255,255,0.45)', transform: open ? 'rotate(180deg)' : 'rotate(0)', transition: 'transform 0.18s ease' }}>⌄</span>
+      <button
+        type="button"
+        className="fx-btn fx-btn--secondary"
+        style={{ width: 62, padding: 0, height: 40 }}
+        onClick={() => setOpen((prev) => !prev)}
+        aria-label="Elegir símbolo de la categoría"
+      >
+        <span style={{ fontSize: 17 }}>{value || '📦'}</span>
+        <Icon name="chevronDown" size={13} />
       </button>
 
       {open && (
-        <div style={{
-          position: 'absolute', top: compact ? 44 : 50, left: 0, zIndex: 20,
-          width: 252, display: 'grid', gridTemplateColumns: 'repeat(6, 1fr)', gap: 6, padding: 10,
-          background: 'rgba(12,12,28,0.98)', border: '1px solid rgba(124,131,253,0.25)',
-          borderRadius: 14, boxShadow: '0 18px 48px rgba(0,0,0,0.55)', backdropFilter: 'blur(14px)',
-        }}>
-          {EMOJI_OPTIONS.map(emoji => {
-            const selected = emoji === value
-            return (
-              <button key={emoji} type="button" onClick={() => { onChange(emoji); setOpen(false) }} style={{
-                width: 32, height: 32, borderRadius: 9,
-                display: 'flex', alignItems: 'center', justifyContent: 'center',
-                background: selected ? 'rgba(124,131,253,0.22)' : 'rgba(255,255,255,0.04)',
-                border: selected ? '1px solid rgba(124,131,253,0.55)' : '1px solid rgba(255,255,255,0.06)',
-                color: 'white', fontSize: 17, cursor: 'pointer', transition: 'all 0.14s ease',
-              }}
-                onMouseEnter={e => { if (!selected) { e.currentTarget.style.background = 'rgba(255,255,255,0.09)' } }}
-                onMouseLeave={e => { if (!selected) { e.currentTarget.style.background = 'rgba(255,255,255,0.04)' } }}
-              >{emoji}</button>
-            )
-          })}
+        <div className="fx-emoji-pop">
+          {EMOJI_OPTIONS.map((emoji) => (
+            <button
+              key={emoji}
+              type="button"
+              className={`fx-emoji-pop__item${emoji === value ? ' is-on' : ''}`}
+              onClick={() => { onChange(emoji); setOpen(false) }}
+            >
+              {emoji}
+            </button>
+          ))}
         </div>
       )}
     </div>
@@ -92,83 +85,113 @@ function CategoriesModal({ onClose, categories, setCategories }) {
   const [editId, setEditId]       = useState(null)
   const [editName, setEditName]   = useState('')
   const [editEmoji, setEditEmoji] = useState('')
-
-  const inputStyle = { flex: 1, background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.08)', borderRadius: 10, padding: '10px 14px', color: 'white', fontSize: 14, outline: 'none', fontFamily: 'DM Sans, sans-serif' }
+  const [error, setError]         = useState('')
 
   const handleCreate = async () => {
     if (!newName.trim()) return
-    setSaving(true)
+    setSaving(true); setError('')
     try {
       const res  = await fetch(`${API_URL}/categories`, { method: 'POST', headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${getToken()}` }, body: JSON.stringify({ name: newName.trim(), emoji: newEmoji }) })
       const data = await res.json()
       if (!res.ok) throw new Error(data.error)
       setCategories(prev => [...prev, data]); setNewName(''); setNewEmoji('📦')
-    } catch (err) { alert(err.message) }
+    } catch (err) { setError(err.message || 'No se pudo crear la categoría') }
     finally { setSaving(false) }
   }
 
   const handleEdit = async (id) => {
+    setError('')
     try {
       const res  = await fetch(`${API_URL}/categories/${id}`, { method: 'PUT', headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${getToken()}` }, body: JSON.stringify({ name: editName, emoji: editEmoji }) })
       const data = await res.json()
       setCategories(prev => prev.map(c => c.id === id ? data : c)); setEditId(null)
-    } catch { alert('Error al editar') }
+    } catch { setError('No se pudo editar la categoría') }
   }
 
   const handleDelete = async (id) => {
-    if (!window.confirm('¿Eliminar categoría?')) return
+    if (!window.confirm('¿Eliminar esta categoría?')) return
+    setError('')
     try {
       await fetch(`${API_URL}/categories/${id}`, { method: 'DELETE', headers: { Authorization: `Bearer ${getToken()}` } })
       setCategories(prev => prev.filter(c => c.id !== id))
-    } catch { alert('Error al eliminar') }
+    } catch { setError('No se pudo eliminar la categoría') }
   }
 
   return (
-    <div style={{ position: 'fixed', inset: 0, zIndex: 600, background: 'rgba(0,0,0,0.85)', backdropFilter: 'blur(8px)', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 20 }}>
-      <div style={{ background: '#0a0a18', border: '1px solid rgba(255,255,255,0.08)', borderRadius: 24, width: '100%', maxWidth: 480, maxHeight: '85vh', overflowY: 'auto' }}>
-        <div style={{ padding: '22px 26px', borderBottom: '1px solid rgba(255,255,255,0.06)', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-          <h3 style={{ fontFamily: "'Fraunces', serif", fontSize: 20, color: 'white' }}>Gestionar categorías</h3>
-          <button onClick={onClose} style={{ width: 34, height: 34, borderRadius: 9, background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.1)', color: 'var(--text-muted)', fontSize: 16, cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>✕</button>
+    <div className="fx-modal" role="dialog" aria-modal="true" onClick={onClose}>
+      <div className="fx-modal__panel" style={{ maxWidth: 480 }} onClick={(e) => e.stopPropagation()}>
+        <div className="fx-modal__head">
+          <h2 className="fx-h2">Categorías</h2>
+          <button className="fx-btn fx-btn--ghost fx-btn--icon" onClick={onClose} aria-label="Cerrar">
+            <Icon name="close" size={17} />
+          </button>
         </div>
-        <div style={{ padding: '20px 26px' }}>
-          <div style={{ marginBottom: 20 }}>
-            <div style={{ fontSize: 11, color: 'var(--text-muted)', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.8px', marginBottom: 10 }}>Nueva categoría</div>
-            <div style={{ display: 'flex', gap: 8 }}>
-              <EmojiSelect value={newEmoji} onChange={setNewEmoji}/>
-              <input value={newName} onChange={e => setNewName(e.target.value)} placeholder="Nombre de la categoría" style={inputStyle} onKeyDown={e => e.key === 'Enter' && handleCreate()}
-                onFocus={e => e.target.style.borderColor = 'rgba(124,131,253,0.5)'}
-                onBlur={e  => e.target.style.borderColor = 'rgba(255,255,255,0.08)'}/>
-              <button onClick={handleCreate} disabled={saving || !newName.trim()} style={{ padding: '10px 16px', borderRadius: 10, background: 'linear-gradient(135deg, #7c83fd, #4f46e5)', border: 'none', color: 'white', fontSize: 13, fontWeight: 600, cursor: 'pointer', opacity: !newName.trim() ? 0.5 : 1 }}>
-                {saving ? '...' : '+ Crear'}
-              </button>
-            </div>
+
+        <div className="fx-modal__body">
+          <p className="fx-eyebrow" style={{ marginBottom: 9 }}>Nueva categoría</p>
+          <div className="fx-row" style={{ gap: 8, marginBottom: 20 }}>
+            <EmojiSelect value={newEmoji} onChange={setNewEmoji} />
+            <input
+              className="fx-input"
+              placeholder="Nombre de la categoría"
+              value={newName}
+              onChange={(e) => setNewName(e.target.value)}
+              onKeyDown={(e) => { if (e.key === 'Enter') handleCreate() }}
+            />
+            <button className="fx-btn fx-btn--primary" onClick={handleCreate} disabled={saving || !newName.trim()}>
+              {saving ? <span className="fx-spinner" /> : <Icon name="plus" size={16} />}
+            </button>
           </div>
 
-          <div style={{ fontSize: 11, color: 'var(--text-muted)', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.8px', marginBottom: 10 }}>Categorías ({categories.length})</div>
+          {error && (
+            <div className="fx-alert fx-alert--error" style={{ marginBottom: 16 }}>
+              <Icon name="alert" size={16} /><span>{error}</span>
+            </div>
+          )}
+
           {categories.length === 0 ? (
-            <div style={{ textAlign: 'center', padding: '32px 0', color: 'var(--text-muted)', fontSize: 13 }}>Sin categorías aún.</div>
+            <p className="fx-hint">Todavía no creaste ninguna categoría.</p>
           ) : (
-            <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
-              {categories.map(cat => (
-                <div key={cat.id} style={{ display: 'flex', alignItems: 'center', gap: 10, background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.06)', borderRadius: 12, padding: '10px 14px' }}>
-                  {editId === cat.id ? (
+            <ul className="fx-list">
+              {categories.map((c) => (
+                <li key={c.id} className="fx-list__row">
+                  {editId === c.id ? (
                     <>
-                      <EmojiSelect value={editEmoji} onChange={setEditEmoji} compact/>
-                      <input value={editName} onChange={e => setEditName(e.target.value)} style={{ flex: 1, background: 'rgba(255,255,255,0.06)', border: '1px solid rgba(124,131,253,0.4)', borderRadius: 8, padding: '6px 10px', color: 'white', fontSize: 13, outline: 'none', fontFamily: 'DM Sans, sans-serif' }} onKeyDown={e => e.key === 'Enter' && handleEdit(cat.id)}/>
-                      <button onClick={() => handleEdit(cat.id)} style={{ padding: '6px 12px', borderRadius: 8, background: 'rgba(52,211,153,0.1)', border: '1px solid rgba(52,211,153,0.25)', color: '#34d399', fontSize: 12, cursor: 'pointer' }}>✓</button>
-                      <button onClick={() => setEditId(null)} style={{ padding: '6px 10px', borderRadius: 8, background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.08)', color: 'var(--text-muted)', fontSize: 12, cursor: 'pointer' }}>✕</button>
+                      <EmojiSelect value={editEmoji} onChange={setEditEmoji} />
+                      <input
+                        className="fx-input"
+                        value={editName}
+                        onChange={(e) => setEditName(e.target.value)}
+                        onKeyDown={(e) => { if (e.key === 'Enter') handleEdit(c.id) }}
+                        autoFocus
+                      />
+                      <button className="fx-btn fx-btn--primary fx-btn--sm" onClick={() => handleEdit(c.id)}>Guardar</button>
+                      <button className="fx-btn fx-btn--ghost fx-btn--sm" onClick={() => setEditId(null)}>Cancelar</button>
                     </>
                   ) : (
                     <>
-                      <span style={{ fontSize: 20 }}>{cat.emoji || '📦'}</span>
-                      <span style={{ flex: 1, fontSize: 14, color: 'white', fontWeight: 500 }}>{cat.name}</span>
-                      <button onClick={() => { setEditId(cat.id); setEditName(cat.name); setEditEmoji(cat.emoji || '📦') }} style={{ padding: '5px 10px', borderRadius: 7, background: 'rgba(124,131,253,0.08)', border: '1px solid rgba(124,131,253,0.2)', color: '#7c83fd', fontSize: 12, cursor: 'pointer' }}>✏️</button>
-                      <button onClick={() => handleDelete(cat.id)} style={{ padding: '5px 8px', borderRadius: 7, background: 'rgba(248,113,113,0.06)', border: '1px solid rgba(248,113,113,0.15)', color: '#f87171', fontSize: 12, cursor: 'pointer' }}>🗑️</button>
+                      <span style={{ fontSize: 17, width: 26, textAlign: 'center' }}>{c.emoji || '📦'}</span>
+                      <span style={{ flex: 1, fontSize: 14 }}>{c.name}</span>
+                      <button
+                        className="fx-btn fx-btn--ghost fx-btn--icon"
+                        onClick={() => { setEditId(c.id); setEditName(c.name); setEditEmoji(c.emoji || '📦') }}
+                        aria-label={`Editar ${c.name}`}
+                      >
+                        <Icon name="edit" size={15} />
+                      </button>
+                      <button
+                        className="fx-btn fx-btn--ghost fx-btn--icon"
+                        style={{ color: 'var(--fx-danger)' }}
+                        onClick={() => handleDelete(c.id)}
+                        aria-label={`Eliminar ${c.name}`}
+                      >
+                        <Icon name="trash" size={15} />
+                      </button>
                     </>
                   )}
-                </div>
+                </li>
               ))}
-            </div>
+            </ul>
           )}
         </div>
       </div>
@@ -176,40 +199,6 @@ function CategoriesModal({ onClose, categories, setCategories }) {
   )
 }
 
-// ─── Botón IA ────────────────────────────────────────────────────────────────
-function AIDescriptionButton() {
-  return (
-    <div style={{
-      display: 'flex', alignItems: 'center', gap: 8,
-      background: 'rgba(255,255,255,0.03)',
-      border: '1px solid rgba(255,255,255,0.07)',
-      borderRadius: 10, padding: '9px 14px',
-      marginBottom: 8, cursor: 'not-allowed',
-      opacity: 0.6,
-    }}>
-      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="rgba(255,255,255,0.3)" strokeWidth="2">
-        <path d="M12 2L2 7l10 5 10-5-10-5z"/>
-        <path d="M2 17l10 5 10-5"/>
-        <path d="M2 12l10 5 10-5"/>
-      </svg>
-      <span style={{ fontSize: 13, color: 'rgba(255,255,255,0.3)', flex: 1 }}>
-        Generar descripción con IA
-      </span>
-      <span style={{
-        fontSize: 10, fontWeight: 700,
-        color: '#fbbf24',
-        background: 'rgba(251,191,36,0.1)',
-        border: '1px solid rgba(251,191,36,0.2)',
-        borderRadius: 5, padding: '2px 7px',
-        whiteSpace: 'nowrap',
-      }}>
-        Próximamente
-      </span>
-    </div>
-  )
-}
-
-// ─── ProductsPage ─────────────────────────────────────────────────────────────
 export default function ProductsPage() {
   const [products,      setProducts]      = useState([])
   const [categories,    setCategories]    = useState([])
@@ -225,7 +214,8 @@ export default function ProductsPage() {
   const [error,   setError]   = useState('')
   const [success, setSuccess] = useState('')
   const [deleteId, setDeleteId] = useState(null)
-  const fileRef = useRef()
+  const [search, setSearch] = useState('')
+  const fileRef = useRef(null)
 
   const [form, setForm] = useState({ name: '', price: '', stock: '', description: '', imageUrl: '', categoryId: '' })
 
@@ -283,7 +273,7 @@ export default function ProductsPage() {
         body:    JSON.stringify(body),
       })
       if (!res.ok) throw new Error('Error al guardar producto')
-      setSuccess(editProduct ? '✅ Producto actualizado.' : '✅ Producto creado.')
+      setSuccess(editProduct ? 'Producto actualizado.' : 'Producto creado.')
       setShowForm(false); loadAll()
     } catch (err) { setError(err.message) }
     finally { setSaving(false); setUploadingImage(false) }
@@ -296,216 +286,254 @@ export default function ProductsPage() {
     } catch { setError('Error al eliminar producto') }
   }
 
-  const filtered = filterCat === 'all'  ? products
+  const byCategory = filterCat === 'all'  ? products
     : filterCat === 'none' ? products.filter(p => !p.category)
     : products.filter(p => p.category?.id === parseInt(filterCat))
 
-  const inputStyle = { width: '100%', background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.08)', borderRadius: 11, padding: '12px 14px', color: 'white', fontSize: 14, outline: 'none', fontFamily: 'DM Sans, sans-serif' }
-  const labelStyle = { display: 'block', fontSize: 12, fontWeight: 600, color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.8px', marginBottom: 8 }
+  const filtered = search.trim()
+    ? byCategory.filter(p => p.name.toLowerCase().includes(search.trim().toLowerCase()))
+    : byCategory
+
+  const deleteTarget = products.find(p => p.id === deleteId)
 
   return (
     <DashboardLayout>
-      <style>{`@keyframes spin { to { transform: rotate(360deg) } }`}</style>
-
-      {/* Header */}
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 28, flexWrap: 'wrap', gap: 16 }}>
+      <div className="fx-page-head">
         <div>
-          <div style={{ fontSize: 11, color: 'var(--primary)', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '1.5px', marginBottom: 6 }}>Panel de vendedor</div>
-          <h1 style={{ fontFamily: "'Fraunces', serif", fontSize: 28, fontWeight: 700, color: 'white' }}>Mis Productos</h1>
-          <p style={{ fontSize: 13, color: 'var(--text-muted)', marginTop: 4 }}>{products.length} producto{products.length !== 1 ? 's' : ''} registrado{products.length !== 1 ? 's' : ''}</p>
+          <h1>Productos</h1>
+          <p>{loading ? 'Cargando…' : `${products.length} ${products.length === 1 ? 'producto' : 'productos'} en tu catálogo`}</p>
         </div>
-        <div style={{ display: 'flex', gap: 10 }}>
-          <button onClick={() => setShowCatModal(true)} style={{ display: 'flex', alignItems: 'center', gap: 8, background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.1)', borderRadius: 12, padding: '10px 16px', color: 'var(--text-soft)', fontSize: 13, fontWeight: 500, cursor: 'pointer' }}>
-            🗂️ Categorías
+        <div className="fx-page-head__actions">
+          <button className="fx-btn fx-btn--secondary" onClick={() => setShowCatModal(true)}>
+            <Icon name="tag" size={15} />
+            Categorías
           </button>
-          <button onClick={openCreate} style={{ display: 'flex', alignItems: 'center', gap: 8, background: 'linear-gradient(135deg, #7c83fd, #4f46e5)', color: 'white', padding: '10px 20px', borderRadius: 12, fontSize: 14, fontWeight: 600, boxShadow: '0 4px 16px rgba(124,131,253,0.3)', border: 'none', cursor: 'pointer' }}
-            onMouseEnter={e => e.currentTarget.style.transform = 'translateY(-1px)'}
-            onMouseLeave={e => e.currentTarget.style.transform = 'translateY(0)'}
-          >
-            <span style={{ fontSize: 18 }}>+</span> Agregar producto
+          <button className="fx-btn fx-btn--primary" onClick={openCreate}>
+            <Icon name="plus" size={16} />
+            Nuevo producto
           </button>
         </div>
       </div>
 
-      {success && <div style={{ background: 'rgba(52,211,153,0.08)', border: '1px solid rgba(52,211,153,0.2)', borderRadius: 10, padding: '12px 16px', marginBottom: 20, fontSize: 13, color: '#34d399' }}>{success}</div>}
-      {error && !showForm && <div style={{ background: 'rgba(248,113,113,0.08)', border: '1px solid rgba(248,113,113,0.2)', borderRadius: 10, padding: '12px 16px', marginBottom: 20, fontSize: 13, color: '#f87171' }}>{error}</div>}
+      {success && (
+        <div className="fx-alert fx-alert--ok" style={{ marginBottom: 16 }}>
+          <Icon name="checkCircle" size={16} /><span>{success}</span>
+        </div>
+      )}
+      {error && !showForm && (
+        <div className="fx-alert fx-alert--error" style={{ marginBottom: 16 }}>
+          <Icon name="alert" size={16} /><span>{error}</span>
+        </div>
+      )}
 
-      {/* Filtros */}
-      {categories.length > 0 && (
-        <div style={{ display: 'flex', gap: 8, marginBottom: 20, flexWrap: 'wrap' }}>
-          {[{ id: 'all', name: `Todos (${products.length})`, emoji: '🔍' },
-            ...categories.map(c => ({ ...c, id: String(c.id), count: products.filter(p => p.category?.id === c.id).length })),
-            { id: 'none', name: `Sin categoría (${products.filter(p => !p.category).length})`, emoji: '📦' }]
-            .map(cat => (
-              <button key={cat.id} onClick={() => setFilterCat(cat.id)} style={{ display: 'flex', alignItems: 'center', gap: 6, padding: '6px 14px', borderRadius: 50, fontSize: 12, fontWeight: 600, cursor: 'pointer', transition: 'all 0.2s', background: filterCat === cat.id ? 'rgba(124,131,253,0.15)' : 'rgba(255,255,255,0.04)', border: filterCat === cat.id ? '1px solid rgba(124,131,253,0.35)' : '1px solid rgba(255,255,255,0.08)', color: filterCat === cat.id ? 'var(--primary)' : 'var(--text-muted)' }}>
-                <span>{cat.emoji}</span> {cat.name}{cat.count !== undefined ? ` (${cat.count})` : ''}
+      <div className="fx-toolbar">
+        <div className="fx-search">
+          <Icon name="search" size={16} />
+          <input
+            className="fx-input"
+            placeholder="Buscar producto"
+            value={search}
+            onChange={(e) => setSearch(e.target.value)}
+          />
+        </div>
+        <select className="fx-select" style={{ maxWidth: 210 }} value={filterCat} onChange={(e) => setFilterCat(e.target.value)}>
+          <option value="all">Todas las categorías</option>
+          <option value="none">Sin categoría</option>
+          {categories.map(c => <option key={c.id} value={c.id}>{c.name}</option>)}
+        </select>
+      </div>
+
+      <div className="fx-card">
+        {loading ? (
+          <div className="fx-grid" style={{ padding: 20, gridTemplateColumns: 'repeat(auto-fill, minmax(210px, 1fr))' }}>
+            {Array.from({ length: 4 }).map((_, i) => <ProductCardSkeleton key={i} />)}
+          </div>
+        ) : filtered.length === 0 ? (
+          <div className="fx-empty">
+            <div className="fx-empty__icon"><Icon name="products" size={20} /></div>
+            <p className="fx-empty__title">
+              {products.length === 0 ? 'Todavía no cargaste productos' : 'Sin resultados'}
+            </p>
+            <p className="fx-empty__text">
+              {products.length === 0
+                ? 'Cargá tu primer producto para que aparezca en tu tienda.'
+                : 'Probá con otro término de búsqueda o cambiá el filtro de categoría.'}
+            </p>
+            {products.length === 0 && (
+              <button className="fx-btn fx-btn--primary" style={{ marginTop: 18 }} onClick={openCreate}>
+                <Icon name="plus" size={16} />
+                Nuevo producto
               </button>
-            ))}
-        </div>
-      )}
+            )}
+          </div>
+        ) : (
+          <div className="fx-table-wrap">
+            <table className="fx-table">
+              <thead>
+                <tr>
+                  <th style={{ width: 52 }} />
+                  <th>Producto</th>
+                  <th>Categoría</th>
+                  <th className="fx-table__num">Precio</th>
+                  <th className="fx-table__num">Stock</th>
+                  <th style={{ width: 84 }} />
+                </tr>
+              </thead>
+              <tbody>
+                {filtered.map((p) => (
+                  <tr key={p.id}>
+                    <td>
+                      <div className="fx-thumb">
+                        {p.imageUrl
+                          ? <img src={p.imageUrl} alt="" />
+                          : <Icon name="image" size={15} />}
+                      </div>
+                    </td>
+                    <td>
+                      <div className="fx-table__strong">{p.name}</div>
+                      {p.description && (
+                        <div className="fx-truncate" style={{ maxWidth: 320, color: 'var(--fx-muted)', fontSize: 12.5, marginTop: 2 }}>
+                          {p.description}
+                        </div>
+                      )}
+                    </td>
+                    <td>
+                      {p.category
+                        ? <span className="fx-badge">{p.category.emoji || ''} {p.category.name}</span>
+                        : <span style={{ color: 'var(--fx-muted)' }}>—</span>}
+                    </td>
+                    <td className="fx-table__num fx-table__strong">S/ {formatPrice(p.price)}</td>
+                    <td className="fx-table__num">
+                      <span className={`fx-badge${p.stock === 0 ? ' fx-badge--danger' : p.stock <= 5 ? ' fx-badge--warn' : ''}`}>
+                        {p.stock}
+                      </span>
+                    </td>
+                    <td>
+                      <div className="fx-row" style={{ gap: 2, justifyContent: 'flex-end' }}>
+                        <button className="fx-btn fx-btn--ghost fx-btn--icon" onClick={() => openEdit(p)} aria-label={`Editar ${p.name}`}>
+                          <Icon name="edit" size={15} />
+                        </button>
+                        <button
+                          className="fx-btn fx-btn--ghost fx-btn--icon"
+                          style={{ color: 'var(--fx-danger)' }}
+                          onClick={() => setDeleteId(p.id)}
+                          aria-label={`Eliminar ${p.name}`}
+                        >
+                          <Icon name="trash" size={15} />
+                        </button>
+                      </div>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        )}
+      </div>
 
-      {loading && <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(260px, 1fr))', gap: 20 }}>{[1,2,3,4,5,6].map(i => <ProductCardSkeleton key={i}/>)}</div>}
-
-      {!loading && products.length === 0 && (
-        <div style={{ textAlign: 'center', padding: '80px 24px', background: 'rgba(13,13,26,0.6)', border: '1px dashed rgba(255,255,255,0.08)', borderRadius: 20 }}>
-          <div style={{ fontSize: 48, marginBottom: 16 }}>📦</div>
-          <h3 style={{ color: 'white', marginBottom: 8, fontFamily: "'Fraunces', serif" }}>Sin productos aún</h3>
-          <p style={{ color: 'var(--text-muted)', fontSize: 14, marginBottom: 24 }}>Agrega tu primer producto para que tus clientes puedan verlo.</p>
-          <button onClick={openCreate} style={{ background: 'linear-gradient(135deg, #7c83fd, #4f46e5)', color: 'white', padding: '12px 24px', borderRadius: 12, fontSize: 14, fontWeight: 600, border: 'none', cursor: 'pointer' }}>+ Agregar mi primer producto</button>
-        </div>
-      )}
-
-      {!loading && filtered.length > 0 && (
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(260px, 1fr))', gap: 20 }}>
-          {filtered.map(product => (
-            <div key={product.id} style={{ background: 'rgba(13,13,26,0.9)', border: '1px solid rgba(255,255,255,0.06)', borderRadius: 18, overflow: 'hidden', transition: 'all 0.3s' }}
-              onMouseEnter={e => { e.currentTarget.style.borderColor = 'rgba(124,131,253,0.25)'; e.currentTarget.style.transform = 'translateY(-2px)' }}
-              onMouseLeave={e => { e.currentTarget.style.borderColor = 'rgba(255,255,255,0.06)'; e.currentTarget.style.transform = 'translateY(0)' }}
-            >
-              <div style={{ height: 180, overflow: 'hidden', background: 'linear-gradient(135deg, #0d0d1e, #1a1a35)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 48, position: 'relative' }}>
-                {product.imageUrl ? <img src={product.imageUrl} alt={product.name} style={{ width: '100%', height: '100%', objectFit: 'cover' }}/> : '📦'}
-                <div style={{ position: 'absolute', top: 10, right: 10, background: product.stock === 0 ? 'rgba(248,113,113,0.15)' : product.stock <= 5 ? 'rgba(251,191,36,0.15)' : 'rgba(52,211,153,0.15)', border: `1px solid ${product.stock === 0 ? 'rgba(248,113,113,0.3)' : product.stock <= 5 ? 'rgba(251,191,36,0.3)' : 'rgba(52,211,153,0.3)'}`, borderRadius: 50, padding: '3px 10px', fontSize: 11, fontWeight: 600, color: product.stock === 0 ? '#f87171' : product.stock <= 5 ? '#fbbf24' : '#34d399' }}>
-                  {product.stock === 0 ? 'Sin stock' : `Stock: ${product.stock}`}
-                </div>
-                {product.category && (
-                  <div style={{ position: 'absolute', top: 10, left: 10, background: 'rgba(0,0,0,0.6)', backdropFilter: 'blur(4px)', borderRadius: 20, padding: '3px 10px', fontSize: 11, color: 'rgba(255,255,255,0.8)', display: 'flex', alignItems: 'center', gap: 4 }}>
-                    {product.category.emoji} {product.category.name}
-                  </div>
-                )}
-              </div>
-              <div style={{ padding: '16px' }}>
-                <div style={{ fontSize: 15, fontWeight: 600, color: 'white', marginBottom: 4 }}>{product.name}</div>
-                {product.description && <div style={{ fontSize: 12, color: 'var(--text-muted)', marginBottom: 8, display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical', overflow: 'hidden' }}>{product.description}</div>}
-                <div style={{ fontFamily: "'Fraunces', serif", fontSize: 22, fontWeight: 700, color: 'var(--primary)', marginBottom: 14 }}>S/ {formatPrice(product.price)}</div>
-                <div style={{ display: 'flex', gap: 8 }}>
-                  <button onClick={() => openEdit(product)} style={{ flex: 1, padding: '9px', background: 'rgba(124,131,253,0.08)', border: '1px solid rgba(124,131,253,0.2)', borderRadius: 10, fontSize: 13, fontWeight: 500, color: 'var(--primary)', cursor: 'pointer', transition: 'all 0.2s' }}
-                    onMouseEnter={e => e.currentTarget.style.background = 'rgba(124,131,253,0.15)'}
-                    onMouseLeave={e => e.currentTarget.style.background = 'rgba(124,131,253,0.08)'}
-                  >✏️ Editar</button>
-                  <button onClick={() => setDeleteId(product.id)} style={{ padding: '9px 14px', background: 'rgba(248,113,113,0.06)', border: '1px solid rgba(248,113,113,0.15)', borderRadius: 10, fontSize: 13, color: '#f87171', cursor: 'pointer' }}
-                    onMouseEnter={e => e.currentTarget.style.background = 'rgba(248,113,113,0.12)'}
-                    onMouseLeave={e => e.currentTarget.style.background = 'rgba(248,113,113,0.06)'}
-                  >🗑️</button>
-                </div>
-              </div>
-            </div>
-          ))}
-        </div>
-      )}
-
-      {/* Modal formulario */}
+      {/* Formulario de producto */}
       {showForm && (
-        <div style={{ position: 'fixed', inset: 0, zIndex: 500, background: 'rgba(0,0,0,0.8)', backdropFilter: 'blur(8px)', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 20 }}>
-          <div style={{ background: '#0a0a18', border: '1px solid rgba(255,255,255,0.08)', borderRadius: 24, width: '100%', maxWidth: 520, maxHeight: '90vh', overflowY: 'auto' }}>
-            <div style={{ padding: '22px 26px', borderBottom: '1px solid rgba(255,255,255,0.06)', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-              <h3 style={{ fontFamily: "'Fraunces', serif", fontSize: 20, color: 'white' }}>{editProduct ? 'Editar producto' : 'Agregar producto'}</h3>
-              <button onClick={() => setShowForm(false)} style={{ width: 34, height: 34, borderRadius: 9, background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.1)', color: 'var(--text-muted)', fontSize: 16, cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>✕</button>
+        <div className="fx-modal" role="dialog" aria-modal="true" onClick={() => setShowForm(false)}>
+          <form className="fx-modal__panel" onClick={(e) => e.stopPropagation()} onSubmit={handleSubmit}>
+            <div className="fx-modal__head">
+              <h2 className="fx-h2">{editProduct ? 'Editar producto' : 'Nuevo producto'}</h2>
+              <button type="button" className="fx-btn fx-btn--ghost fx-btn--icon" onClick={() => setShowForm(false)} aria-label="Cerrar">
+                <Icon name="close" size={17} />
+              </button>
             </div>
 
-            <form onSubmit={handleSubmit} style={{ padding: '24px 26px', display: 'flex', flexDirection: 'column', gap: 14 }}>
-              {/* Imagen */}
-              <div>
-                <label style={labelStyle}>Imagen</label>
-                <div style={{ display: 'flex', gap: 8, marginBottom: 8 }}>
-                  {imagePreview ? (
-                    <div style={{ position: 'relative', width: 88, height: 88, borderRadius: 10, overflow: 'hidden', border: '2px solid rgba(124,131,253,0.6)', flexShrink: 0 }}>
-                      <img src={imagePreview} alt="preview" style={{ width: '100%', height: '100%', objectFit: 'cover' }}/>
-                      <button type="button" onClick={() => { setImageFile(null); setImagePreview(null); setForm(f => ({...f, imageUrl: ''})) }} style={{ position: 'absolute', top: 4, right: 4, width: 18, height: 18, borderRadius: '50%', background: 'rgba(248,113,113,0.9)', border: 'none', color: 'white', fontSize: 9, cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 700 }}>✕</button>
-                    </div>
-                  ) : (
-                    <div onClick={() => fileRef.current?.click()} style={{ width: 88, height: 88, borderRadius: 10, border: '2px dashed rgba(124,131,253,0.25)', background: 'rgba(124,131,253,0.04)', cursor: 'pointer', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: 4, flexShrink: 0 }}>
-                      <span style={{ fontSize: 20 }}>📷</span>
-                      <span style={{ fontSize: 10, color: 'var(--text-muted)' }}>Subir</span>
-                    </div>
-                  )}
-                  <input value={form.imageUrl} onChange={e => { setForm({...form, imageUrl: e.target.value}); if(e.target.value) setImagePreview(e.target.value) }} placeholder="O pega una URL de imagen" style={{ ...inputStyle, flex: 1 }}
-                    onFocus={e => e.target.style.borderColor = 'rgba(124,131,253,0.5)'}
-                    onBlur={e  => e.target.style.borderColor = 'rgba(255,255,255,0.08)'}/>
-                </div>
-                <input ref={fileRef} type="file" accept="image/*" style={{ display: 'none' }} onChange={handleImageChange}/>
+            <div className="fx-modal__body">
+              <div className="fx-field">
+                <label className="fx-label" htmlFor="p-name">Nombre</label>
+                <input id="p-name" className="fx-input" value={form.name} onChange={(e) => setForm({ ...form, name: e.target.value })} placeholder="Nombre del producto" />
               </div>
 
-              {/* Nombre */}
-              <div>
-                <label style={labelStyle}>Nombre *</label>
-                <input value={form.name} onChange={e => setForm({...form, name: e.target.value})} placeholder="Ej: Café Americano" style={inputStyle}
-                  onFocus={e => e.target.style.borderColor = 'rgba(124,131,253,0.5)'}
-                  onBlur={e  => e.target.style.borderColor = 'rgba(255,255,255,0.08)'}/>
-              </div>
-
-              {/* Precio y Stock */}
-              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12 }}>
-                <div>
-                  <label style={labelStyle}>Precio (S/) *</label>
-                  <input type="number" min="0" step="0.01" value={form.price} onChange={e => setForm({...form, price: e.target.value})} placeholder="0.00" style={inputStyle}
-                    onFocus={e => e.target.style.borderColor = 'rgba(124,131,253,0.5)'}
-                    onBlur={e  => e.target.style.borderColor = 'rgba(255,255,255,0.08)'}/>
+              <div className="fx-grid" style={{ gridTemplateColumns: '1fr 1fr', gap: 12 }}>
+                <div className="fx-field">
+                  <label className="fx-label" htmlFor="p-price">Precio (S/)</label>
+                  <input id="p-price" className="fx-input" type="number" step="0.01" min="0" value={form.price} onChange={(e) => setForm({ ...form, price: e.target.value })} placeholder="0.00" />
                 </div>
-                <div>
-                  <label style={labelStyle}>Stock *</label>
-                  <input type="number" min="0" value={form.stock} onChange={e => setForm({...form, stock: e.target.value})} placeholder="0" style={inputStyle}
-                    onFocus={e => e.target.style.borderColor = 'rgba(124,131,253,0.5)'}
-                    onBlur={e  => e.target.style.borderColor = 'rgba(255,255,255,0.08)'}/>
+                <div className="fx-field">
+                  <label className="fx-label" htmlFor="p-stock">Stock</label>
+                  <input id="p-stock" className="fx-input" type="number" min="0" value={form.stock} onChange={(e) => setForm({ ...form, stock: e.target.value })} placeholder="0" />
                 </div>
               </div>
 
-              {/* Categoría */}
-              <div>
-                <label style={labelStyle}>Categoría</label>
-                <select value={form.categoryId} onChange={e => setForm({...form, categoryId: e.target.value})} style={{ ...inputStyle, cursor: 'pointer', colorScheme: 'dark' }}>
+              <div className="fx-field">
+                <label className="fx-label" htmlFor="p-cat">Categoría</label>
+                <select id="p-cat" className="fx-select" value={form.categoryId} onChange={(e) => setForm({ ...form, categoryId: e.target.value })}>
                   <option value="">Sin categoría</option>
-                  {categories.map(c => <option key={c.id} value={c.id}>{c.emoji} {c.name}</option>)}
+                  {categories.map(c => <option key={c.id} value={c.id}>{c.name}</option>)}
                 </select>
               </div>
 
-              {/* Descripción + botón IA */}
-              <div>
-                <label style={labelStyle}>Descripción</label>
-                <AIDescriptionButton
-                  form={form}
-                  categories={categories}
-                  onGenerated={desc => setForm(f => ({ ...f, description: desc }))}
-                />
-                <textarea
-                  value={form.description}
-                  onChange={e => setForm({...form, description: e.target.value})}
-                  placeholder="Describe tu producto o genera una descripción con IA..."
-                  rows={3}
-                  style={{ ...inputStyle, resize: 'vertical' }}
-                  onFocus={e => e.target.style.borderColor = 'rgba(124,131,253,0.5)'}
-                  onBlur={e  => e.target.style.borderColor = 'rgba(255,255,255,0.08)'}
-                />
+              <div className="fx-field">
+                <label className="fx-label" htmlFor="p-desc">Descripción</label>
+                <textarea id="p-desc" className="fx-textarea" value={form.description} onChange={(e) => setForm({ ...form, description: e.target.value })} placeholder="Detalles del producto (opcional)" />
               </div>
 
-              {error && <div style={{ background: 'rgba(248,113,113,0.08)', border: '1px solid rgba(248,113,113,0.2)', borderRadius: 10, padding: '10px 14px', fontSize: 13, color: '#f87171' }}>⚠️ {error}</div>}
-
-              <div style={{ display: 'flex', gap: 10 }}>
-                <button type="button" onClick={() => setShowForm(false)} style={{ flex: 1, padding: '13px', background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.08)', borderRadius: 12, color: 'var(--text-soft)', fontSize: 14, cursor: 'pointer' }}>Cancelar</button>
-                <button type="submit" disabled={saving} style={{ flex: 2, padding: '13px', background: saving ? 'rgba(124,131,253,0.4)' : 'linear-gradient(135deg, #7c83fd, #4f46e5)', border: 'none', borderRadius: 12, color: 'white', fontSize: 14, fontWeight: 600, cursor: saving ? 'not-allowed' : 'pointer' }}>
-                  {uploadingImage ? '📤 Subiendo...' : saving ? 'Guardando...' : editProduct ? '✅ Guardar cambios' : '✅ Crear producto'}
-                </button>
+              <div className="fx-field">
+                <span className="fx-label">Imagen</span>
+                <div className="fx-row" style={{ gap: 12 }}>
+                  <div className="fx-thumb fx-thumb--lg">
+                    {imagePreview
+                      ? <img src={imagePreview} alt="" />
+                      : <Icon name="image" size={20} />}
+                  </div>
+                  <div>
+                    <input ref={fileRef} type="file" accept="image/*" onChange={handleImageChange} style={{ display: 'none' }} id="p-file" />
+                    <button type="button" className="fx-btn fx-btn--secondary fx-btn--sm" onClick={() => fileRef.current?.click()}>
+                      <Icon name="upload" size={15} />
+                      {imagePreview ? 'Cambiar imagen' : 'Subir imagen'}
+                    </button>
+                    <p className="fx-hint" style={{ marginTop: 6, fontSize: 12.5 }}>JPG o PNG, hasta 5 MB.</p>
+                  </div>
+                </div>
               </div>
-            </form>
-          </div>
+
+              {error && (
+                <div className="fx-alert fx-alert--error">
+                  <Icon name="alert" size={16} /><span>{error}</span>
+                </div>
+              )}
+            </div>
+
+            <div className="fx-modal__foot">
+              <button type="button" className="fx-btn fx-btn--ghost" onClick={() => setShowForm(false)}>Cancelar</button>
+              <button type="submit" className="fx-btn fx-btn--primary" disabled={saving}>
+                {saving
+                  ? <><span className="fx-spinner" /> {uploadingImage ? 'Subiendo imagen…' : 'Guardando…'}</>
+                  : editProduct ? 'Guardar cambios' : 'Crear producto'}
+              </button>
+            </div>
+          </form>
         </div>
       )}
 
-      {/* Modal eliminar */}
+      {/* Confirmación de borrado */}
       {deleteId && (
-        <div style={{ position: 'fixed', inset: 0, zIndex: 500, background: 'rgba(0,0,0,0.8)', backdropFilter: 'blur(8px)', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 20 }}>
-          <div style={{ background: '#0a0a18', border: '1px solid rgba(248,113,113,0.2)', borderRadius: 20, padding: '32px 28px', maxWidth: 360, width: '100%', textAlign: 'center' }}>
-            <div style={{ fontSize: 40, marginBottom: 16 }}>🗑️</div>
-            <h3 style={{ fontFamily: "'Fraunces', serif", fontSize: 20, color: 'white', marginBottom: 8 }}>¿Eliminar producto?</h3>
-            <p style={{ fontSize: 14, color: 'var(--text-muted)', marginBottom: 24 }}>Esta acción no se puede deshacer.</p>
-            <div style={{ display: 'flex', gap: 10 }}>
-              <button onClick={() => setDeleteId(null)} style={{ flex: 1, padding: '12px', background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.08)', borderRadius: 11, color: 'var(--text-soft)', fontSize: 14, cursor: 'pointer' }}>Cancelar</button>
-              <button onClick={() => handleDelete(deleteId)} style={{ flex: 1, padding: '12px', background: 'rgba(248,113,113,0.12)', border: '1px solid rgba(248,113,113,0.3)', borderRadius: 11, color: '#f87171', fontSize: 14, fontWeight: 600, cursor: 'pointer' }}>Eliminar</button>
+        <div className="fx-modal" role="dialog" aria-modal="true" onClick={() => setDeleteId(null)}>
+          <div className="fx-modal__panel" style={{ maxWidth: 420 }} onClick={(e) => e.stopPropagation()}>
+            <div className="fx-modal__body">
+              <h2 className="fx-h2" style={{ marginBottom: 8 }}>Eliminar producto</h2>
+              <p className="fx-hint">
+                {deleteTarget ? `“${deleteTarget.name}” se eliminará de tu catálogo y dejará de verse en la tienda.` : 'Esta acción no se puede deshacer.'}
+              </p>
+            </div>
+            <div className="fx-modal__foot">
+              <button className="fx-btn fx-btn--ghost" onClick={() => setDeleteId(null)}>Cancelar</button>
+              <button className="fx-btn fx-btn--danger" onClick={() => handleDelete(deleteId)}>
+                <Icon name="trash" size={15} />
+                Eliminar
+              </button>
             </div>
           </div>
         </div>
       )}
 
-      {showCatModal && <CategoriesModal onClose={() => setShowCatModal(false)} categories={categories} setCategories={setCategories}/>}
+      {showCatModal && (
+        <CategoriesModal onClose={() => setShowCatModal(false)} categories={categories} setCategories={setCategories} />
+      )}
     </DashboardLayout>
   )
 }

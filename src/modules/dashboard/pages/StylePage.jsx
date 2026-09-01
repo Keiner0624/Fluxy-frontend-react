@@ -4,11 +4,12 @@ import DashboardLayout from '@/modules/dashboard/components/DashboardLayout'
 import PlanGate from '@/components/PlanGate'
 import usePlan from '@/hooks/usePlan'
 import { API_URL, getCompanyStoreUrl } from '@/app/config'
-
-function getToken() { return localStorage.getItem('token') || '' }
+import Icon from '@/components/Icon'
 
 const CLOUDINARY_CLOUD  = 'dklhbrw7s'
 const CLOUDINARY_PRESET = 'fluxy_unsigned'
+
+function getToken() { return localStorage.getItem('token') || '' }
 
 const PRESETS = [
   { id: 'cosmic',  name: 'Cosmic Dark',  description: 'Oscuro con destellos violetas', preview: 'linear-gradient(135deg, #06060f, #1a0a2e)', config: { bgType: 'animated-gradient', colors: ['#06060f', '#1a0a2e', '#0d1a3e'], primary: '#7c83fd', animation: 'mesh',  bgImage: '', bgOverlay: 0.5 } },
@@ -27,11 +28,11 @@ const PRIMARY_COLORS = [
 ]
 
 const ANIMATIONS = [
-  { key: 'none',  label: 'Sin animación',    icon: '⬜' },
-  { key: 'mesh',  label: 'Mesh gradiente',   icon: '🌐' },
-  { key: 'wave',  label: 'Olas suaves',      icon: '🌊' },
-  { key: 'pulse', label: 'Pulso radial',     icon: '💫' },
-  { key: 'flow',  label: 'Flujo de colores', icon: '🎨' },
+  { key: 'none',  label: 'Sin animación' },
+  { key: 'mesh',  label: 'Mesh gradiente' },
+  { key: 'wave',  label: 'Olas suaves' },
+  { key: 'pulse', label: 'Pulso radial' },
+  { key: 'flow',  label: 'Flujo de colores' },
 ]
 
 const DEFAULT_STYLE = {
@@ -145,7 +146,7 @@ function StorePreview({ style, company }) {
   )
 }
 
-// ─── StyleContent ─────────────────────────────────────────────────────────────
+// ─── Controles ───────────────────────────────────────────────────────────────
 function StyleContent() {
   const company  = JSON.parse(localStorage.getItem('company') || '{}') || {}
   const slug     = company.slug || 'default'
@@ -195,208 +196,156 @@ function StyleContent() {
         body: JSON.stringify({ storeStyle: payload }),
       })
     } catch { /* no crítico */ }
-    setSuccess('✅ Estilo guardado y aplicado a tu tienda.')
+    setSuccess('Estilo guardado y aplicado a tu tienda.')
     setTimeout(() => setSuccess(''), 3000)
     setSaving(false)
   }
 
-  const previewBg = () => style.colors?.length > 1
-    ? `linear-gradient(135deg, ${style.colors.join(', ')})`
-    : style.colors?.[0] || '#06060f'
+  const handleReset = () => setStyle({ ...DEFAULT_STYLE })
 
   return (
-    <div className="fluxy-two-col" style={{ display: 'grid', gridTemplateColumns: 'minmax(0,1fr) minmax(0,360px)', gap: 24, alignItems: 'start' }}>
-
-      {/* ── Controles ── */}
-      <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
-
-        {/* Presets */}
-        <div style={{ background: 'rgba(13,13,26,0.9)', border: '1px solid rgba(255,255,255,0.06)', borderRadius: 20, padding: '24px' }}>
-          <div style={{ fontSize: 13, fontWeight: 600, color: 'white', marginBottom: 16, paddingBottom: 12, borderBottom: '1px solid rgba(255,255,255,0.06)' }}>🎨 Temas prediseñados</div>
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(145px, 1fr))', gap: 10 }}>
-            {PRESETS.map(preset => (
-              <button key={preset.id} type="button" onClick={() => applyPreset(preset)} style={{
-                padding: 0, border: style.preset === preset.id ? '2px solid var(--primary)' : '2px solid rgba(255,255,255,0.06)',
-                borderRadius: 14, overflow: 'hidden', cursor: 'pointer', transition: 'all 0.2s', background: 'transparent',
-                boxShadow: style.preset === preset.id ? '0 0 20px rgba(124,131,253,0.3)' : 'none',
-              }}>
-                <div style={{ height: 46, background: preset.preview }}/>
-                <div style={{ padding: '7px 10px', background: 'rgba(13,13,26,0.95)', textAlign: 'left' }}>
-                  <div style={{ fontSize: 12, fontWeight: 600, color: 'white', marginBottom: 1 }}>{preset.name}</div>
-                  <div style={{ fontSize: 10, color: 'var(--text-muted)' }}>{preset.description}</div>
-                </div>
-                {style.preset === preset.id && <div style={{ background: 'var(--primary)', padding: '3px', textAlign: 'center', fontSize: 10, color: 'white', fontWeight: 600 }}>✓ Activo</div>}
-              </button>
-            ))}
-          </div>
+    <>
+      {success && (
+        <div className="fx-alert fx-alert--ok" style={{ marginBottom: 16 }}>
+          <Icon name="checkCircle" size={16} /><span>{success}</span>
         </div>
+      )}
 
-        {/* Color primario */}
-        <div style={{ background: 'rgba(13,13,26,0.9)', border: '1px solid rgba(255,255,255,0.06)', borderRadius: 20, padding: '24px' }}>
-          <div style={{ fontSize: 13, fontWeight: 600, color: 'white', marginBottom: 16, paddingBottom: 12, borderBottom: '1px solid rgba(255,255,255,0.06)' }}>🎯 Color de acento</div>
-          <div style={{ display: 'flex', flexWrap: 'wrap', gap: 10, marginBottom: 12 }}>
-            {PRIMARY_COLORS.map(c => (
-              <button key={c.color} type="button" onClick={() => setStyle(s => ({ ...s, primary: c.color, preset: 'custom' }))}
-                style={{ width: 42, height: 42, borderRadius: 11, background: c.color, border: style.primary === c.color ? '3px solid white' : '3px solid transparent', cursor: 'pointer', transition: 'all 0.2s', boxShadow: style.primary === c.color ? `0 0 16px ${c.color}80` : 'none', position: 'relative' }} title={c.name}>
-                {style.primary === c.color && <span style={{ position: 'absolute', inset: 0, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 16, color: c.color === '#ffffff' ? '#000' : '#fff' }}>✓</span>}
-              </button>
-            ))}
-            <input type="color" value={style.primary} onChange={e => setStyle(s => ({ ...s, primary: e.target.value, preset: 'custom' }))} style={{ width: 42, height: 42, borderRadius: 11, border: '2px dashed rgba(255,255,255,0.2)', cursor: 'pointer', padding: 2 }} title="Custom"/>
-          </div>
-          <div style={{ display: 'flex', alignItems: 'center', gap: 10, background: 'rgba(255,255,255,0.03)', borderRadius: 10, padding: '8px 12px' }}>
-            <div style={{ width: 16, height: 16, borderRadius: '50%', background: style.primary, boxShadow: `0 0 8px ${style.primary}60` }}/>
-            <span style={{ fontSize: 12, color: style.primary, fontWeight: 600 }}>{style.primary}</span>
-          </div>
-        </div>
-
-        {/* Colores del fondo */}
-        <div style={{ background: 'rgba(13,13,26,0.9)', border: '1px solid rgba(255,255,255,0.06)', borderRadius: 20, padding: '24px' }}>
-          <div style={{ fontSize: 13, fontWeight: 600, color: 'white', marginBottom: 16, paddingBottom: 12, borderBottom: '1px solid rgba(255,255,255,0.06)' }}>🖼️ Colores del fondo</div>
-          <div style={{ display: 'flex', gap: 10, flexWrap: 'wrap', marginBottom: 14 }}>
-            {style.colors.map((color, i) => (
-              <div key={i} style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
-                <input type="color" value={color} onChange={e => { const nc = [...style.colors]; nc[i] = e.target.value; setStyle(s => ({ ...s, colors: nc, preset: 'custom' })) }} style={{ width: 38, height: 38, borderRadius: 10, border: '1px solid rgba(255,255,255,0.1)', cursor: 'pointer', padding: 2 }}/>
-                <span style={{ fontSize: 11, color: 'var(--text-muted)' }}>Color {i + 1}</span>
+      <div className="fx-style">
+        <div className="fx-style__controls">
+          <div className="fx-card">
+            <div className="fx-card__head"><h2 className="fx-h3">Temas</h2></div>
+            <div className="fx-card__body">
+              <div className="fx-presets">
+                {PRESETS.map((p) => (
+                  <button
+                    key={p.id}
+                    type="button"
+                    className={`fx-preset${style.preset === p.id ? ' is-on' : ''}`}
+                    onClick={() => applyPreset(p)}
+                  >
+                    <span className="fx-preset__swatch" style={{ background: p.preview }} />
+                    <span className="fx-preset__name">{p.name}</span>
+                    <span className="fx-preset__desc">{p.description}</span>
+                  </button>
+                ))}
               </div>
-            ))}
-            {style.colors.length < 4 && (
-              <button type="button" onClick={() => setStyle(s => ({ ...s, colors: [...s.colors, '#1a1a2e'], preset: 'custom' }))} style={{ width: 38, height: 38, borderRadius: 10, background: 'rgba(255,255,255,0.05)', border: '2px dashed rgba(255,255,255,0.15)', color: 'var(--text-muted)', fontSize: 20, cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>+</button>
-            )}
-            {style.colors.length > 1 && (
-              <button type="button" onClick={() => setStyle(s => ({ ...s, colors: s.colors.slice(0, -1), preset: 'custom' }))} style={{ width: 38, height: 38, borderRadius: 10, background: 'rgba(248,113,113,0.08)', border: '1px solid rgba(248,113,113,0.2)', color: '#f87171', fontSize: 18, cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>−</button>
-            )}
-          </div>
-          <div style={{ height: 48, borderRadius: 10, background: previewBg(), border: '1px solid rgba(255,255,255,0.08)', transition: 'background 0.3s' }}/>
-        </div>
-
-        {/* 🆕 Imagen de fondo */}
-        <div style={{ background: 'rgba(13,13,26,0.9)', border: '1px solid rgba(255,255,255,0.06)', borderRadius: 20, padding: '24px' }}>
-          <div style={{ fontSize: 13, fontWeight: 600, color: 'white', marginBottom: 4, paddingBottom: 12, borderBottom: '1px solid rgba(255,255,255,0.06)' }}>🌄 Imagen de fondo</div>
-          <p style={{ fontSize: 12, color: 'var(--text-muted)', marginBottom: 16, marginTop: 12, lineHeight: 1.6 }}>
-            Sube una foto como fondo de tu tienda. El gradiente se aplica encima para mantener legibilidad. Se adapta automáticamente a escritorio y móvil.
-          </p>
-
-          {style.bgImage ? (
-            <div style={{ marginBottom: 16 }}>
-              {/* Preview con overlay */}
-              <div style={{ height: 110, borderRadius: 12, overflow: 'hidden', position: 'relative', border: '1px solid rgba(255,255,255,0.08)', marginBottom: 14 }}>
-                <img src={style.bgImage} alt="fondo" style={{ width: '100%', height: '100%', objectFit: 'cover' }}/>
-                <div style={{ position: 'absolute', inset: 0, background: previewBg(), opacity: style.bgOverlay ?? 0.5 }}/>
-                <div style={{ position: 'absolute', inset: 0, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                  <span style={{ fontSize: 11, color: 'white', background: 'rgba(0,0,0,0.5)', borderRadius: 6, padding: '3px 8px' }}>Vista previa del overlay</span>
-                </div>
-                <button type="button" onClick={() => setStyle(s => ({ ...s, bgImage: '', preset: 'custom' }))} style={{ position: 'absolute', top: 8, right: 8, background: 'rgba(0,0,0,0.7)', border: 'none', borderRadius: 7, padding: '4px 10px', color: '#f87171', fontSize: 12, fontWeight: 600, cursor: 'pointer' }}>
-                  ✕ Quitar
-                </button>
-              </div>
-
-              {/* Slider opacidad */}
-              <div>
-                <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 8 }}>
-                  <span style={{ fontSize: 12, color: 'var(--text-muted)' }}>Opacidad del gradiente</span>
-                  <span style={{ fontSize: 12, fontWeight: 600, color: 'white' }}>{Math.round((style.bgOverlay ?? 0.5) * 100)}%</span>
-                </div>
-                <input type="range" min="0" max="1" step="0.05" value={style.bgOverlay ?? 0.5}
-                  onChange={e => setStyle(s => ({ ...s, bgOverlay: parseFloat(e.target.value) }))}
-                  style={{ width: '100%', accentColor: 'var(--primary)' }}
-                />
-                <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 10, color: 'var(--text-muted)', marginTop: 4 }}>
-                  <span>0% — Imagen pura</span>
-                  <span>100% — Solo gradiente</span>
-                </div>
-              </div>
-
-              <button type="button" onClick={() => bgImgRef.current?.click()} style={{ width: '100%', marginTop: 12, padding: '9px', background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.08)', borderRadius: 10, color: 'var(--text-muted)', fontSize: 12, cursor: 'pointer' }}>
-                🔄 Cambiar imagen
-              </button>
             </div>
-          ) : (
-            <>
-              <div onClick={() => bgImgRef.current?.click()} style={{
-                height: 90, borderRadius: 12, border: '2px dashed rgba(124,131,253,0.25)',
-                background: 'rgba(124,131,253,0.04)', cursor: 'pointer',
-                display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center',
-                gap: 6, marginBottom: 12, transition: 'all 0.2s',
-              }}
-                onMouseEnter={e => e.currentTarget.style.borderColor = 'rgba(124,131,253,0.5)'}
-                onMouseLeave={e => e.currentTarget.style.borderColor = 'rgba(124,131,253,0.25)'}
-              >
-                {uploadingBg ? (
-                  <div style={{ fontSize: 12, color: 'var(--text-muted)' }}>⬆️ Subiendo...</div>
-                ) : (
-                  <>
-                    <span style={{ fontSize: 24 }}>🌄</span>
-                    <span style={{ fontSize: 12, color: 'var(--text-muted)' }}>Clic para subir imagen de fondo</span>
-                    <span style={{ fontSize: 10, color: 'var(--text-muted)', opacity: 0.6 }}>JPG, PNG — Recomendado 1920×1080px</span>
-                  </>
-                )}
+          </div>
+
+          <div className="fx-card">
+            <div className="fx-card__head"><h2 className="fx-h3">Color principal</h2></div>
+            <div className="fx-card__body">
+              <div className="fx-swatches">
+                {PRIMARY_COLORS.map((c) => (
+                  <button
+                    key={c.color}
+                    type="button"
+                    title={c.name}
+                    aria-label={c.name}
+                    className={`fx-swatch${style.primary === c.color ? ' is-on' : ''}`}
+                    style={{ background: c.color }}
+                    onClick={() => setStyle(s => ({ ...s, primary: c.color, preset: 'custom' }))}
+                  />
+                ))}
               </div>
-              <button type="button" onClick={() => bgImgRef.current?.click()} disabled={uploadingBg} style={{ width: '100%', padding: '10px', background: 'rgba(124,131,253,0.08)', border: '1px solid rgba(124,131,253,0.2)', borderRadius: 10, color: 'var(--primary)', fontSize: 13, fontWeight: 600, cursor: 'pointer' }}>
-                {uploadingBg ? '⬆️ Subiendo...' : '📤 Subir imagen de fondo'}
-              </button>
-            </>
-          )}
-          <input ref={bgImgRef} type="file" accept="image/*" style={{ display: 'none' }} onChange={handleBgImageUpload}/>
-        </div>
+              <div className="fx-row" style={{ gap: 10, marginTop: 14 }}>
+                <input
+                  type="color"
+                  className="fx-color"
+                  value={style.primary || '#7c83fd'}
+                  onChange={(e) => setStyle(s => ({ ...s, primary: e.target.value, preset: 'custom' }))}
+                  aria-label="Color personalizado"
+                />
+                <span className="fx-code">{style.primary}</span>
+              </div>
+            </div>
+          </div>
 
-        {/* Animaciones */}
-        <div style={{ background: 'rgba(13,13,26,0.9)', border: '1px solid rgba(255,255,255,0.06)', borderRadius: 20, padding: '24px' }}>
-          <div style={{ fontSize: 13, fontWeight: 600, color: 'white', marginBottom: 16, paddingBottom: 12, borderBottom: '1px solid rgba(255,255,255,0.06)' }}>✨ Animación de fondo</div>
-          <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
-            {ANIMATIONS.map(anim => (
-              <button key={anim.key} type="button" onClick={() => setStyle(s => ({ ...s, animation: anim.key, preset: 'custom' }))} style={{
-                display: 'flex', alignItems: 'center', gap: 12, padding: '11px 16px', borderRadius: 12,
-                background: style.animation === anim.key ? 'rgba(124,131,253,0.12)' : 'rgba(255,255,255,0.03)',
-                border: style.animation === anim.key ? '1px solid rgba(124,131,253,0.35)' : '1px solid rgba(255,255,255,0.06)',
-                color: style.animation === anim.key ? 'var(--primary)' : 'var(--text-soft)',
-                fontSize: 14, fontWeight: style.animation === anim.key ? 600 : 400, cursor: 'pointer', transition: 'all 0.2s', textAlign: 'left',
-              }}>
-                <span style={{ fontSize: 18 }}>{anim.icon}</span>
-                <span>{anim.label}</span>
-                {style.animation === anim.key && <span style={{ marginLeft: 'auto', fontSize: 12 }}>✓</span>}
-              </button>
-            ))}
+          <div className="fx-card">
+            <div className="fx-card__head"><h2 className="fx-h3">Animación de fondo</h2></div>
+            <div className="fx-card__body">
+              <div className="fx-checks">
+                {ANIMATIONS.map((a) => (
+                  <button
+                    key={a.key}
+                    type="button"
+                    className={`fx-choice${style.animation === a.key ? ' is-on' : ''}`}
+                    onClick={() => setStyle(s => ({ ...s, animation: a.key, preset: 'custom' }))}
+                  >
+                    {a.label}
+                  </button>
+                ))}
+              </div>
+            </div>
+          </div>
+
+          <div className="fx-card">
+            <div className="fx-card__head"><h2 className="fx-h3">Imagen de fondo</h2></div>
+            <div className="fx-card__body">
+              {style.bgImage ? (
+                <>
+                  <div className="fx-bgpreview" style={{ backgroundImage: `url(${style.bgImage})` }} />
+                  <div className="fx-field" style={{ marginTop: 14 }}>
+                    <label className="fx-label" htmlFor="st-overlay">
+                      Oscurecer imagen: {Math.round((style.bgOverlay ?? 0.5) * 100)}%
+                    </label>
+                    <input
+                      id="st-overlay"
+                      type="range"
+                      min="0"
+                      max="0.9"
+                      step="0.05"
+                      className="fx-range"
+                      value={style.bgOverlay ?? 0.5}
+                      onChange={(e) => setStyle(s => ({ ...s, bgOverlay: parseFloat(e.target.value) }))}
+                    />
+                  </div>
+                  <button className="fx-btn fx-btn--danger fx-btn--sm" onClick={() => setStyle(s => ({ ...s, bgImage: '' }))}>
+                    <Icon name="trash" size={15} />
+                    Quitar imagen
+                  </button>
+                </>
+              ) : (
+                <>
+                  <p className="fx-hint" style={{ marginBottom: 12 }}>
+                    Opcional. Se muestra detrás del contenido de tu tienda.
+                  </p>
+                  <input ref={bgImgRef} type="file" accept="image/*" onChange={handleBgImageUpload} style={{ display: 'none' }} />
+                  <button className="fx-btn fx-btn--secondary fx-btn--sm" onClick={() => bgImgRef.current?.click()} disabled={uploadingBg}>
+                    {uploadingBg ? <><span className="fx-spinner" /> Subiendo…</> : <><Icon name="upload" size={15} /> Subir imagen</>}
+                  </button>
+                </>
+              )}
+            </div>
+          </div>
+
+          <div className="fx-row" style={{ gap: 8 }}>
+            <button className="fx-btn fx-btn--primary" onClick={handleSave} disabled={saving}>
+              {saving ? <><span className="fx-spinner" /> Guardando…</> : 'Guardar y aplicar'}
+            </button>
+            <button className="fx-btn fx-btn--ghost" onClick={handleReset}>Restaurar</button>
           </div>
         </div>
 
-        {success && <div style={{ background: 'rgba(52,211,153,0.08)', border: '1px solid rgba(52,211,153,0.2)', borderRadius: 10, padding: '11px 14px', fontSize: 13, color: '#34d399' }}>{success}</div>}
-
-        <button onClick={handleSave} disabled={saving} style={{ width: '100%', padding: '15px', borderRadius: 14, background: saving ? 'rgba(124,131,253,0.4)' : 'linear-gradient(135deg, #7c83fd, #4f46e5)', border: 'none', color: 'white', fontSize: 15, fontWeight: 700, cursor: saving ? 'not-allowed' : 'pointer', boxShadow: saving ? 'none' : '0 8px 24px rgba(124,131,253,0.25)' }}>
-          {saving ? 'Guardando...' : '💾 Aplicar estilo a mi tienda'}
-        </button>
+        <div className="fx-style__preview">
+          <div className="fx-card">
+            <div className="fx-card__head">
+              <h2 className="fx-h3">Vista previa</h2>
+              <div className="fx-tabs" style={{ padding: 3 }}>
+                <button className={`fx-tab${previewMode === 'desktop' ? ' fx-tab--on' : ''}`} onClick={() => setPreviewMode('desktop')}>Escritorio</button>
+                <button className={`fx-tab${previewMode === 'mobile' ? ' fx-tab--on' : ''}`} onClick={() => setPreviewMode('mobile')}>Móvil</button>
+              </div>
+            </div>
+            <div className="fx-card__body">
+              <div className={previewMode === 'mobile' ? 'fx-preview-frame fx-preview-frame--mobile' : 'fx-preview-frame'}>
+                <StorePreview style={style} company={company} />
+              </div>
+            </div>
+          </div>
+        </div>
       </div>
-
-      {/* ── Vista previa ── */}
-      <div style={{ position: 'sticky', top: 24, display: 'flex', flexDirection: 'column', gap: 12 }}>
-        {/* Toggle */}
-        <div style={{ display: 'flex', gap: 8 }}>
-          {[{ key: 'desktop', icon: '🖥️', label: 'Escritorio' }, { key: 'mobile', icon: '📱', label: 'Móvil' }].map(m => (
-            <button key={m.key} onClick={() => setPreviewMode(m.key)} style={{
-              flex: 1, padding: '8px', borderRadius: 10, fontSize: 12, fontWeight: 600, cursor: 'pointer', transition: 'all 0.2s',
-              background: previewMode === m.key ? 'rgba(124,131,253,0.15)' : 'rgba(255,255,255,0.04)',
-              border: previewMode === m.key ? '1px solid rgba(124,131,253,0.35)' : '1px solid rgba(255,255,255,0.08)',
-              color: previewMode === m.key ? 'var(--primary)' : 'var(--text-muted)',
-            }}>{m.icon} {m.label}</button>
-          ))}
-        </div>
-
-        <div style={{ maxWidth: previewMode === 'mobile' ? 300 : '100%', margin: '0 auto', width: '100%', transition: 'max-width 0.3s ease' }}>
-          <StorePreview style={style} company={company} />
-        </div>
-
-        {/* Info */}
-        <div style={{ background: 'rgba(124,131,253,0.06)', border: '1px solid rgba(124,131,253,0.15)', borderRadius: 12, padding: '12px 16px' }}>
-          <div style={{ fontSize: 11, color: 'var(--primary)', fontWeight: 600, marginBottom: 4 }}>Configuración actual</div>
-          <div style={{ fontSize: 13, fontWeight: 600, color: 'white', marginBottom: 2 }}>
-            {style.preset === 'custom' ? 'Personalizado' : PRESETS.find(p => p.id === style.preset)?.name || 'Custom'}
-          </div>
-          <div style={{ fontSize: 11, color: 'var(--text-muted)' }}>
-            {ANIMATIONS.find(a => a.key === style.animation)?.label}
-            {style.bgImage ? ' · Con imagen de fondo' : ' · Sin imagen de fondo'}
-          </div>
-        </div>
-      </div>
-    </div>
+    </>
   )
 }
 
@@ -405,16 +354,11 @@ export default function StylePage() {
 
   return (
     <DashboardLayout>
-      <style>{`
-        @media (max-width: 768px) {
-          .fluxy-two-col { grid-template-columns: 1fr !important; }
-          .fluxy-sticky { position: relative !important; top: 0 !important; }
-        }
-      `}</style>
-      <div style={{ marginBottom: 28 }}>
-        <div style={{ fontSize: 11, color: 'var(--primary)', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '1.5px', marginBottom: 6 }}>Panel de vendedor</div>
-        <h1 style={{ fontFamily: "'Fraunces', serif", fontSize: 28, fontWeight: 700, color: 'white' }}>Estilo de tu tienda</h1>
-        <p style={{ fontSize: 13, color: 'var(--text-muted)', marginTop: 4 }}>Personaliza colores, imagen de fondo y animaciones. Vista previa en tiempo real.</p>
+      <div className="fx-page-head">
+        <div>
+          <h1>Estilo de la tienda</h1>
+          <p>Personalizá colores, fondo y animaciones. La vista previa se actualiza en tiempo real.</p>
+        </div>
       </div>
 
       {!loading && (
@@ -425,3 +369,5 @@ export default function StylePage() {
     </DashboardLayout>
   )
 }
+
+

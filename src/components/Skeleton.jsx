@@ -1,103 +1,62 @@
 // src/components/Skeleton.jsx
+// Los estilos del shimmer viven en styles/app.css (.fx-skeleton).
 
-// ─── Animación shimmer ────────────────────────────────────────────────────────
-const shimmerStyle = `
-  @keyframes shimmer {
-    0%   { background-position: -600px 0; }
-    100% { background-position: 600px 0; }
-  }
-`
-
-function SkeletonBase({ width = '100%', height = 16, borderRadius = 8, style = {} }) {
+function SkeletonBase({ width = '100%', height = 16, borderRadius = 6, style = {} }) {
   return (
-    <>
-      <style>{shimmerStyle}</style>
-      <div style={{
-        width, height, borderRadius,
-        background: 'linear-gradient(90deg, rgba(255,255,255,0.04) 25%, rgba(255,255,255,0.08) 50%, rgba(255,255,255,0.04) 75%)',
-        backgroundSize: '600px 100%',
-        animation: 'shimmer 1.4s infinite linear',
-        flexShrink: 0,
-        ...style,
-      }}/>
-    </>
+    <div
+      className="fx-skeleton"
+      style={{ width, height, borderRadius, flexShrink: 0, ...style }}
+    />
   )
 }
 
-// ─── Skeleton para cards de productos ────────────────────────────────────────
+// ─── Tarjeta de producto ─────────────────────────────────────────────────────
 export function ProductCardSkeleton() {
   return (
-    <div style={{
-      background: 'rgba(13,13,26,0.9)',
-      border: '1px solid rgba(255,255,255,0.06)',
-      borderRadius: 18, overflow: 'hidden',
-    }}>
-      {/* Imagen */}
-      <SkeletonBase height={180} borderRadius={0}/>
-      {/* Info */}
-      <div style={{ padding: 16, display: 'flex', flexDirection: 'column', gap: 10 }}>
-        <SkeletonBase height={16} width="70%"/>
-        <SkeletonBase height={12} width="90%"/>
-        <SkeletonBase height={12} width="60%"/>
-        <SkeletonBase height={28} width="45%"/>
-        <div style={{ display: 'flex', gap: 8, marginTop: 4 }}>
-          <SkeletonBase height={36} borderRadius={10}/>
-          <SkeletonBase height={36} width={44} borderRadius={10}/>
-        </div>
+    <div className="fx-card" style={{ overflow: 'hidden' }}>
+      <SkeletonBase height={150} borderRadius={0} />
+      <div style={{ padding: 16 }}>
+        <SkeletonBase width="72%" height={15} />
+        <SkeletonBase width="42%" height={13} style={{ marginTop: 9 }} />
+        <SkeletonBase width="34%" height={19} style={{ marginTop: 14 }} />
       </div>
     </div>
   )
 }
 
-// ─── Skeleton para filas de pedidos ──────────────────────────────────────────
+// ─── Fila de pedido ──────────────────────────────────────────────────────────
 export function OrderRowSkeleton() {
   return (
-    <div style={{
-      background: 'rgba(13,13,26,0.9)',
-      border: '1px solid rgba(255,255,255,0.06)',
-      borderRadius: 16, padding: '16px 20px',
-      display: 'flex', alignItems: 'center', gap: 16,
-    }}>
-      <SkeletonBase width={44} height={44} borderRadius={12}/>
-      <div style={{ flex: 1, display: 'flex', flexDirection: 'column', gap: 8 }}>
-        <SkeletonBase height={14} width="50%"/>
-        <SkeletonBase height={11} width="35%"/>
-      </div>
-      <SkeletonBase height={12} width={80}/>
-      <SkeletonBase height={20} width={70}/>
-      <SkeletonBase height={28} width={90} borderRadius={50}/>
-    </div>
+    <tr>
+      {[36, 140, 90, 70, 80].map((w, i) => (
+        <td key={i} style={{ padding: '13px 16px', borderBottom: '1px solid var(--fx-line)' }}>
+          <SkeletonBase width={w} height={13} />
+        </td>
+      ))}
+    </tr>
   )
 }
 
-// ─── Skeleton para stat cards ─────────────────────────────────────────────────
+// ─── Indicador ───────────────────────────────────────────────────────────────
 export function StatCardSkeleton() {
   return (
-    <div style={{
-      background: 'rgba(13,13,26,0.9)',
-      border: '1px solid rgba(255,255,255,0.06)',
-      borderRadius: 14, padding: 16,
-      display: 'flex', flexDirection: 'column', gap: 10,
-    }}>
-      <SkeletonBase width={28} height={28} borderRadius={8}/>
-      <SkeletonBase height={28} width="50%"/>
-      <SkeletonBase height={12} width="65%"/>
+    <div className="fx-stat">
+      <SkeletonBase width={90} height={12} />
+      <SkeletonBase width={70} height={26} style={{ marginTop: 12 }} />
+      <SkeletonBase width={110} height={12} style={{ marginTop: 9 }} />
     </div>
   )
 }
 
-// ─── Skeleton para dashboard card ────────────────────────────────────────────
+// ─── Tarjeta genérica del panel ──────────────────────────────────────────────
 export function DashboardCardSkeleton() {
   return (
-    <div style={{
-      background: 'rgba(13,13,26,0.9)',
-      border: '1px solid rgba(255,255,255,0.06)',
-      borderRadius: 16, padding: 20,
-      display: 'flex', flexDirection: 'column', gap: 12,
-    }}>
-      <SkeletonBase width={40} height={40} borderRadius={11}/>
-      <SkeletonBase height={15} width="55%"/>
-      <SkeletonBase height={12} width="75%"/>
+    <div className="fx-card">
+      <div className="fx-card__body">
+        <SkeletonBase width="46%" height={15} />
+        <SkeletonBase width="100%" height={13} style={{ marginTop: 14 }} />
+        <SkeletonBase width="82%" height={13} style={{ marginTop: 9 }} />
+      </div>
     </div>
   )
 }

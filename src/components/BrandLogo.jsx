@@ -1,9 +1,10 @@
+// src/components/BrandLogo.jsx
 export default function BrandLogo({
-  size = 36,
-  gap = 10,
+  size = 32,
+  gap = 9,
   showWordmark = true,
   textSize = 20,
-  textColor = 'white',
+  textColor = 'currentColor',
   style,
   imageStyle,
   textStyle,
@@ -27,11 +28,11 @@ export default function BrandLogo({
       {showWordmark && (
         <span
           style={{
-            fontFamily: "'Fraunces', serif",
+            fontFamily: "'DM Sans', system-ui, sans-serif",
             fontSize: textSize,
-            fontWeight: 700,
+            fontWeight: 800,
             color: textColor,
-            letterSpacing: '-0.3px',
+            letterSpacing: '-0.65px',
             ...textStyle,
           }}
         >

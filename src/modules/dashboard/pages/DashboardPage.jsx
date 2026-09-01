@@ -1,9 +1,9 @@
 // src/modules/dashboard/pages/DashboardPage.jsx
-import { useNavigate, useSearchParams } from 'react-router-dom'
+import { useNavigate, useSearchParams, Link } from 'react-router-dom'
 import { useEffect, useState } from 'react'
 import DashboardLayout from '@/modules/dashboard/components/DashboardLayout'
 import { API_URL, getCompanyStoreUrl } from '@/app/config'
-import { DashboardCardSkeleton } from '@/components/Skeleton'
+import Icon from '@/components/Icon'
 
 const PLAN_NAMES = { PRO: 'Pro', BUSINESS: 'Business' }
 const PAYMENT_STATUS_MAP = {
@@ -60,6 +60,13 @@ async function refreshSellerAccount(expectedPlan) {
     if (!expectedPlan || data.planName === expectedPlan) break
   }
 }
+
+const SHORTCUTS = [
+  { to: '/dashboard/products', icon: 'products', title: 'Productos',     text: 'Cargá y organizá tu catálogo.' },
+  { to: '/dashboard/orders',   icon: 'orders',   title: 'Pedidos',       text: 'Revisá y gestioná tus ventas.' },
+  { to: '/dashboard/style',    icon: 'style',    title: 'Estilo',        text: 'Personalizá el diseño de la tienda.' },
+  { to: '/dashboard/settings', icon: 'settings', title: 'Configuración', text: 'Datos del negocio y pagos.' },
+]
 
 export default function DashboardPage() {
   const navigate = useNavigate()
@@ -145,198 +152,128 @@ export default function DashboardPage() {
     sessionStorage.setItem(BIRTHDAY_SHOWN_KEY, '1')
   }
 
-  // ─── Badge plan ──────────────────────────────────────────────────────────
-  const PlanBadge = () => {
-    if (plan === 'BUSINESS') return (
-      <div style={{ display: 'flex', alignItems: 'center', gap: 8, background: 'rgba(52,211,153,0.12)', border: '1px solid rgba(52,211,153,0.3)', borderRadius: 12, padding: '11px 20px', fontSize: 13, fontWeight: 700, color: '#34d399' }}>
-        🚀 Plan Business
-      </div>
-    )
-    if (plan === 'PRO') return (
-      <div onClick={() => navigate('/dashboard/plans')} style={{ display: 'flex', alignItems: 'center', gap: 8, background: 'rgba(124,131,253,0.15)', border: '1px solid rgba(124,131,253,0.35)', borderRadius: 12, padding: '11px 20px', fontSize: 13, fontWeight: 700, color: '#7c83fd', cursor: 'pointer' }}
-        onMouseEnter={e => e.currentTarget.style.background = 'rgba(124,131,253,0.22)'}
-        onMouseLeave={e => e.currentTarget.style.background = 'rgba(124,131,253,0.15)'}>
-        ⚡ Plan Pro
-      </div>
-    )
+  const paymentAlert = () => {
+    if (!paymentStatus) return null
+    const { status, plan: planParam } = paymentStatus
+    const planLabel = PLAN_NAMES[planParam?.toUpperCase()] || planParam
+
+    if (status === 'success') {
+      return (
+        <div className="fx-alert fx-alert--ok" role="status">
+          <Icon name="checkCircle" size={17} />
+          <span>Pago confirmado{planLabel ? `. Ya tenés acceso al plan ${planLabel}.` : '.'}</span>
+        </div>
+      )
+    }
+    if (status === 'pending') {
+      return (
+        <div className="fx-alert fx-alert--warn" role="status">
+          <Icon name="clock" size={17} />
+          <span>Tu pago está en revisión. Te avisamos cuando se acredite.</span>
+        </div>
+      )
+    }
     return (
-      <button onClick={() => navigate('/dashboard/plans')} style={{ display: 'flex', alignItems: 'center', gap: 8, background: 'linear-gradient(135deg, #7c83fd, #4f46e5)', color: 'white', border: 'none', borderRadius: 12, padding: '11px 20px', fontSize: 13, fontWeight: 600, cursor: 'pointer', boxShadow: '0 4px 16px rgba(124,131,253,0.3)' }}
-        onMouseEnter={e => e.currentTarget.style.transform = 'translateY(-1px)'}
-        onMouseLeave={e => e.currentTarget.style.transform = 'translateY(0)'}>
-        ⚡ Mejorar plan
-      </button>
+      <div className="fx-alert fx-alert--error" role="status">
+        <Icon name="alert" size={17} />
+        <span>No pudimos procesar el pago. Podés intentarlo de nuevo desde la sección de planes.</span>
+      </div>
     )
   }
 
   return (
     <DashboardLayout>
-      <style>{`
-        @keyframes fadeIn     { from { opacity:0; transform:translateY(-8px) }  to { opacity:1; transform:translateY(0) } }
-        @keyframes modalIn    { from { opacity:0; transform:scale(0.85) }        to { opacity:1; transform:scale(1) } }
-        @keyframes confetti   { 0%,100% { transform: translateY(0) rotate(0deg) } 50% { transform: translateY(-12px) rotate(10deg) } }
-        @keyframes spin       { to { transform: rotate(360deg) } }
-      `}</style>
-
-      {/* ══════════════════ MODAL DE CUMPLEAÑOS ══════════════════ */}
-      {showBirthday && (
-        <div style={{
-          position: 'fixed', inset: 0, zIndex: 9999,
-          background: 'rgba(0,0,0,0.75)',
-          backdropFilter: 'blur(6px)',
-          display: 'flex', alignItems: 'center', justifyContent: 'center',
-          padding: '24px',
-          animation: 'fadeIn 0.3s ease',
-        }} onClick={closeBirthdayModal}>
-          <div onClick={e => e.stopPropagation()} style={{
-            background: 'linear-gradient(160deg, #0d0d1a 0%, #111130 100%)',
-            border: '1px solid rgba(251,191,36,0.3)',
-            borderRadius: 28, padding: '48px 40px',
-            maxWidth: 440, width: '100%',
-            textAlign: 'center',
-            boxShadow: '0 40px 100px rgba(0,0,0,0.6), 0 0 60px rgba(251,191,36,0.08)',
-            animation: 'modalIn 0.35s cubic-bezier(0.34,1.56,0.64,1)',
-            position: 'relative', overflow: 'hidden',
-          }}>
-            {/* Brillo superior */}
-            <div style={{ position: 'absolute', top: 0, left: '50%', transform: 'translateX(-50%)', width: '80%', height: 2, background: 'linear-gradient(to right, transparent, rgba(251,191,36,0.6), transparent)' }}/>
-
-            {/* Emojis animados */}
-            <div style={{ fontSize: 64, marginBottom: 8, animation: 'confetti 1.5s ease-in-out infinite' }}>
-              🎂
-            </div>
-            <div style={{ fontSize: 24, marginBottom: 20, letterSpacing: 4 }}>🎉 🎈 🎊</div>
-
-            <h2 style={{ fontFamily: "'Fraunces', serif", fontSize: 30, fontWeight: 700, color: 'white', marginBottom: 12, lineHeight: 1.2 }}>
-              ¡Feliz cumpleaños,<br/>
-              <span style={{ color: '#fbbf24' }}>{firstName || 'vendedor'}</span>!
-            </h2>
-
-            <p style={{ fontSize: 15, color: 'rgba(255,255,255,0.6)', lineHeight: 1.7, marginBottom: 32 }}>
-              Todo el equipo de <strong style={{ color: 'var(--primary)' }}>Fluxy</strong> te desea un día increíble.
-              Que este año esté lleno de ventas y éxitos 🚀
-            </p>
-
-            <button onClick={closeBirthdayModal} style={{
-              width: '100%', padding: '14px',
-              background: 'linear-gradient(135deg, #fbbf24, #d97706)',
-              color: 'white', border: 'none', borderRadius: 14,
-              fontSize: 15, fontWeight: 700, cursor: 'pointer',
-              boxShadow: '0 8px 24px rgba(251,191,36,0.35)',
-            }}>
-              🎂 ¡Gracias! Ir al dashboard
+      <div className="fx-page-head">
+        <div>
+          <h1>{displayName ? `Hola, ${displayName}` : 'Resumen'}</h1>
+          <p>{company.name ? `Panel de ${company.name}` : 'Panel de control de tu tienda'}</p>
+        </div>
+        <div className="fx-page-head__actions">
+          {loadingPlan ? (
+            <span className="fx-skeleton" style={{ display: 'block', width: 104, height: 32 }} />
+          ) : plan === 'FREE' ? (
+            <button className="fx-btn fx-btn--primary" onClick={() => navigate('/dashboard/plans')}>
+              <Icon name="plans" size={15} />
+              Mejorar plan
             </button>
-          </div>
-        </div>
-      )}
-
-      {/* ══ Banner vencimiento próximo ══ */}
-      {daysLeft !== null && (
-        <div style={{ background: daysLeft <= 3 ? 'rgba(248,113,113,0.08)' : 'rgba(251,191,36,0.08)', border: `1px solid ${daysLeft <= 3 ? 'rgba(248,113,113,0.3)' : 'rgba(251,191,36,0.3)'}`, borderRadius: 14, padding: '14px 20px', marginBottom: 20, display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 12, flexWrap: 'wrap', animation: 'fadeIn 0.4s ease' }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
-            <span style={{ fontSize: 24 }}>{daysLeft <= 3 ? '🚨' : '⏰'}</span>
-            <div>
-              <div style={{ fontSize: 14, fontWeight: 700, color: daysLeft <= 3 ? '#f87171' : '#fbbf24' }}>
-                Tu plan vence en {daysLeft} día{daysLeft !== 1 ? 's' : ''}
-              </div>
-              <div style={{ fontSize: 12, color: 'var(--text-muted)', marginTop: 2 }}>
-                Renueva tu plan para no perder acceso a tus funciones.
-              </div>
-            </div>
-          </div>
-          <button onClick={() => navigate('/dashboard/plans')} style={{ background: daysLeft <= 3 ? 'linear-gradient(135deg, #f87171, #ef4444)' : 'linear-gradient(135deg, #fbbf24, #d97706)', color: 'white', border: 'none', borderRadius: 10, padding: '9px 18px', fontSize: 13, fontWeight: 600, cursor: 'pointer', whiteSpace: 'nowrap' }}>
-            Renovar ahora →
-          </button>
-        </div>
-      )}
-
-      {/* ══ Banners de pago ══ */}
-      {paymentStatus?.status === 'success' && (
-        <div style={{ background: 'rgba(52,211,153,0.1)', border: '1px solid rgba(52,211,153,0.3)', borderRadius: 14, padding: '16px 20px', marginBottom: 24, display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 12, flexWrap: 'wrap', animation: 'fadeIn 0.4s ease' }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
-            <span style={{ fontSize: 28 }}>🎉</span>
-            <div>
-              <div style={{ fontSize: 15, fontWeight: 700, color: '#34d399' }}>
-                Pago confirmado. Ya tienes acceso al plan {PLAN_NAMES[paymentStatus.plan] || paymentStatus.plan || 'seleccionado'}.
-              </div>
-              <div style={{ fontSize: 13, color: 'var(--text-muted)', marginTop: 2 }}>Tu cuenta fue actualizada correctamente.</div>
-            </div>
-          </div>
-          <button onClick={() => navigate('/dashboard/products')} style={{ background: 'linear-gradient(135deg, #34d399, #059669)', color: 'white', border: 'none', borderRadius: 10, padding: '9px 18px', fontSize: 13, fontWeight: 600, cursor: 'pointer' }}>Ir a productos →</button>
-        </div>
-      )}
-
-      {paymentStatus?.status === 'failure' && (
-        <div style={{ background: 'rgba(248,113,113,0.08)', border: '1px solid rgba(248,113,113,0.25)', borderRadius: 14, padding: '16px 20px', marginBottom: 24, display: 'flex', alignItems: 'center', gap: 12 }}>
-          <span style={{ fontSize: 24 }}>❌</span>
-          <div>
-            <div style={{ fontSize: 14, fontWeight: 600, color: '#f87171' }}>El pago no pudo procesarse</div>
-            <div style={{ fontSize: 13, color: 'var(--text-muted)', marginTop: 2 }}>Intenta de nuevo con otro método de pago.</div>
-          </div>
-        </div>
-      )}
-
-      {paymentStatus?.status === 'pending' && (
-        <div style={{ background: 'rgba(251,191,36,0.08)', border: '1px solid rgba(251,191,36,0.25)', borderRadius: 14, padding: '16px 20px', marginBottom: 24, display: 'flex', alignItems: 'center', gap: 12 }}>
-          <span style={{ fontSize: 24 }}>⏳</span>
-          <div>
-            <div style={{ fontSize: 14, fontWeight: 600, color: '#fbbf24' }}>Pago pendiente de confirmación</div>
-            <div style={{ fontSize: 13, color: 'var(--text-muted)', marginTop: 2 }}>Tu plan se activará automáticamente cuando el pago sea confirmado.</div>
-          </div>
-        </div>
-      )}
-
-      {/* ══ Bienvenida ══ */}
-      <div style={{ background: 'linear-gradient(135deg, rgba(124,131,253,0.1), rgba(79,70,229,0.05))', border: '1px solid rgba(124,131,253,0.2)', borderRadius: 20, padding: '28px 32px', marginBottom: 28, position: 'relative', overflow: 'hidden' }}>
-        <div style={{ position: 'absolute', top: 0, left: 0, right: 0, height: 2, background: 'linear-gradient(to right, transparent, var(--primary), transparent)' }}/>
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', flexWrap: 'wrap', gap: 16 }}>
-          <div>
-            <div style={{ fontSize: 11, color: 'var(--primary)', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '1.5px', marginBottom: 8 }}>
-              Panel de control
-            </div>
-            <h1 style={{ fontFamily: "'Fraunces', serif", fontSize: 28, fontWeight: 700, color: 'white', marginBottom: 6 }}>
-              ¡Bienvenido, {displayName}! 👋
-            </h1>
-            <p style={{ fontSize: 14, color: 'var(--text-soft)' }}>
-              {company.name || ''}
-            </p>
-          </div>
-          <PlanBadge />
+          ) : (
+            <Link to="/dashboard/plans" className="fx-badge fx-badge--brand" style={{ height: 32, padding: '0 12px' }}>
+              <Icon name="plans" size={14} />
+              Plan {PLAN_NAMES[plan] || plan}
+            </Link>
+          )}
         </div>
       </div>
 
-      {/* ══ Cards rápidas ══ */}
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: 16, marginBottom: 28 }}>
-        {loadingPlan && [1,2,3,4].map(i => <DashboardCardSkeleton key={i}/>)}
-        {!loadingPlan && [
-          { icon: '📦', label: 'Productos',     desc: 'Gestiona tu catálogo',  path: '/dashboard/products', color: '#7c83fd' },
-          { icon: '🛒', label: 'Pedidos',       desc: 'Ver pedidos recibidos', path: '/dashboard/orders',   color: '#34d399' },
-          { icon: '⚙️', label: 'Configuración', desc: 'Edita tu tienda',       path: '/dashboard/settings', color: '#fbbf24' },
-          { icon: '⚡', label: 'Planes',        desc: 'Ver planes y precios',  path: '/dashboard/plans',    color: '#a78bfa' },
-        ].map(card => (
-          <button key={card.path} onClick={() => navigate(card.path)} style={{ background: 'rgba(13,13,26,0.9)', border: '1px solid rgba(255,255,255,0.06)', borderRadius: 16, padding: '20px', textAlign: 'left', cursor: 'pointer', transition: 'all 0.2s' }}
-            onMouseEnter={e => { e.currentTarget.style.borderColor = `${card.color}40`; e.currentTarget.style.transform = 'translateY(-2px)' }}
-            onMouseLeave={e => { e.currentTarget.style.borderColor = 'rgba(255,255,255,0.06)'; e.currentTarget.style.transform = 'translateY(0)' }}>
-            <div style={{ width: 40, height: 40, borderRadius: 11, background: `${card.color}15`, border: `1px solid ${card.color}30`, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 20, marginBottom: 12 }}>{card.icon}</div>
-            <div style={{ fontSize: 15, fontWeight: 600, color: 'white', marginBottom: 4 }}>{card.label}</div>
-            <div style={{ fontSize: 12, color: 'var(--text-muted)' }}>{card.desc}</div>
-          </button>
+      <div className="fx-grid" style={{ gap: 12, marginBottom: 22 }}>
+        {paymentAlert()}
+
+        {daysLeft !== null && (
+          <div className="fx-alert fx-alert--warn">
+            <Icon name="clock" size={17} />
+            <span style={{ flex: 1 }}>
+              Tu plan vence en {daysLeft} {daysLeft === 1 ? 'día' : 'días'}. Renovalo para no perder acceso a tus funciones.
+            </span>
+            <Link to="/dashboard/plans" className="fx-btn fx-btn--sm fx-btn--secondary">Renovar</Link>
+          </div>
+        )}
+      </div>
+
+      {storeUrl && (
+        <div className="fx-card" style={{ marginBottom: 22 }}>
+          <div className="fx-card__body fx-row fx-row--between" style={{ flexWrap: 'wrap', gap: 14 }}>
+            <div style={{ minWidth: 0 }}>
+              <p className="fx-eyebrow" style={{ marginBottom: 6 }}>Tu tienda en línea</p>
+              <p className="fx-truncate" style={{ fontSize: 14.5, fontWeight: 500 }}>{storeUrl}</p>
+            </div>
+            <div className="fx-row" style={{ gap: 8 }}>
+              <button
+                type="button"
+                className="fx-btn fx-btn--secondary fx-btn--sm"
+                onClick={() => navigator.clipboard?.writeText(storeUrl)}
+              >
+                <Icon name="copy" size={15} />
+                Copiar enlace
+              </button>
+              <a href={storeUrl} target="_blank" rel="noreferrer" className="fx-btn fx-btn--primary fx-btn--sm">
+                <Icon name="external" size={15} />
+                Visitar
+              </a>
+            </div>
+          </div>
+        </div>
+      )}
+
+      <h2 className="fx-h2" style={{ marginBottom: 14 }}>Accesos rápidos</h2>
+      <div className="fx-grid" style={{ gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))' }}>
+        {SHORTCUTS.map((s) => (
+          <Link key={s.to} to={s.to} className="fx-shortcut">
+            <span className="fx-shortcut__icon"><Icon name={s.icon} size={18} /></span>
+            <span className="fx-shortcut__title">{s.title}</span>
+            <span className="fx-shortcut__text">{s.text}</span>
+            <Icon name="arrowRight" size={15} className="fx-shortcut__go" />
+          </Link>
         ))}
       </div>
 
-      {/* ══ Link tienda ══ */}
-      {storeUrl && (
-        <div style={{ background: 'rgba(13,13,26,0.8)', border: '1px solid rgba(255,255,255,0.06)', borderRadius: 16, padding: '20px 24px', display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: 12 }}>
-          <div>
-            <div style={{ fontSize: 12, color: 'var(--text-muted)', marginBottom: 4 }}>🔗 Tu tienda pública</div>
-            <div style={{ fontSize: 14, color: 'var(--primary)', fontWeight: 500 }}>{storeUrl}</div>
+      {showBirthday && (
+        <div className="fx-modal" role="dialog" aria-modal="true" onClick={closeBirthdayModal}>
+          <div className="fx-modal__panel" style={{ maxWidth: 400, textAlign: 'center' }} onClick={(e) => e.stopPropagation()}>
+            <div className="fx-modal__body">
+              <div className="fx-auth__mark" style={{ margin: '0 auto 16px' }}>
+                <Icon name="tag" size={22} />
+              </div>
+              <h2 className="fx-h2" style={{ marginBottom: 8 }}>
+                {displayName ? `Feliz cumpleaños, ${displayName}` : 'Feliz cumpleaños'}
+              </h2>
+              <p className="fx-hint" style={{ marginBottom: 22 }}>
+                Todo el equipo de Fluxy te desea un año lleno de ventas y buenos resultados.
+              </p>
+              <button className="fx-btn fx-btn--primary fx-btn--block" onClick={closeBirthdayModal}>
+                Gracias
+              </button>
+            </div>
           </div>
-          <a href={storeUrl} target="_blank" rel="noreferrer" style={{ display: 'flex', alignItems: 'center', gap: 6, background: 'rgba(52,211,153,0.08)', border: '1px solid rgba(52,211,153,0.2)', borderRadius: 10, padding: '8px 16px', fontSize: 13, fontWeight: 600, color: '#34d399' }}>
-            Ver tienda
-            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-              <path d="M18 13v6a2 2 0 01-2 2H5a2 2 0 01-2-2V8a2 2 0 012-2h6"/>
-              <polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/>
-            </svg>
-          </a>
         </div>
       )}
     </DashboardLayout>

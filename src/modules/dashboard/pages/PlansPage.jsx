@@ -3,6 +3,7 @@ import { useState, useEffect } from 'react'
 import DashboardLayout from '@/modules/dashboard/components/DashboardLayout'
 import { API_URL } from '@/app/config'
 import { useCurrency } from '@/hooks/useCurrency'
+import Icon from '@/components/Icon'
 
 function getToken() {
   return localStorage.getItem('token') || ''
@@ -12,82 +13,68 @@ const PLANS = [
   {
     key: 'FREE',
     name: 'Free',
-    price: 0,
-    priceLabel: 'Gratis',
-    color: '#9ca3af',
-    bg: 'rgba(255,255,255,0.04)',
-    border: 'rgba(255,255,255,0.10)',
+    tagline: 'Para empezar a vender hoy mismo.',
     badge: null,
     benefits: [
-      { icon: '📦', text: 'Hasta 10 productos en tu tienda' },
-      { icon: '🛒', text: 'Recepción de pedidos básica' },
-      { icon: '🎨', text: 'Personalización de colores y logo' },
-      { icon: '🔗', text: 'Tienda pública con slug propio' },
-      { icon: '📊', text: 'Métricas básicas de ventas' },
+      'Hasta 10 productos en tu tienda',
+      'Recepción de pedidos básica',
+      'Personalización de colores y logo',
+      'Tienda pública con enlace propio',
+      'Métricas básicas de ventas',
     ],
     excluded: [
       'Mensaje automático por WhatsApp',
       'Estados de pedidos avanzados',
       'Dominio personalizado',
-      'Quitar branding Fluxy',
+      'Quitar la marca de Fluxy',
       'Soporte prioritario',
     ],
   },
   {
     key: 'PRO',
     name: 'Pro',
-    price: 39,
-    priceLabel: 'S/ 39',
-    color: '#7c83fd',
-    bg: 'rgba(124,131,253,0.08)',
-    border: 'rgba(124,131,253,0.30)',
-    badge: 'Más popular',
+    tagline: 'Para negocios que ya venden todos los días.',
+    badge: 'Más elegido',
     benefits: [
-      { icon: '📦', text: 'Hasta 100 productos en tu tienda' },
-      { icon: '💬', text: 'Mensaje automático de pedido por WhatsApp al vendedor' },
-      { icon: '🔔', text: 'Notificación al cliente con resumen del pedido' },
-      { icon: '📋', text: 'Panel de pedidos con estados (Pendiente, Completado, Cancelado)' },
-      { icon: '📊', text: 'Estadísticas completas de ventas y gráficas' },
-      { icon: '🏆', text: 'Ranking de productos más vendidos' },
-      { icon: '🎨', text: 'Personalización avanzada: colores, gradientes y animaciones' },
-      { icon: '🖼️', text: 'Logo personalizado en tu tienda' },
-      { icon: '💳', text: 'Múltiples métodos de pago visibles (Yape, Plin, transferencia)' },
-      { icon: '📱', text: 'Tienda 100% responsive para móvil' },
-      { icon: '⚡', text: 'Soporte por correo electrónico' },
+      'Hasta 100 productos en tu tienda',
+      'Mensaje automático de pedido por WhatsApp',
+      'Notificación al cliente con el resumen del pedido',
+      'Panel de pedidos con estados',
+      'Estadísticas completas y gráficos',
+      'Ranking de productos más vendidos',
+      'Personalización avanzada de la tienda',
+      'Logo propio en tu tienda',
+      'Múltiples métodos de pago visibles',
+      'Soporte por correo electrónico',
     ],
     excluded: [
       'Dominio personalizado',
-      'Quitar branding Fluxy',
+      'Quitar la marca de Fluxy',
       'Soporte prioritario 24/7',
     ],
   },
   {
     key: 'BUSINESS',
     name: 'Business',
-    price: 59,
-    priceLabel: 'S/ 59',
-    color: '#34d399',
-    bg: 'rgba(52,211,153,0.06)',
-    border: 'rgba(52,211,153,0.25)',
+    tagline: 'Todo incluido, sin límites.',
     badge: 'Todo incluido',
     benefits: [
-      { icon: '♾️', text: 'Productos ilimitados en tu tienda' },
-      { icon: '💬', text: 'Mensaje automático de pedido por WhatsApp al vendedor' },
-      { icon: '🔔', text: 'Notificación al cliente con resumen del pedido' },
-      { icon: '📋', text: 'Panel de pedidos con estados avanzados' },
-      { icon: '📊', text: 'Estadísticas completas de ventas y gráficas' },
-      { icon: '🏆', text: 'Ranking de productos más vendidos' },
-      { icon: '🎨', text: 'Personalización avanzada: colores, gradientes y animaciones' },
-      { icon: '🌐', text: 'Dominio personalizado para tu tienda' },
-      { icon: '🏷️', text: 'Quitar branding de Fluxy de tu tienda' },
-      { icon: '💳', text: 'Múltiples métodos de pago visibles' },
-      { icon: '📱', text: 'Tienda 100% responsive para móvil' },
-      { icon: '🚀', text: 'Soporte prioritario 24/7' },
-      { icon: '📈', text: 'Reportes avanzados de ventas por período' },
+      'Productos ilimitados',
+      'Mensaje automático de pedido por WhatsApp',
+      'Notificación al cliente con el resumen del pedido',
+      'Panel de pedidos con estados avanzados',
+      'Estadísticas completas y gráficos',
+      'Ranking de productos más vendidos',
+      'Personalización avanzada de la tienda',
+      'Dominio personalizado',
+      'Tienda sin la marca de Fluxy',
+      'Soporte prioritario 24/7',
     ],
     excluded: [],
   },
 ]
+
+const PLAN_ORDER = { FREE: 0, PRO: 1, BUSINESS: 2 }
 
 export default function PlansPage() {
   const { currencyInfo, formatProPrice, formatBusinessPrice } = useCurrency()
@@ -171,178 +158,95 @@ export default function PlansPage() {
     }
   }
 
+  const priceLabel = (key) => {
+    if (key === 'FREE') return 'Gratis'
+    return key === 'PRO' ? formatProPrice() : formatBusinessPrice()
+  }
+
   return (
     <DashboardLayout>
-      <style>{`
-        @keyframes spin { to { transform: rotate(360deg) } }
-        @keyframes fadeIn { from { opacity:0; transform:translateY(-8px) } to { opacity:1; transform:translateY(0) } }
-      `}</style>
+      <div className="fx-page-head">
+        <div>
+          <h1>Plan y facturación</h1>
+          <p>Estás en el plan <strong style={{ color: 'var(--fx-ink)' }}>{PLANS.find(p => p.key === currentPlan)?.name || currentPlan}</strong>.</p>
+        </div>
+      </div>
 
-      {/* ── Trial activado ── */}
       {trialSuccess && (
-        <div style={{
-          background: 'rgba(52,211,153,0.1)', border: '1px solid rgba(52,211,153,0.3)',
-          borderRadius: 14, padding: '16px 20px', marginBottom: 24,
-          display: 'flex', alignItems: 'center', gap: 12,
-          animation: 'fadeIn 0.4s ease',
-        }}>
-          <span style={{ fontSize: 28 }}>🎉</span>
-          <div>
-            <div style={{ fontSize: 15, fontWeight: 700, color: '#34d399' }}>¡Plan Pro activado gratis por 1 mes!</div>
-            <div style={{ fontSize: 13, color: 'var(--text-muted)', marginTop: 2 }}>Disfruta todas las funciones premium. Al vencer volverás al plan Free.</div>
+        <div className="fx-alert fx-alert--ok" style={{ marginBottom: 16 }}>
+          <Icon name="checkCircle" size={16} />
+          <span>Prueba del plan Pro activada. Ya tenés acceso a todas sus funciones.</span>
+        </div>
+      )}
+      {paymentError && (
+        <div className="fx-alert fx-alert--error" style={{ marginBottom: 16 }}>
+          <Icon name="alert" size={16} /><span>{paymentError}</span>
+        </div>
+      )}
+
+      {currentPlan === 'FREE' && !trialUsed && (
+        <div className="fx-card" style={{ marginBottom: 20 }}>
+          <div className="fx-card__body fx-row fx-row--between" style={{ flexWrap: 'wrap', gap: 14 }}>
+            <div>
+              <h2 className="fx-h3" style={{ marginBottom: 4 }}>Probá el plan Pro gratis</h2>
+              <p className="fx-hint">7 días con todas las funciones. No se requiere tarjeta.</p>
+            </div>
+            <button className="fx-btn fx-btn--primary" onClick={handleTrial} disabled={loadingTrial}>
+              {loadingTrial ? <><span className="fx-spinner" /> Activando…</> : 'Activar prueba gratuita'}
+            </button>
           </div>
         </div>
       )}
 
-      {/* ── Header ── */}
-      <div style={{ marginBottom: 32 }}>
-        <div style={{ fontSize: 11, color: 'var(--primary)', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '1.5px', marginBottom: 6 }}>
-          Planes y precios
-        </div>
-        <h1 style={{ fontFamily: "'Fraunces', serif", fontSize: 28, fontWeight: 700, color: 'white', marginBottom: 8 }}>
-          Elige tu plan
-        </h1>
-        <p style={{ fontSize: 14, color: 'var(--text-muted)' }}>
-          Actualiza tu plan y desbloquea más funciones para hacer crecer tu negocio.
-        </p>
-      </div>
-
-      {/* ── Plan actual ── */}
-      <div style={{
-        background: 'rgba(124,131,253,0.06)', border: '1px solid rgba(124,131,253,0.15)',
-        borderRadius: 12, padding: '12px 18px', marginBottom: 32,
-        display: 'flex', alignItems: 'center', gap: 10,
-      }}>
-        <span style={{ fontSize: 16 }}>💡</span>
-        <span style={{ fontSize: 13, color: 'var(--text-muted)' }}>
-          Tu plan actual: <strong style={{ color: 'white' }}>{currentPlan}</strong>
-          {currentPlan === 'FREE' && ' — Mejora para desbloquear más funciones'}
-          {currentPlan === 'PRO' && ' — ¡Considera Business para funciones ilimitadas!'}
-          {currentPlan === 'BUSINESS' && ' — Tienes acceso a todas las funciones 🎉'}
-        </span>
-      </div>
-
-      {/* ── Error de pago ── */}
-      {paymentError && (
-        <div style={{
-          background: 'rgba(248,113,113,0.08)', border: '1px solid rgba(248,113,113,0.2)',
-          borderRadius: 10, padding: '12px 16px', marginBottom: 24, fontSize: 13, color: '#f87171',
-        }}>⚠️ {paymentError}</div>
-      )}
-
-      {/* ── Grid de planes ── */}
-      <div style={{
-        display: 'grid',
-        gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))',
-        gap: 20, alignItems: 'start',
-      }}>
-        {PLANS.map(plan => {
-          const isCurrent  = currentPlan === plan.key
-          const isLoading  = loadingPayment === plan.key
+      <div className="fx-plans">
+        {PLANS.map((plan) => {
+          const isCurrent = currentPlan === plan.key
+          const isLower   = PLAN_ORDER[plan.key] < PLAN_ORDER[currentPlan]
+          const isLoading = loadingPayment === plan.key
 
           return (
-            <div key={plan.key} style={{
-              background: plan.bg,
-              border: `1px solid ${isCurrent ? plan.color : plan.border}`,
-              borderRadius: 20, overflow: 'hidden',
-              position: 'relative',
-              boxShadow: isCurrent ? `0 0 0 2px ${plan.color}40` : 'none',
-              transition: 'all 0.2s',
-            }}>
-
-              {/* Badge */}
-              {plan.badge && (
-                <div style={{
-                  position: 'absolute', top: 16, right: 16,
-                  background: plan.color, color: 'white',
-                  borderRadius: 20, padding: '3px 10px',
-                  fontSize: 11, fontWeight: 700,
-                }}>{plan.badge}</div>
-              )}
-
-              {/* Plan actual badge */}
-              {isCurrent && (
-                <div style={{
-                  position: 'absolute', top: 16, right: 16,
-                  background: 'rgba(255,255,255,0.1)', color: 'white',
-                  border: '1px solid rgba(255,255,255,0.2)',
-                  borderRadius: 20, padding: '3px 10px',
-                  fontSize: 11, fontWeight: 700,
-                }}>✓ Tu plan</div>
-              )}
-
-              {/* Header del plan */}
-              <div style={{ padding: '24px 24px 20px', borderBottom: `1px solid ${plan.border}` }}>
-                <div style={{
-                  fontSize: 13, fontWeight: 700, color: plan.color,
-                  textTransform: 'uppercase', letterSpacing: '1px', marginBottom: 8,
-                }}>{plan.name}</div>
-                <div style={{ display: 'flex', alignItems: 'baseline', gap: 6, marginBottom: 4 }}>
-                  <span style={{ fontFamily: "'Fraunces', serif", fontSize: 36, fontWeight: 900, color: 'white' }}>
-                    {plan.key === 'FREE' ? 'Gratis' : plan.key === 'PRO' ? formatProPrice() : formatBusinessPrice()}
-                  </span>
-                  {plan.price > 0 && (
-                    <span style={{ fontSize: 13, color: 'var(--text-muted)' }}>/mes</span>
-                  )}
+            <div key={plan.key} className={`fx-plan${isCurrent ? ' fx-plan--current' : ''}`}>
+              <div className="fx-plan__head">
+                <div className="fx-row fx-row--between">
+                  <h2 className="fx-h2">{plan.name}</h2>
+                  {isCurrent
+                    ? <span className="fx-badge fx-badge--brand">Tu plan</span>
+                    : plan.badge ? <span className="fx-badge">{plan.badge}</span> : null}
                 </div>
-                {plan.price === 0 && (
-                  <div style={{ fontSize: 12, color: 'var(--text-muted)' }}>Para siempre</div>
-                )}
+                <p className="fx-plan__price">
+                  {priceLabel(plan.key)}
+                  {plan.key !== 'FREE' && <span className="fx-plan__period"> / mes</span>}
+                </p>
+                <p className="fx-hint">{plan.tagline}</p>
               </div>
 
-              {/* Beneficios */}
-              <div style={{ padding: '20px 24px' }}>
-                <div style={{ display: 'flex', flexDirection: 'column', gap: 10, marginBottom: 20 }}>
-                  {plan.benefits.map((b, i) => (
-                    <div key={i} style={{ display: 'flex', alignItems: 'flex-start', gap: 10 }}>
-                      <span style={{ fontSize: 15, flexShrink: 0, marginTop: 1 }}>{b.icon}</span>
-                      <span style={{ fontSize: 13, color: '#e5e7eb', lineHeight: 1.5 }}>{b.text}</span>
-                    </div>
-                  ))}
-                  {plan.excluded.map((e, i) => (
-                    <div key={i} style={{ display: 'flex', alignItems: 'flex-start', gap: 10, opacity: 0.35 }}>
-                      <span style={{ fontSize: 15, flexShrink: 0, marginTop: 1 }}>✕</span>
-                      <span style={{ fontSize: 13, color: '#9ca3af', lineHeight: 1.5, textDecoration: 'line-through' }}>{e}</span>
-                    </div>
-                  ))}
-                </div>
+              <ul className="fx-plan__list">
+                {plan.benefits.map((b) => (
+                  <li key={b}>
+                    <Icon name="check" size={15} style={{ color: 'var(--fx-ok)' }} />
+                    <span>{b}</span>
+                  </li>
+                ))}
+                {plan.excluded.map((b) => (
+                  <li key={b} className="is-off">
+                    <Icon name="close" size={15} />
+                    <span>{b}</span>
+                  </li>
+                ))}
+              </ul>
 
-                {/* Botón */}
+              <div className="fx-plan__foot">
                 {isCurrent ? (
-                  <div style={{
-                    textAlign: 'center', padding: '12px',
-                    background: 'rgba(255,255,255,0.04)',
-                    border: '1px solid rgba(255,255,255,0.08)',
-                    borderRadius: 12, fontSize: 13,
-                    color: 'var(--text-muted)',
-                  }}>✓ Plan activo</div>
-                ) : plan.key === 'FREE' ? (
-                  <div style={{ textAlign: 'center', padding: '12px', background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.08)', borderRadius: 12, fontSize: 13, color: 'var(--text-muted)' }}>Plan base</div>
+                  <button className="fx-btn fx-btn--secondary fx-btn--block" disabled>Plan actual</button>
+                ) : isLower ? (
+                  <button className="fx-btn fx-btn--ghost fx-btn--block" disabled>Incluido en tu plan</button>
                 ) : (
                   <button
+                    className="fx-btn fx-btn--primary fx-btn--block"
                     onClick={() => handleUpgrade(plan.key)}
-                    disabled={!!loadingPayment}
-                    style={{
-                      width: '100%', padding: '13px',
-                      background: loadingPayment
-                        ? 'rgba(255,255,255,0.06)'
-                        : `linear-gradient(135deg, ${plan.color}, ${plan.key === 'PRO' ? '#4f46e5' : '#059669'})`,
-                      border: 'none', borderRadius: 12,
-                      color: 'white', fontSize: 14, fontWeight: 600,
-                      cursor: loadingPayment ? 'not-allowed' : 'pointer',
-                      opacity: loadingPayment && !isLoading ? 0.5 : 1,
-                      transition: 'all 0.2s',
-                      display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8,
-                    }}
+                    disabled={isLoading}
                   >
-                    {isLoading ? (
-                      <>
-                        <span style={{ width: 16, height: 16, border: '2px solid rgba(255,255,255,0.3)', borderTopColor: 'white', borderRadius: '50%', display: 'inline-block', animation: 'spin 0.8s linear infinite' }} />
-                        Redirigiendo...
-                      </>
-                    ) : (
-                      <>⚡ Activar {plan.name} — {plan.key === 'PRO' ? formatProPrice() : formatBusinessPrice()}/mes</>
-                    )}
+                    {isLoading ? <><span className="fx-spinner" /> Redirigiendo…</> : `Cambiar a ${plan.name}`}
                   </button>
                 )}
               </div>
@@ -351,62 +255,9 @@ export default function PlansPage() {
         })}
       </div>
 
-      {/* ── Banner prueba gratuita ── */}
-      {currentPlan === 'FREE' && (
-        <div style={{
-          background: 'linear-gradient(135deg, rgba(124,131,253,0.1), rgba(79,70,229,0.06))',
-          border: '1px solid rgba(124,131,253,0.25)',
-          borderRadius: 20, padding: '28px 32px', marginTop: 24, marginBottom: 8,
-          display: 'flex', alignItems: 'center', justifyContent: 'space-between',
-          flexWrap: 'wrap', gap: 20, position: 'relative', overflow: 'hidden',
-        }}>
-          <div style={{ position: 'absolute', top: -40, right: -40, width: 150, height: 150, borderRadius: '50%', background: 'rgba(124,131,253,0.08)', pointerEvents: 'none' }}/>
-          <div>
-            <div style={{ fontSize: 11, color: '#7c83fd', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '1.5px', marginBottom: 8 }}>Oferta especial</div>
-            <h3 style={{ fontFamily: "'Fraunces', serif", fontSize: 22, fontWeight: 800, color: 'white', marginBottom: 8 }}>
-              Prueba el Plan Pro gratis por 1 mes 🚀
-            </h3>
-            <p style={{ fontSize: 14, color: 'var(--text-muted)', lineHeight: 1.6, maxWidth: 440 }}>
-              Activa todas las funciones premium sin pagar nada. Al vencer el mes, tu cuenta vuelve al plan Free automáticamente.
-            </p>
-          </div>
-          {trialUsed ? (
-            <div style={{ background: 'rgba(156,163,175,0.1)', border: '1px solid rgba(156,163,175,0.2)', borderRadius: 14, padding: '14px 24px', fontSize: 13, color: '#9ca3af', textAlign: 'center' }}>
-              ✓ Ya usaste tu prueba gratuita
-            </div>
-          ) : (
-            <button onClick={handleTrial} disabled={loadingTrial} style={{
-              background: loadingTrial ? 'rgba(124,131,253,0.4)' : 'linear-gradient(135deg, #7c83fd, #4f46e5)',
-              color: 'white', border: 'none', borderRadius: 14,
-              padding: '14px 28px', fontSize: 15, fontWeight: 700,
-              cursor: loadingTrial ? 'not-allowed' : 'pointer',
-              boxShadow: loadingTrial ? 'none' : '0 8px 24px rgba(124,131,253,0.35)',
-              whiteSpace: 'nowrap', flexShrink: 0, transition: 'all 0.2s',
-            }}
-              onMouseEnter={e => { if (!loadingTrial) e.currentTarget.style.transform = 'translateY(-2px)' }}
-              onMouseLeave={e => e.currentTarget.style.transform = 'translateY(0)'}
-            >
-              {loadingTrial ? 'Activando...' : '🎁 Probar Pro gratis 1 mes'}
-            </button>
-          )}
-        </div>
-      )}
-
-      {/* ── Footer info ── */}
-      <div style={{
-        marginTop: 32, padding: '20px 24px',
-        background: 'rgba(13,13,26,0.6)',
-        border: '1px solid rgba(255,255,255,0.06)',
-        borderRadius: 14, textAlign: 'center',
-      }}>
-        <div style={{ fontSize: 13, color: 'var(--text-muted)', marginBottom: 6 }}>
-          🔒 Pago seguro con <strong style={{ color: '#00bcff' }}>Mercado Pago</strong>
-          {currencyInfo?.name && <span style={{ marginLeft: 12, opacity: 0.6 }}>· Precios en {currencyInfo.currency} ({currencyInfo.name})</span>}
-        </div>
-        <div style={{ fontSize: 12, color: 'var(--text-muted)', opacity: 0.7 }}>
-          Cancela cuando quieras · Sin contratos · Soporte en español
-        </div>
-      </div>
+      <p className="fx-hint" style={{ marginTop: 18, textAlign: 'center' }}>
+        Los pagos se procesan con Mercado Pago. La renovación es mensual y manual: si no renovás, tu cuenta vuelve al plan Free.
+      </p>
     </DashboardLayout>
   )
 }

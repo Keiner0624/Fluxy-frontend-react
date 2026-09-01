@@ -1,6 +1,8 @@
 // src/modules/landing/pages/TermsPage.jsx
-import { useState, useEffect } from 'react'
-import { Link } from 'react-router-dom'
+import { useState, useEffect, useMemo } from 'react'
+import { Link, useSearchParams } from 'react-router-dom'
+import BrandLogo from '@/components/BrandLogo'
+import Icon from '@/components/Icon'
 
 const LAST_UPDATED = '5 de mayo de 2026'
 
@@ -200,150 +202,129 @@ Plataforma: fluxyweb.com`,
   ],
 }
 
+const DOCS = [
+  { key: 'terms',   label: 'Términos y condiciones' },
+  { key: 'privacy', label: 'Política de privacidad' },
+]
+
 export default function TermsPage() {
-  const [tab, setTab] = useState('terms')
-  const [active, setActive] = useState(null)
-  const [mounted, setMounted] = useState(false)
+  const [searchParams, setSearchParams] = useSearchParams()
+  const doc = searchParams.get('doc') === 'privacy' ? 'privacy' : 'terms'
+  const [activeId, setActiveId] = useState(null)
 
+  const sections = useMemo(() => SECTIONS[doc] ?? [], [doc])
+
+  // Marca en el índice la sección visible al hacer scroll
   useEffect(() => {
-    setTimeout(() => setMounted(true), 80)
-    window.scrollTo(0, 0)
-  }, [])
+    const nodes = sections
+      .map((s) => document.getElementById(`sec-${s.id}`))
+      .filter(Boolean)
+    if (nodes.length === 0) return
 
-  const sections = SECTIONS[tab]
+    const observer = new IntersectionObserver(
+      (entries) => {
+        const visible = entries
+          .filter((e) => e.isIntersecting)
+          .sort((a, b) => a.boundingClientRect.top - b.boundingClientRect.top)[0]
+        if (visible) setActiveId(visible.target.id.replace('sec-', ''))
+      },
+      { rootMargin: '-88px 0px -70% 0px', threshold: 0 },
+    )
+
+    nodes.forEach((n) => observer.observe(n))
+    return () => observer.disconnect()
+  }, [sections])
+
+  const selectDoc = (key) => {
+    setSearchParams(key === 'terms' ? {} : { doc: key })
+    setActiveId(null)
+    window.scrollTo({ top: 0 })
+  }
 
   return (
-    <div style={{
-      minHeight: '100vh', background: '#06060f',
-      fontFamily: 'DM Sans, sans-serif', color: 'white',
-    }}>
-      <style>{`
-        @keyframes fadeUp { from { opacity:0; transform:translateY(16px) } to { opacity:1; transform:translateY(0) } }
-        * { box-sizing: border-box; margin: 0; padding: 0; }
-        .section-item { transition: all 0.2s; }
-        .section-item:hover { background: rgba(124,131,253,0.04) !important; }
-      `}</style>
-
-      {/* Fondo */}
-      <div style={{ position: 'fixed', inset: 0, zIndex: 0, background: 'radial-gradient(ellipse 60% 40% at 50% 0%, rgba(124,131,253,0.07) 0%, transparent 60%)' }}/>
-      <div style={{ position: 'fixed', inset: 0, zIndex: 0, backgroundImage: 'linear-gradient(rgba(124,131,253,0.025) 1px, transparent 1px), linear-gradient(90deg, rgba(124,131,253,0.025) 1px, transparent 1px)', backgroundSize: '60px 60px' }}/>
-
-      {/* Navbar */}
-      <nav style={{ position: 'sticky', top: 0, zIndex: 100, background: 'rgba(6,6,15,0.92)', backdropFilter: 'blur(20px)', borderBottom: '1px solid rgba(255,255,255,0.06)', padding: '0 24px' }}>
-        <div style={{ maxWidth: 900, margin: '0 auto', height: 60, display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-          <Link to="/" style={{ textDecoration: 'none', display: 'flex', alignItems: 'center', gap: 10 }}>
-            <div style={{ width: 28, height: 28, borderRadius: 8, background: 'linear-gradient(135deg, #7c83fd, #4f46e5)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 12, fontWeight: 900, color: 'white' }}>F</div>
-            <span style={{ fontSize: 15, fontWeight: 700, color: 'white' }}>Fluxy</span>
+    <div className="fx fx-legal">
+      <header className="fx-legal__nav">
+        <div className="fx-legal__nav-inner">
+          <Link to="/">
+            <BrandLogo size={28} textSize={18} textColor="var(--fx-ink)" />
           </Link>
-          <Link to="/" style={{ fontSize: 13, color: 'rgba(255,255,255,0.4)', textDecoration: 'none', transition: 'color 0.2s' }}
-            onMouseEnter={e => e.currentTarget.style.color = 'white'}
-            onMouseLeave={e => e.currentTarget.style.color = 'rgba(255,255,255,0.4)'}
-          >← Volver al inicio</Link>
+          <Link to="/" className="fx-btn fx-btn--ghost fx-btn--sm">
+            <Icon name="arrowLeft" size={15} />
+            Volver al inicio
+          </Link>
         </div>
-      </nav>
+      </header>
 
-      <div style={{
-        maxWidth: 900, margin: '0 auto', padding: '48px 24px 80px',
-        position: 'relative', zIndex: 1,
-        opacity: mounted ? 1 : 0,
-        transform: mounted ? 'translateY(0)' : 'translateY(20px)',
-        transition: 'all 0.6s ease',
-      }}>
-
-        {/* Header */}
-        <div style={{ textAlign: 'center', marginBottom: 48 }}>
-          <div style={{ display: 'inline-flex', alignItems: 'center', gap: 8, background: 'rgba(124,131,253,0.08)', border: '1px solid rgba(124,131,253,0.2)', borderRadius: 50, padding: '5px 16px', marginBottom: 20 }}>
-            <span style={{ fontSize: 12, color: '#7c83fd', fontWeight: 600 }}>Documentos legales</span>
-          </div>
-          <h1 style={{ fontFamily: "'Fraunces', serif", fontSize: 'clamp(28px, 5vw, 44px)', fontWeight: 900, color: 'white', letterSpacing: '-1px', marginBottom: 12 }}>
-            Términos legales de Fluxy
-          </h1>
-          <p style={{ fontSize: 14, color: 'rgba(255,255,255,0.35)', lineHeight: 1.7 }}>
-            Última actualización: {LAST_UPDATED}
-          </p>
+      <div className="fx-legal__shell">
+        <div className="fx-legal__header">
+          <span className="fx-eyebrow">Documentos legales</span>
+          <h1 className="fx-legal__title">{DOCS.find((d) => d.key === doc).label}</h1>
+          <p className="fx-hint">Última actualización: {LAST_UPDATED}</p>
         </div>
 
-        {/* Tabs */}
-        <div style={{ display: 'flex', gap: 8, marginBottom: 32, background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.06)', borderRadius: 14, padding: 6 }}>
-          {[
-            { key: 'terms',   label: '📋 Términos y condiciones' },
-            { key: 'privacy', label: '🔒 Política de privacidad' },
-          ].map(t => (
-            <button key={t.key} onClick={() => { setTab(t.key); setActive(null) }} style={{
-              flex: 1, padding: '10px 16px', borderRadius: 10,
-              background: tab === t.key ? 'rgba(124,131,253,0.15)' : 'transparent',
-              border: tab === t.key ? '1px solid rgba(124,131,253,0.3)' : '1px solid transparent',
-              color: tab === t.key ? '#7c83fd' : 'rgba(255,255,255,0.4)',
-              fontSize: 13, fontWeight: tab === t.key ? 700 : 400,
-              cursor: 'pointer', transition: 'all 0.2s',
-              fontFamily: 'DM Sans, sans-serif',
-            }}>{t.label}</button>
-          ))}
-        </div>
-
-        {/* Secciones */}
-        <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
-          {sections.map((section) => (
-            <div key={section.id} className="section-item" style={{
-              background: active === section.id ? 'rgba(124,131,253,0.06)' : 'rgba(13,13,26,0.8)',
-              border: active === section.id ? '1px solid rgba(124,131,253,0.2)' : '1px solid rgba(255,255,255,0.06)',
-              borderRadius: 16, overflow: 'hidden', cursor: 'pointer',
-            }}
-              onClick={() => setActive(active === section.id ? null : section.id)}
+        <div className="fx-legal__tabs" role="tablist">
+          {DOCS.map((d) => (
+            <button
+              key={d.key}
+              role="tab"
+              aria-selected={doc === d.key}
+              className={`fx-legal__tab${doc === d.key ? ' fx-legal__tab--on' : ''}`}
+              onClick={() => selectDoc(d.key)}
             >
-              {/* Header sección */}
-              <div style={{ padding: '18px 24px', display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 16 }}>
-                <h3 style={{ fontSize: 15, fontWeight: 700, color: active === section.id ? '#7c83fd' : 'white', lineHeight: 1.3 }}>
-                  {section.title}
-                </h3>
-                <div style={{
-                  width: 24, height: 24, borderRadius: '50%', flexShrink: 0,
-                  background: active === section.id ? 'rgba(124,131,253,0.15)' : 'rgba(255,255,255,0.05)',
-                  border: active === section.id ? '1px solid rgba(124,131,253,0.3)' : '1px solid rgba(255,255,255,0.08)',
-                  display: 'flex', alignItems: 'center', justifyContent: 'center',
-                  fontSize: 12, color: active === section.id ? '#7c83fd' : 'rgba(255,255,255,0.3)',
-                  transition: 'all 0.2s',
-                  transform: active === section.id ? 'rotate(180deg)' : 'rotate(0)',
-                }}>▾</div>
-              </div>
-
-              {/* Contenido */}
-              {active === section.id && (
-                <div style={{ padding: '0 24px 22px' }}>
-                  <div style={{ height: 1, background: 'rgba(124,131,253,0.1)', marginBottom: 18 }}/>
-                  {section.content.split('\n').map((line, i) => (
-                    line.trim() === '' ? <br key={i}/> : (
-                      <p key={i} style={{
-                        fontSize: 14, color: line.startsWith('•') ? 'rgba(255,255,255,0.6)' : 'rgba(255,255,255,0.5)',
-                        lineHeight: 1.8, marginBottom: 4,
-                        paddingLeft: line.startsWith('•') ? 8 : 0,
-                      }}>{line}</p>
-                    )
-                  ))}
-                </div>
-              )}
-            </div>
+              {d.label}
+            </button>
           ))}
         </div>
 
-        {/* Footer */}
-        <div style={{ marginTop: 48, padding: '24px', background: 'rgba(124,131,253,0.05)', border: '1px solid rgba(124,131,253,0.12)', borderRadius: 16, textAlign: 'center' }}>
-          <p style={{ fontSize: 13, color: 'rgba(255,255,255,0.35)', lineHeight: 1.7, marginBottom: 12 }}>
-            ¿Tienes preguntas sobre estos documentos?
-          </p>
-          <a href="mailto:pkeinerr.e13@gmail.com" style={{
-            display: 'inline-flex', alignItems: 'center', gap: 8,
-            background: 'rgba(124,131,253,0.1)', border: '1px solid rgba(124,131,253,0.25)',
-            borderRadius: 10, padding: '9px 20px', fontSize: 13, fontWeight: 600, color: '#7c83fd',
-            textDecoration: 'none', transition: 'all 0.2s',
-          }}
-            onMouseEnter={e => e.currentTarget.style.background = 'rgba(124,131,253,0.18)'}
-            onMouseLeave={e => e.currentTarget.style.background = 'rgba(124,131,253,0.1)'}
-          >
-            ✉️ pkeinerr.e13@gmail.com
-          </a>
+        <div className="fx-legal__body">
+          <nav className="fx-legal__toc" aria-label="Índice">
+            <p className="fx-eyebrow" style={{ marginBottom: 12 }}>Contenido</p>
+            <ol>
+              {sections.map((s) => (
+                <li key={s.id}>
+                  <a
+                    href={`#sec-${s.id}`}
+                    className={activeId === s.id ? 'is-active' : undefined}
+                    onClick={() => setActiveId(s.id)}
+                  >
+                    {s.title}
+                  </a>
+                </li>
+              ))}
+            </ol>
+          </nav>
+
+          <article className="fx-legal__doc">
+            {sections.map((s) => (
+              <section key={s.id} id={`sec-${s.id}`} className="fx-legal__section">
+                <h2>{s.title}</h2>
+                {s.content.split('\n\n').map((block, i) => {
+                  const lines = block.split('\n')
+                  const isList = lines.every((l) => l.trim().startsWith('•'))
+                  if (isList) {
+                    return (
+                      <ul key={i}>
+                        {lines.map((l, j) => <li key={j}>{l.replace(/^\s*•\s*/, '')}</li>)}
+                      </ul>
+                    )
+                  }
+                  return <p key={i}>{block}</p>
+                })}
+              </section>
+            ))}
+          </article>
         </div>
+
+        <footer className="fx-legal__foot">
+          <p className="fx-hint">
+            ¿Dudas sobre estos documentos? Escribinos a{' '}
+            <a href="mailto:soporte@fluxyweb.com" className="fx-auth__link">soporte@fluxyweb.com</a>.
+          </p>
+          <Link to="/" className="fx-btn fx-btn--secondary fx-btn--sm">Volver al inicio</Link>
+        </footer>
       </div>
     </div>
   )
 }
+
+

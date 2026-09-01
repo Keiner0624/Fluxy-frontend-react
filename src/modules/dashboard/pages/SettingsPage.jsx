@@ -5,6 +5,7 @@ import DashboardLayout from '@/modules/dashboard/components/DashboardLayout'
 import usePlan from '@/hooks/usePlan'
 import { API_URL, getCompanyStoreUrl } from '@/app/config'
 import { useCurrency } from '@/hooks/useCurrency'
+import Icon from '@/components/Icon'
 
 const CLOUDINARY_CLOUD  = 'dklhbrw7s'
 const CLOUDINARY_PRESET = 'fluxy_unsigned'
@@ -76,101 +77,7 @@ async function uploadToCloudinary(file) {
   return (await res.json()).secure_url
 }
 
-// ─── Vista previa de configuración ───────────────────────────────────────────
-function SettingsPreview({ form, logoPreview, paymentMethods = [] }) {
-  const primary = '#7c83fd'
-  const accepted = paymentMethods.filter(p => form.paymentMethods.includes(p.key))
-
-  return (
-    <div style={{ borderRadius: 16, overflow: 'hidden', border: '1px solid rgba(255,255,255,0.08)', boxShadow: '0 20px 60px rgba(0,0,0,0.5)' }}>
-      {/* Browser bar */}
-      <div style={{ background: 'rgba(8,8,20,0.95)', padding: '8px 12px', display: 'flex', alignItems: 'center', gap: 8, borderBottom: '1px solid rgba(255,255,255,0.06)' }}>
-        <div style={{ display: 'flex', gap: 5 }}>
-          {['#f87171','#fbbf24','#34d399'].map(c => <div key={c} style={{ width: 8, height: 8, borderRadius: '50%', background: c }}/>)}
-        </div>
-        <div style={{ flex: 1, background: 'rgba(255,255,255,0.05)', borderRadius: 4, padding: '3px 8px', fontSize: 9, color: 'rgba(255,255,255,0.3)', textAlign: 'center' }}>
-          fluxy.app/store/mi-tienda
-        </div>
-      </div>
-
-      {/* Store header */}
-      <div style={{ background: 'rgba(6,6,15,0.92)', borderBottom: '1px solid rgba(255,255,255,0.06)', padding: '10px 16px', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-        <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
-          {logoPreview ? (
-            <img src={logoPreview} alt="logo" style={{ width: 28, height: 28, borderRadius: 8, objectFit: 'cover', border: '1px solid rgba(255,255,255,0.1)' }}/>
-          ) : (
-            <div style={{ width: 28, height: 28, borderRadius: 8, background: `linear-gradient(135deg, ${primary}, #4f46e5)`, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 12, fontWeight: 800, color: 'white' }}>
-              {form.name?.[0]?.toUpperCase() || 'T'}
-            </div>
-          )}
-          <div>
-            <div style={{ fontSize: 12, fontWeight: 700, color: 'white' }}>{form.name || 'Tu negocio'}</div>
-            <div style={{ fontSize: 9, color: 'rgba(255,255,255,0.35)' }}>via Fluxy</div>
-          </div>
-        </div>
-        <div style={{ background: primary, borderRadius: 8, padding: '4px 10px', fontSize: 9, fontWeight: 700, color: '#fff' }}>🛒 0</div>
-      </div>
-
-      {/* Hero info */}
-      <div style={{ background: 'linear-gradient(135deg, #06060f, #1a0a2e)', padding: '20px 16px' }}>
-        <div style={{ display: 'inline-flex', alignItems: 'center', gap: 4, background: `${primary}18`, border: `1px solid ${primary}35`, borderRadius: 50, padding: '3px 10px', marginBottom: 10 }}>
-          <div style={{ width: 4, height: 4, borderRadius: '50%', background: primary }}/>
-          <span style={{ fontSize: 9, color: primary, fontWeight: 600 }}>Tienda oficial</span>
-        </div>
-        <h2 style={{ fontFamily: "'Fraunces', serif", fontSize: 16, fontWeight: 900, color: 'white', lineHeight: 1.2, marginBottom: 6 }}>
-          Bienvenido a <span style={{ color: primary }}>{form.name || 'Tu Tienda'}</span>
-        </h2>
-        {form.description && (
-          <p style={{ fontSize: 10, color: 'rgba(255,255,255,0.45)', lineHeight: 1.5, marginBottom: 12 }}>
-            {form.description.slice(0, 80)}{form.description.length > 80 ? '...' : ''}
-          </p>
-        )}
-
-        {/* Info card */}
-        <div style={{ background: 'rgba(13,13,26,0.8)', border: '1px solid rgba(255,255,255,0.07)', borderRadius: 12, padding: '12px 14px', marginTop: 12 }}>
-          <div style={{ fontSize: 9, color: 'rgba(255,255,255,0.3)', textTransform: 'uppercase', letterSpacing: '1px', marginBottom: 10, fontWeight: 700 }}>Información</div>
-          <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
-            {form.phone && (
-              <div style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
-                <div style={{ width: 22, height: 22, borderRadius: 6, background: 'rgba(124,131,253,0.1)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 10 }}>📞</div>
-                <span style={{ fontSize: 10, color: 'rgba(255,255,255,0.5)' }}>{form.phone}</span>
-              </div>
-            )}
-            {form.address && (
-              <div style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
-                <div style={{ width: 22, height: 22, borderRadius: 6, background: 'rgba(124,131,253,0.1)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 10 }}>📍</div>
-                <span style={{ fontSize: 10, color: 'rgba(255,255,255,0.5)' }}>{form.address.slice(0, 30)}{form.address.length > 30 ? '...' : ''}</span>
-              </div>
-            )}
-            <div style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
-              <div style={{ width: 22, height: 22, borderRadius: 6, background: 'rgba(124,131,253,0.1)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 10 }}>⚡</div>
-              <span style={{ fontSize: 10, color: 'rgba(255,255,255,0.5)' }}>Respuesta inmediata</span>
-            </div>
-          </div>
-
-          {accepted.length > 0 && (
-            <div style={{ marginTop: 12, paddingTop: 10, borderTop: '1px solid rgba(255,255,255,0.05)' }}>
-              <div style={{ fontSize: 9, color: 'rgba(255,255,255,0.25)', textTransform: 'uppercase', letterSpacing: '1px', marginBottom: 8, fontWeight: 700 }}>Pagos aceptados</div>
-              <div style={{ display: 'flex', flexWrap: 'wrap', gap: 5 }}>
-                {accepted.map(p => (
-                  <div key={p.key} style={{ background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.07)', borderRadius: 6, padding: '3px 8px', fontSize: 9, color: 'rgba(255,255,255,0.45)' }}>
-                    {p.emoji} {p.label}
-                  </div>
-                ))}
-              </div>
-            </div>
-          )}
-        </div>
-      </div>
-
-      <div style={{ background: 'rgba(8,8,20,0.9)', padding: '7px 12px', textAlign: 'center', fontSize: 10, color: 'rgba(255,255,255,0.25)' }}>
-        Vista previa en tiempo real
-      </div>
-    </div>
-  )
-}
-
-// ─── CustomDomainSection ──────────────────────────────────────────────────────
+// ─── Dominio personalizado ───────────────────────────────────────────────────
 function CustomDomainSection({ plan }) {
   const navigate = useNavigate()
   const [domain, setDomain]               = useState('')
@@ -178,7 +85,7 @@ function CustomDomainSection({ plan }) {
   const [domainStatus, setDomainStatus]   = useState('none')
   const [saving, setSaving]               = useState(false)
   const [removing, setRemoving]           = useState(false)
-  const [message, setMessage]             = useState('')
+  const [message, setMessage]             = useState(null)
   const [instructions, setInstructions]   = useState(null)
   const isBusiness = plan === 'BUSINESS'
 
@@ -195,108 +102,118 @@ function CustomDomainSection({ plan }) {
 
   const handleAddDomain = async () => {
     if (!domain.trim()) return
-    setSaving(true); setMessage('')
+    setSaving(true); setMessage(null)
     try {
       const res  = await fetch(`${API_URL}/domains/add`, { method: 'POST', headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${getToken()}` }, body: JSON.stringify({ domain: domain.trim() }) })
       const data = await res.json()
       if (!res.ok) throw new Error(data.message || 'Error al agregar dominio')
-      setCurrentDomain(data.domain); setDomainStatus('pending'); setInstructions(data.instructions); setMessage('✅ ' + data.message); setDomain('')
-    } catch (err) { setMessage('⚠️ ' + err.message) }
+      setCurrentDomain(data.domain); setDomainStatus('pending'); setInstructions(data.instructions)
+      setMessage({ type: 'ok', text: data.message }); setDomain('')
+    } catch (err) { setMessage({ type: 'error', text: err.message }) }
     finally { setSaving(false) }
   }
 
   const handleRemoveDomain = async () => {
-    setRemoving(true); setMessage('')
+    setRemoving(true); setMessage(null)
     try {
       const res  = await fetch(`${API_URL}/domains/remove`, { method: 'DELETE', headers: { Authorization: `Bearer ${getToken()}` } })
       const data = await res.json()
       if (!res.ok) throw new Error(data.message)
-      setCurrentDomain(''); setDomainStatus('none'); setInstructions(null); setMessage('✅ Dominio eliminado.')
-    } catch (err) { setMessage('⚠️ ' + err.message) }
+      setCurrentDomain(''); setDomainStatus('none'); setInstructions(null)
+      setMessage({ type: 'ok', text: 'Dominio eliminado.' })
+    } catch (err) { setMessage({ type: 'error', text: err.message }) }
     finally { setRemoving(false) }
   }
 
+  const STATUS = {
+    verified: { label: 'Verificado', badge: 'fx-badge--ok',     icon: 'checkCircle' },
+    pending:  { label: 'Pendiente',  badge: 'fx-badge--warn',   icon: 'clock' },
+    error:    { label: 'Con error',  badge: 'fx-badge--danger', icon: 'alert' },
+  }
+
   return (
-    <div style={{ background: 'rgba(13,13,26,0.9)', border: `1px solid ${isBusiness ? 'rgba(52,211,153,0.2)' : 'rgba(255,255,255,0.06)'}`, borderRadius: 20, padding: '24px' }}>
-      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 16, paddingBottom: 12, borderBottom: '1px solid rgba(255,255,255,0.06)' }}>
-        <div style={{ fontSize: 13, fontWeight: 600, color: 'white' }}>🌐 Dominio personalizado</div>
-        {!isBusiness && <span style={{ fontSize: 10, fontWeight: 700, color: '#34d399', background: 'rgba(52,211,153,0.15)', border: '1px solid rgba(52,211,153,0.25)', borderRadius: 6, padding: '2px 8px', textTransform: 'uppercase' }}>BUSINESS</span>}
+    <div className="fx-card">
+      <div className="fx-card__head">
+        <h2 className="fx-h3">Dominio personalizado</h2>
+        {!isBusiness && <span className="fx-badge">Business</span>}
       </div>
 
-      {!isBusiness ? (
-        <div style={{ textAlign: 'center', padding: '20px 0' }}>
-          <div style={{ fontSize: 36, marginBottom: 12 }}>🔒</div>
-          <div style={{ fontSize: 14, color: 'var(--text-muted)', marginBottom: 16, lineHeight: 1.6 }}>
-            Conecta tu propio dominio (ej: <strong style={{ color: 'white' }}>mitienda.com</strong>) y quita el branding de Fluxy.
-          </div>
-          <button onClick={() => navigate('/dashboard/plans')} style={{ background: 'linear-gradient(135deg, #34d399, #059669)', color: 'white', border: 'none', borderRadius: 10, padding: '10px 20px', fontSize: 13, fontWeight: 600, cursor: 'pointer' }}>🚀 Ver plan Business</button>
-        </div>
-      ) : (
-        <>
-          {currentDomain ? (
-            <div style={{ marginBottom: 20 }}>
-              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', background: 'rgba(52,211,153,0.06)', border: '1px solid rgba(52,211,153,0.2)', borderRadius: 12, padding: '12px 16px', flexWrap: 'wrap', gap: 10 }}>
-                <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
-                  <span style={{ fontSize: 16 }}>🌐</span>
+      <div className="fx-card__body">
+        {!isBusiness ? (
+          <>
+            <p className="fx-hint" style={{ marginBottom: 16 }}>
+              Conectá tu propio dominio (por ejemplo <strong style={{ color: 'var(--fx-ink)' }}>mitienda.com</strong>) y
+              mostrá tu tienda sin la marca de Fluxy.
+            </p>
+            <button className="fx-btn fx-btn--primary" onClick={() => navigate('/dashboard/plans')}>
+              Ver plan Business
+              <Icon name="arrowRight" size={15} />
+            </button>
+          </>
+        ) : (
+          <>
+            {message && (
+              <div className={`fx-alert fx-alert--${message.type === 'ok' ? 'ok' : 'error'}`} style={{ marginBottom: 16 }}>
+                <Icon name={message.type === 'ok' ? 'checkCircle' : 'alert'} size={16} />
+                <span>{message.text}</span>
+              </div>
+            )}
+
+            {currentDomain ? (
+              <>
+                <div className="fx-row fx-row--between" style={{ flexWrap: 'wrap', gap: 12 }}>
                   <div>
-                    <div style={{ fontSize: 14, fontWeight: 600, color: 'white' }}>{currentDomain}</div>
-                    <div style={{ fontSize: 12, marginTop: 2 }}>
-                      {domainStatus === 'verified' && <span style={{ color: '#34d399' }}>✅ Verificado</span>}
-                      {domainStatus === 'pending'  && <span style={{ color: '#fbbf24' }}>⏳ Pendiente</span>}
-                      {domainStatus === 'error'    && <span style={{ color: '#f87171' }}>❌ Error</span>}
-                    </div>
+                    <p style={{ fontSize: 15, fontWeight: 600 }}>{currentDomain}</p>
+                    <span className={`fx-badge ${STATUS[domainStatus]?.badge || ''}`} style={{ marginTop: 6 }}>
+                      <Icon name={STATUS[domainStatus]?.icon || 'info'} size={12} />
+                      {STATUS[domainStatus]?.label || domainStatus}
+                    </span>
+                  </div>
+                  <div className="fx-row" style={{ gap: 8 }}>
+                    <button className="fx-btn fx-btn--secondary fx-btn--sm" onClick={loadDomainStatus}>
+                      <Icon name="refresh" size={15} />
+                      Verificar
+                    </button>
+                    <button className="fx-btn fx-btn--danger fx-btn--sm" onClick={handleRemoveDomain} disabled={removing}>
+                      {removing ? <span className="fx-spinner" /> : <Icon name="trash" size={15} />}
+                      Quitar
+                    </button>
                   </div>
                 </div>
-                <div style={{ display: 'flex', gap: 8 }}>
-                  <button onClick={loadDomainStatus} style={{ padding: '6px 12px', borderRadius: 8, background: 'rgba(255,255,255,0.06)', border: '1px solid rgba(255,255,255,0.1)', color: 'var(--text-soft)', fontSize: 12, cursor: 'pointer' }}>🔄</button>
-                  <button onClick={handleRemoveDomain} disabled={removing} style={{ padding: '6px 12px', borderRadius: 8, background: 'rgba(248,113,113,0.08)', border: '1px solid rgba(248,113,113,0.2)', color: '#f87171', fontSize: 12, cursor: 'pointer' }}>{removing ? '...' : '🗑️'}</button>
-                </div>
-              </div>
-            </div>
-          ) : (
-            <div style={{ marginBottom: 20 }}>
-              <div style={{ fontSize: 12, color: 'var(--text-muted)', marginBottom: 8 }}>Sin https:// ni www:</div>
-              <div style={{ display: 'flex', gap: 10 }}>
-                <input value={domain} onChange={e => setDomain(e.target.value)} placeholder="mitienda.com" onKeyDown={e => e.key === 'Enter' && handleAddDomain()}
-                  style={{ flex: 1, background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.08)', borderRadius: 11, padding: '12px 14px', color: 'white', fontSize: 14, outline: 'none', fontFamily: 'DM Sans, sans-serif' }}
-                  onFocus={e => e.target.style.borderColor = 'rgba(52,211,153,0.5)'}
-                  onBlur={e => e.target.style.borderColor = 'rgba(255,255,255,0.08)'}
+
+                {(instructions || domainStatus === 'pending') && (
+                  <div className="fx-alert" style={{ marginTop: 16, display: 'block' }}>
+                    <p style={{ marginBottom: 8, fontWeight: 500 }}>Configurá estos registros en tu proveedor de DNS:</p>
+                    {instructions ? (
+                      <pre className="fx-pre">{typeof instructions === 'string' ? instructions : JSON.stringify(instructions, null, 2)}</pre>
+                    ) : (
+                      <p>Los cambios de DNS pueden tardar hasta 48 horas en propagarse.</p>
+                    )}
+                  </div>
+                )}
+              </>
+            ) : (
+              <div className="fx-row" style={{ gap: 8 }}>
+                <input
+                  className="fx-input"
+                  placeholder="mitienda.com"
+                  value={domain}
+                  onChange={(e) => setDomain(e.target.value)}
+                  onKeyDown={(e) => { if (e.key === 'Enter') handleAddDomain() }}
                 />
-                <button onClick={handleAddDomain} disabled={saving || !domain.trim()} style={{ padding: '12px 20px', borderRadius: 11, background: 'linear-gradient(135deg, #34d399, #059669)', border: 'none', color: 'white', fontSize: 14, fontWeight: 600, cursor: 'pointer', opacity: saving || !domain.trim() ? 0.6 : 1 }}>
-                  {saving ? '...' : 'Agregar'}
+                <button className="fx-btn fx-btn--primary" onClick={handleAddDomain} disabled={saving || !domain.trim()}>
+                  {saving ? <><span className="fx-spinner" /> Conectando…</> : 'Conectar'}
                 </button>
               </div>
-            </div>
-          )}
-
-          {(instructions || domainStatus === 'pending') && (
-            <div style={{ background: 'rgba(251,191,36,0.06)', border: '1px solid rgba(251,191,36,0.2)', borderRadius: 12, padding: '16px' }}>
-              <div style={{ fontSize: 13, fontWeight: 600, color: '#fbbf24', marginBottom: 12 }}>📋 Configura tu DNS</div>
-              <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
-                {[
-                  { label: 'Para www.tudominio.com', code: 'CNAME   www   cname.vercel-dns.com' },
-                  { label: 'Para tudominio.com (sin www)', code: 'A   @   76.76.21.21' },
-                ].map((item, i) => (
-                  <div key={i} style={{ background: 'rgba(0,0,0,0.3)', borderRadius: 8, padding: '10px 14px' }}>
-                    <div style={{ fontSize: 11, color: 'var(--text-muted)', marginBottom: 4 }}>{item.label}</div>
-                    <div style={{ fontFamily: 'monospace', fontSize: 12, color: 'white' }}>{item.code}</div>
-                  </div>
-                ))}
-              </div>
-              <div style={{ fontSize: 11, color: 'var(--text-muted)', marginTop: 10 }}>⏱️ Los cambios de DNS pueden tardar hasta 48 horas.</div>
-            </div>
-          )}
-
-          {message && (
-            <div style={{ marginTop: 12, padding: '10px 14px', borderRadius: 10, fontSize: 13, background: message.startsWith('✅') ? 'rgba(52,211,153,0.08)' : 'rgba(248,113,113,0.08)', border: `1px solid ${message.startsWith('✅') ? 'rgba(52,211,153,0.2)' : 'rgba(248,113,113,0.2)'}`, color: message.startsWith('✅') ? '#34d399' : '#f87171' }}>{message}</div>
-          )}
-        </>
-      )}
+            )}
+          </>
+        )}
+      </div>
     </div>
   )
 }
 
-// ─── SettingsPage principal ───────────────────────────────────────────────────
+// ─── SettingsPage ────────────────────────────────────────────────────────────
 export default function SettingsPage() {
   const { plan } = usePlan()
   const { currencyInfo } = useCurrency()
@@ -352,142 +269,129 @@ export default function SettingsPage() {
       const updated = await res.json()
       const merged  = { ...company, name: updated.name, slug: updated.slug, logoUrl: updated.logoUrl }
       localStorage.setItem('company', JSON.stringify({ ...merged, storeUrl: getCompanyStoreUrl(merged) }))
-      setSuccess('✅ Configuración guardada.')
+      setSuccess('Configuración guardada.')
       setTimeout(() => setSuccess(''), 3000)
     } catch (err) { setError(err.message) }
     finally { setSaving(false) }
   }
 
-  const inputStyle = { width: '100%', background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.08)', borderRadius: 12, padding: '13px 14px 13px 44px', color: 'white', fontSize: 14, outline: 'none', fontFamily: 'DM Sans, sans-serif', transition: 'all 0.2s' }
-  const fields = [
-    { key: 'name',        label: 'Nombre del negocio *', icon: '🏪', placeholder: 'Ej: Cafetería Luna' },
-    { key: 'description', label: 'Descripción',          icon: '📝', placeholder: 'Describe tu negocio...', type: 'textarea' },
-    { key: 'phone',       label: 'WhatsApp',             icon: '📱', placeholder: '51999999999' },
-    { key: 'address',     label: 'Dirección',            icon: '📍', placeholder: 'Av. Ejemplo 123, Lima' },
-    { key: 'email',       label: 'Correo',               icon: '✉️', placeholder: 'tu@negocio.com', type: 'email' },
-  ]
-
   return (
     <DashboardLayout>
-      <style>{`
-        @media (max-width: 768px) {
-          .fluxy-two-col { grid-template-columns: 1fr !important; }
-          .fluxy-sticky { position: relative !important; top: 0 !important; }
-        }
-      `}</style>
-      <div style={{ marginBottom: 28 }}>
-        <div style={{ fontSize: 11, color: 'var(--primary)', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '1.5px', marginBottom: 6 }}>Panel de vendedor</div>
-        <h1 style={{ fontFamily: "'Fraunces', serif", fontSize: 28, fontWeight: 700, color: 'white' }}>Configuración de tienda</h1>
+      <div className="fx-page-head">
+        <div>
+          <h1>Configuración</h1>
+          <p>Datos de tu negocio, logo y métodos de pago</p>
+        </div>
+        <div className="fx-page-head__actions">
+          <button className="fx-btn fx-btn--primary" onClick={handleSubmit} disabled={saving || loading}>
+            {saving ? <><span className="fx-spinner" /> Guardando…</> : 'Guardar cambios'}
+          </button>
+        </div>
       </div>
 
-      {storeUrl && (
-        <div style={{ background: 'rgba(52,211,153,0.06)', border: '1px solid rgba(52,211,153,0.2)', borderRadius: 14, padding: '14px 18px', marginBottom: 24, display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: 10 }}>
-          <div>
-            <div style={{ fontSize: 11, color: '#34d399', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.8px', marginBottom: 3 }}>🔗 Tu tienda pública</div>
-            <div style={{ fontSize: 14, color: 'var(--text-soft)' }}>{storeUrl}</div>
-          </div>
-          <a href={storeUrl} target="_blank" rel="noreferrer" style={{ display: 'flex', alignItems: 'center', gap: 6, background: 'rgba(52,211,153,0.1)', border: '1px solid rgba(52,211,153,0.25)', borderRadius: 9, padding: '7px 14px', fontSize: 13, fontWeight: 600, color: '#34d399' }}>Ver tienda ↗</a>
+      {success && (
+        <div className="fx-alert fx-alert--ok" style={{ marginBottom: 16 }}>
+          <Icon name="checkCircle" size={16} /><span>{success}</span>
+        </div>
+      )}
+      {error && (
+        <div className="fx-alert fx-alert--error" style={{ marginBottom: 16 }}>
+          <Icon name="alert" size={16} /><span>{error}</span>
         </div>
       )}
 
-      {loading ? (
-        <div style={{ textAlign: 'center', padding: 60, color: 'var(--text-muted)' }}>Cargando...</div>
-      ) : (
-        <div className="fluxy-two-col" style={{ display: 'grid', gridTemplateColumns: 'minmax(0,1fr) minmax(0,340px)', gap: 24, alignItems: 'start' }}>
-
-          {/* ── Columna izquierda: Formulario ── */}
-          <form onSubmit={handleSubmit}>
-            <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
-
-              {/* Logo */}
-              <div style={{ background: 'rgba(13,13,26,0.9)', border: '1px solid rgba(255,255,255,0.06)', borderRadius: 20, padding: '24px' }}>
-                <div style={{ fontSize: 13, fontWeight: 600, color: 'white', marginBottom: 16, paddingBottom: 12, borderBottom: '1px solid rgba(255,255,255,0.06)' }}>Logo de tu negocio</div>
-                <div style={{ display: 'flex', alignItems: 'center', gap: 20 }}>
-                  <div onClick={() => logoRef.current?.click()} style={{ width: 90, height: 90, borderRadius: 18, flexShrink: 0, background: logoPreview ? 'transparent' : 'rgba(124,131,253,0.08)', border: '2px dashed rgba(124,131,253,0.3)', display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer', overflow: 'hidden', position: 'relative', transition: 'all 0.2s' }}
-                    onMouseEnter={e => e.currentTarget.style.borderColor = 'rgba(124,131,253,0.6)'}
-                    onMouseLeave={e => e.currentTarget.style.borderColor = 'rgba(124,131,253,0.3)'}
-                  >
-                    {logoPreview ? <img src={logoPreview} alt="logo" style={{ width: '100%', height: '100%', objectFit: 'cover' }}/> : <span style={{ fontSize: 28 }}>🖼️</span>}
-                    {uploadingLogo && <div style={{ position: 'absolute', inset: 0, background: 'rgba(0,0,0,0.6)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 12, color: 'white' }}>⬆️</div>}
-                  </div>
-                  <div>
-                    <div style={{ fontSize: 14, fontWeight: 600, color: 'white', marginBottom: 6 }}>{logoPreview ? 'Logo cargado ✓' : 'Sube el logo de tu negocio'}</div>
-                    <div style={{ fontSize: 12, color: 'var(--text-muted)', marginBottom: 12, lineHeight: 1.5 }}>PNG o JPG. Recomendado: 200×200px</div>
-                    <button type="button" onClick={() => logoRef.current?.click()} style={{ padding: '8px 16px', borderRadius: 9, background: 'rgba(124,131,253,0.1)', border: '1px solid rgba(124,131,253,0.25)', color: 'var(--primary)', fontSize: 13, fontWeight: 600, cursor: 'pointer' }}>
-                      {uploadingLogo ? 'Subiendo...' : logoPreview ? '🔄 Cambiar' : '📤 Subir logo'}
-                    </button>
-                  </div>
+      <form onSubmit={handleSubmit} className="fx-grid" style={{ gap: 16 }}>
+        <div className="fx-card">
+          <div className="fx-card__head"><h2 className="fx-h3">Datos del negocio</h2></div>
+          <div className="fx-card__body">
+            <div className="fx-field">
+              <span className="fx-label">Logo</span>
+              <div className="fx-row" style={{ gap: 12 }}>
+                <div className="fx-thumb fx-thumb--lg">
+                  {logoPreview ? <img src={logoPreview} alt="" /> : <Icon name="building" size={20} />}
                 </div>
-                <input ref={logoRef} type="file" accept="image/*" style={{ display: 'none' }} onChange={handleLogoChange}/>
-              </div>
-
-              {/* Info */}
-              <div style={{ background: 'rgba(13,13,26,0.9)', border: '1px solid rgba(255,255,255,0.06)', borderRadius: 20, padding: '24px' }}>
-                <div style={{ fontSize: 13, fontWeight: 600, color: 'white', marginBottom: 16, paddingBottom: 12, borderBottom: '1px solid rgba(255,255,255,0.06)' }}>Información del negocio</div>
-                {fields.map(field => (
-                  <div key={field.key} style={{ marginBottom: 16 }}>
-                    <label style={{ display: 'block', fontSize: 12, fontWeight: 600, color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.8px', marginBottom: 8 }}>{field.label}</label>
-                    <div style={{ position: 'relative' }}>
-                      <span style={{ position: 'absolute', left: 14, top: field.type === 'textarea' ? 14 : '50%', transform: field.type === 'textarea' ? 'none' : 'translateY(-50%)', fontSize: 16, pointerEvents: 'none' }}>{field.icon}</span>
-                      {field.type === 'textarea' ? (
-                        <textarea value={form[field.key]} onChange={e => setForm({ ...form, [field.key]: e.target.value })} placeholder={field.placeholder} rows={3} style={{ ...inputStyle, resize: 'vertical' }}
-                          onFocus={e => { e.target.style.borderColor = 'rgba(124,131,253,0.5)'; e.target.style.background = 'rgba(124,131,253,0.05)' }}
-                          onBlur={e => { e.target.style.borderColor = 'rgba(255,255,255,0.08)'; e.target.style.background = 'rgba(255,255,255,0.04)' }}
-                        />
-                      ) : (
-                        <input type={field.type || 'text'} value={form[field.key]} onChange={e => setForm({ ...form, [field.key]: e.target.value })} placeholder={field.placeholder} style={inputStyle}
-                          onFocus={e => { e.target.style.borderColor = 'rgba(124,131,253,0.5)'; e.target.style.background = 'rgba(124,131,253,0.05)' }}
-                          onBlur={e => { e.target.style.borderColor = 'rgba(255,255,255,0.08)'; e.target.style.background = 'rgba(255,255,255,0.04)' }}
-                        />
-                      )}
-                    </div>
-                  </div>
-                ))}
-              </div>
-
-              {/* Pagos */}
-              <div style={{ background: 'rgba(13,13,26,0.9)', border: '1px solid rgba(255,255,255,0.06)', borderRadius: 20, padding: '24px' }}>
-                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 16, paddingBottom: 12, borderBottom: '1px solid rgba(255,255,255,0.06)' }}>
-                  <div style={{ fontSize: 13, fontWeight: 600, color: 'white' }}>Métodos de pago aceptados</div>
-                  {currencyInfo?.name && <div style={{ fontSize: 11, color: 'var(--text-muted)', background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.08)', borderRadius: 6, padding: '2px 8px' }}>📍 {currencyInfo.name}</div>}
-                </div>
-                <div style={{ display: 'flex', flexWrap: 'wrap', gap: 10 }}>
-                  {PAYMENT_METHODS.map(pm => {
-                    const active = form.paymentMethods.includes(pm.key)
-                    return (
-                      <button key={pm.key} type="button" onClick={() => togglePayment(pm.key)} style={{ display: 'flex', alignItems: 'center', gap: 8, padding: '10px 18px', borderRadius: 12, background: active ? 'rgba(124,131,253,0.15)' : 'rgba(255,255,255,0.04)', border: active ? '1px solid rgba(124,131,253,0.4)' : '1px solid rgba(255,255,255,0.08)', color: active ? 'var(--primary)' : 'var(--text-soft)', fontSize: 14, fontWeight: active ? 600 : 400, cursor: 'pointer', transition: 'all 0.2s' }}>
-                        <span>{pm.emoji}</span> {pm.label} {active && <span style={{ fontSize: 12 }}>✓</span>}
-                      </button>
-                    )
-                  })}
+                <div>
+                  <input ref={logoRef} type="file" accept="image/*" onChange={handleLogoChange} style={{ display: 'none' }} />
+                  <button type="button" className="fx-btn fx-btn--secondary fx-btn--sm" onClick={() => logoRef.current?.click()} disabled={uploadingLogo}>
+                    {uploadingLogo ? <><span className="fx-spinner" /> Subiendo…</> : <><Icon name="upload" size={15} /> {logoPreview ? 'Cambiar logo' : 'Subir logo'}</>}
+                  </button>
+                  <p className="fx-hint" style={{ marginTop: 6, fontSize: 12.5 }}>Se muestra en la cabecera de tu tienda.</p>
                 </div>
               </div>
-
-              {/* Dominio */}
-              <CustomDomainSection plan={plan} />
-
-              {error   && <div style={{ background: 'rgba(248,113,113,0.08)', border: '1px solid rgba(248,113,113,0.2)', borderRadius: 10, padding: '11px 14px', fontSize: 13, color: '#f87171' }}>⚠️ {error}</div>}
-              {success && <div style={{ background: 'rgba(52,211,153,0.08)', border: '1px solid rgba(52,211,153,0.2)', borderRadius: 10, padding: '11px 14px', fontSize: 13, color: '#34d399' }}>{success}</div>}
-
-              <button type="submit" disabled={saving || uploadingLogo} style={{ width: '100%', padding: '15px', borderRadius: 14, background: (saving || uploadingLogo) ? 'rgba(124,131,253,0.4)' : 'linear-gradient(135deg, #7c83fd, #4f46e5)', border: 'none', color: 'white', fontSize: 15, fontWeight: 700, cursor: (saving || uploadingLogo) ? 'not-allowed' : 'pointer', boxShadow: (saving || uploadingLogo) ? 'none' : '0 8px 24px rgba(124,131,253,0.25)' }}>
-                {saving ? 'Guardando...' : uploadingLogo ? 'Subiendo logo...' : '💾 Guardar configuración'}
-              </button>
             </div>
-          </form>
 
-          {/* ── Vista previa ── */}
-          <div className="fluxy-sticky" style={{ position: 'sticky', top: 24 }}>
-            <div style={{ fontSize: 12, fontWeight: 600, color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '1px', marginBottom: 12 }}>Vista previa</div>
-            <SettingsPreview form={form} logoPreview={logoPreview} paymentMethods={PAYMENT_METHODS} />
-            <div style={{ marginTop: 12, background: 'rgba(124,131,253,0.06)', border: '1px solid rgba(124,131,253,0.15)', borderRadius: 12, padding: '12px 16px' }}>
-              <div style={{ fontSize: 11, color: 'var(--primary)', fontWeight: 600, marginBottom: 4 }}>💡 Tip</div>
-              <div style={{ fontSize: 12, color: 'var(--text-muted)', lineHeight: 1.6 }}>
-                Los cambios se reflejan en tiempo real aquí. Guarda para que tus clientes los vean.
+            <div className="fx-field">
+              <label className="fx-label" htmlFor="s-name">Nombre del negocio</label>
+              <input id="s-name" className="fx-input" value={form.name} onChange={(e) => setForm({ ...form, name: e.target.value })} />
+            </div>
+
+            <div className="fx-field">
+              <label className="fx-label" htmlFor="s-desc">Descripción</label>
+              <textarea id="s-desc" className="fx-textarea" value={form.description} onChange={(e) => setForm({ ...form, description: e.target.value })} placeholder="Contá brevemente qué vendés" />
+            </div>
+
+            <div className="fx-grid" style={{ gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: 12 }}>
+              <div className="fx-field">
+                <label className="fx-label" htmlFor="s-phone">WhatsApp</label>
+                <input id="s-phone" className="fx-input" value={form.phone} onChange={(e) => setForm({ ...form, phone: e.target.value })} placeholder="999888777" />
               </div>
+              <div className="fx-field">
+                <label className="fx-label" htmlFor="s-email">Correo de contacto</label>
+                <input id="s-email" className="fx-input" type="email" value={form.email} onChange={(e) => setForm({ ...form, email: e.target.value })} />
+              </div>
+            </div>
+
+            <div className="fx-field" style={{ marginBottom: 0 }}>
+              <label className="fx-label" htmlFor="s-addr">Dirección</label>
+              <input id="s-addr" className="fx-input" value={form.address} onChange={(e) => setForm({ ...form, address: e.target.value })} placeholder="Opcional" />
             </div>
           </div>
         </div>
-      )}
+
+        <div className="fx-card">
+          <div className="fx-card__head">
+            <h2 className="fx-h3">Métodos de pago</h2>
+            <span className="fx-hint" style={{ fontSize: 12.5 }}>Se muestran en el checkout</span>
+          </div>
+          <div className="fx-card__body">
+            <div className="fx-checks">
+              {PAYMENT_METHODS.map((pm) => (
+                <label key={pm.key} className={`fx-choice${form.paymentMethods.includes(pm.key) ? ' is-on' : ''}`}>
+                  <input
+                    type="checkbox"
+                    checked={form.paymentMethods.includes(pm.key)}
+                    onChange={() => togglePayment(pm.key)}
+                  />
+                  <span>{pm.label}</span>
+                </label>
+              ))}
+            </div>
+          </div>
+        </div>
+
+        {storeUrl && (
+          <div className="fx-card">
+            <div className="fx-card__head"><h2 className="fx-h3">Enlace de tu tienda</h2></div>
+            <div className="fx-card__body fx-row fx-row--between" style={{ flexWrap: 'wrap', gap: 12 }}>
+              <span className="fx-truncate" style={{ fontSize: 14 }}>{storeUrl}</span>
+              <div className="fx-row" style={{ gap: 8 }}>
+                <button type="button" className="fx-btn fx-btn--secondary fx-btn--sm" onClick={() => navigator.clipboard?.writeText(storeUrl)}>
+                  <Icon name="copy" size={15} />
+                  Copiar
+                </button>
+                <a href={storeUrl} target="_blank" rel="noreferrer" className="fx-btn fx-btn--secondary fx-btn--sm">
+                  <Icon name="external" size={15} />
+                  Abrir
+                </a>
+              </div>
+            </div>
+          </div>
+        )}
+
+        <CustomDomainSection plan={plan} />
+      </form>
     </DashboardLayout>
   )
 }
+
+
