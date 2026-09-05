@@ -6,9 +6,8 @@ import usePlan from '@/hooks/usePlan'
 import { API_URL, getCompanyStoreUrl } from '@/app/config'
 import { useCurrency } from '@/hooks/useCurrency'
 import Icon from '@/components/Icon'
+import { uploadImage } from '@/app/cloudinary'
 
-const CLOUDINARY_CLOUD  = 'dklhbrw7s'
-const CLOUDINARY_PRESET = 'fluxy_unsigned'
 
 function getToken() { return localStorage.getItem('token') || '' }
 
@@ -68,14 +67,6 @@ function getPaymentMethods(countryCode) {
   return PAYMENT_METHODS_BY_COUNTRY[countryCode] || PAYMENT_METHODS_BY_COUNTRY.DEFAULT
 }
 
-async function uploadToCloudinary(file) {
-  const formData = new FormData()
-  formData.append('file', file)
-  formData.append('upload_preset', CLOUDINARY_PRESET)
-  const res = await fetch(`https://api.cloudinary.com/v1_1/${CLOUDINARY_CLOUD}/image/upload`, { method: 'POST', body: formData })
-  if (!res.ok) throw new Error('Error al subir imagen')
-  return (await res.json()).secure_url
-}
 
 // ─── Dominio personalizado ───────────────────────────────────────────────────
 function CustomDomainSection({ plan }) {
@@ -249,7 +240,7 @@ export default function SettingsPage() {
     if (!file) return
     setLogoPreview(URL.createObjectURL(file))
     setUploadingLogo(true); setError('')
-    try { const url = await uploadToCloudinary(file); setForm(f => ({ ...f, logoUrl: url })) }
+    try { const url = await uploadImage(file); setForm(f => ({ ...f, logoUrl: url })) }
     catch (err) { setError('Error al subir el logo: ' + err.message) }
     finally { setUploadingLogo(false) }
   }

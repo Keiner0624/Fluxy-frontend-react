@@ -5,9 +5,8 @@ import PlanGate from '@/components/PlanGate'
 import usePlan from '@/hooks/usePlan'
 import { API_URL, getCompanyStoreUrl } from '@/app/config'
 import Icon from '@/components/Icon'
+import { uploadImage } from '@/app/cloudinary'
 
-const CLOUDINARY_CLOUD  = 'dklhbrw7s'
-const CLOUDINARY_PRESET = 'fluxy_unsigned'
 
 function getToken() { return localStorage.getItem('token') || '' }
 
@@ -41,14 +40,6 @@ const DEFAULT_STYLE = {
   bgImage: '', bgOverlay: 0.5,
 }
 
-async function uploadToCloudinary(file) {
-  const formData = new FormData()
-  formData.append('file', file)
-  formData.append('upload_preset', CLOUDINARY_PRESET)
-  const res = await fetch(`https://api.cloudinary.com/v1_1/${CLOUDINARY_CLOUD}/image/upload`, { method: 'POST', body: formData })
-  if (!res.ok) throw new Error('Error al subir imagen')
-  return (await res.json()).secure_url
-}
 
 // ─── Vista previa de la tienda ────────────────────────────────────────────────
 function StorePreview({ style, company }) {
@@ -176,7 +167,7 @@ function StyleContent() {
     if (!file) return
     setUploadingBg(true)
     try {
-      const url = await uploadToCloudinary(file)
+      const url = await uploadImage(file)
       setStyle(s => ({ ...s, bgImage: url, preset: 'custom' }))
     } catch { /* silencioso */ }
     finally { setUploadingBg(false); e.target.value = '' }

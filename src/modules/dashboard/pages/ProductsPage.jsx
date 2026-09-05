@@ -4,24 +4,11 @@ import DashboardLayout from '@/modules/dashboard/components/DashboardLayout'
 import { API_URL } from '@/app/config'
 import { ProductCardSkeleton } from '@/components/Skeleton'
 import Icon from '@/components/Icon'
-
-const CLOUDINARY_CLOUD  = import.meta.env.VITE_CLOUDINARY_CLOUD  || 'dklhbrw7s'
-const CLOUDINARY_PRESET = import.meta.env.VITE_CLOUDINARY_PRESET || 'fluxy_unsigned'
-const MAX_IMAGE_SIZE    = 5 * 1024 * 1024
+import { uploadImage, validateImage } from '@/app/cloudinary'
 
 function formatPrice(price) {
   const value = Number(price)
   return Number.isFinite(value) ? value.toFixed(2) : '0.00'
-}
-
-async function uploadToCloudinary(file) {
-  const formData = new FormData()
-  formData.append('file', file)
-  formData.append('upload_preset', CLOUDINARY_PRESET)
-  const res  = await fetch(`https://api.cloudinary.com/v1_1/${CLOUDINARY_CLOUD}/image/upload`, { method: 'POST', body: formData })
-  const data = await res.json()
-  if (!res.ok) throw new Error(data?.error?.message || 'Error al subir imagen')
-  return data.secure_url
 }
 
 function getToken() { return localStorage.getItem('token') || '' }
@@ -254,8 +241,8 @@ export default function ProductsPage() {
   const handleImageChange = (e) => {
     const file = e.target.files[0]
     if (!file) return
-    if (!file.type.startsWith('image/'))  { setError('Imagen inválida.'); e.target.value = ''; return }
-    if (file.size > MAX_IMAGE_SIZE)        { setError('La imagen supera los 5MB.'); e.target.value = ''; return }
+    const invalid = validateImage(file)
+    if (invalid) { setError(invalid); e.target.value = ''; return }
     setError(''); setImageFile(file); setImagePreview(URL.createObjectURL(file)); e.target.value = ''
   }
 
@@ -265,7 +252,7 @@ export default function ProductsPage() {
     setSaving(true); setError('')
     try {
       let imageUrl = form.imageUrl.trim()
-      if (imageFile) { setUploadingImage(true); imageUrl = await uploadToCloudinary(imageFile); setUploadingImage(false) }
+      if (imageFile) { setUploadingImage(true); imageUrl = await uploadImage(imageFile); setUploadingImage(false) }
       const body = { name: form.name.trim(), price: parseFloat(form.price), stock: parseInt(form.stock), description: form.description.trim(), imageUrl, category: form.categoryId ? { id: parseInt(form.categoryId) } : null }
       const res = await fetch(editProduct ? `${API_URL}/products/${editProduct.id}` : `${API_URL}/products`, {
         method:  editProduct ? 'PUT' : 'POST',
