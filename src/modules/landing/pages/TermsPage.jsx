@@ -147,7 +147,6 @@ No vendemos, alquilamos ni compartimos su información personal con terceros par
 • SendGrid — envío de correos electrónicos
 • Cloudinary — almacenamiento de imágenes
 • Vercel — hospedaje de la aplicación
-• Railway — hospedaje del servidor
 • Google Analytics — análisis de tráfico web
 
 Le recomendamos revisar las políticas de privacidad de cada servicio.`,
