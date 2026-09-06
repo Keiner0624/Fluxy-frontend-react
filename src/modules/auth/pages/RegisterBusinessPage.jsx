@@ -214,8 +214,8 @@ export default function RegisterBusinessPage() {
             <>
               <div className="fx-auth__head">
                 <span className="fx-eyebrow">Paso 2 de 2</span>
-                <h1 className="fx-h1" style={{ marginTop: 8 }}>Contanos quién sos</h1>
-                <p className="fx-hint">Usamos estos datos para personalizar tu panel. Podés completarlos después.</p>
+                <h1 className="fx-h1" style={{ marginTop: 8 }}>Cuentanos quién eres</h1>
+                <p className="fx-hint">Usamos estos datos para personalizar tu panel. Puedes completarlos después.</p>
               </div>
 
               <form onSubmit={handleSaveProfile} noValidate>
