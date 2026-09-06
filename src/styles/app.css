@@ -8,6 +8,7 @@
   --fx-brand: #1769e0;
   --fx-brand-dark: #0b4eb8;
   --fx-brand-soft: #eaf2ff;
+  --fx-brand-line: #c3dbfa;
 
   /* Texto */
   --fx-ink: #0b172a;
@@ -34,6 +35,27 @@
   --fx-shadow: 0 1px 3px rgba(11, 23, 42, .07), 0 8px 24px rgba(11, 23, 42, .05);
   --fx-shadow-lg: 0 12px 40px rgba(11, 23, 42, .12);
 
+  /* Bordes de estado */
+  --fx-ok-line: #bfe3d1;
+  --fx-warn-line: #ecd9ab;
+  --fx-danger-line: #f2cdc8;
+  --fx-danger-line-strong: #f0bfba;
+  --fx-input-error: #e0a49d;
+
+  /* Barra lateral */
+  --fx-sidebar: #0b172a;
+  --fx-sidebar-ink: #cdd8e8;
+  --fx-sidebar-dim: #6b7f99;
+  --fx-sidebar-link: #b3c2d6;
+  --fx-sidebar-action: #93a4bb;
+  --fx-sidebar-line: rgba(255, 255, 255, .08);
+  --fx-sidebar-hover: rgba(255, 255, 255, .06);
+
+  /* Varios */
+  --fx-placeholder: #a7b3c4;
+  --fx-scroll: #c9d3e0;
+  --fx-scroll-hover: #aab8ca;
+
   --fx-r-sm: 6px;
   --fx-r: 10px;
   --fx-r-lg: 14px;
@@ -43,6 +65,8 @@
   color: var(--fx-ink);
   font-family: 'DM Sans', system-ui, -apple-system, 'Segoe UI', sans-serif;
   -webkit-font-smoothing: antialiased;
+  /* Acotado a .fx: la tienda pública es siempre oscura y no debe heredarlo. */
+  color-scheme: light;
 }
 
 .fx *,
@@ -55,10 +79,10 @@
 .fx ::-webkit-scrollbar-thumb {
   border: 3px solid transparent;
   border-radius: 8px;
-  background: #c9d3e0;
+  background: var(--fx-scroll);
   background-clip: content-box;
 }
-.fx ::-webkit-scrollbar-thumb:hover { background: #aab8ca; background-clip: content-box; }
+.fx ::-webkit-scrollbar-thumb:hover { background: var(--fx-scroll-hover); background-clip: content-box; }
 
 /* ── Tipografía ───────────────────────────────────────────────────────────── */
 
@@ -123,7 +147,7 @@
 .fx-btn--ghost:hover:not(:disabled) { background: var(--fx-soft); color: var(--fx-ink); }
 
 .fx-btn--danger { border-color: var(--fx-line-strong); background: var(--fx-surface); color: var(--fx-danger); }
-.fx-btn--danger:hover:not(:disabled) { border-color: #f0bfba; background: var(--fx-danger-soft); }
+.fx-btn--danger:hover:not(:disabled) { border-color: var(--fx-danger-line-strong); background: var(--fx-danger-soft); }
 
 .fx-btn--block { width: 100%; }
 .fx-btn--lg { height: 44px; padding: 0 20px; font-size: 15px; }
@@ -158,7 +182,7 @@
 }
 
 .fx-input::placeholder,
-.fx-textarea::placeholder { color: #a7b3c4; }
+.fx-textarea::placeholder { color: var(--fx-placeholder); }
 
 .fx-input:focus,
 .fx-select:focus,
@@ -171,7 +195,7 @@
 .fx-input:disabled,
 .fx-select:disabled { background: var(--fx-soft); color: var(--fx-muted); cursor: not-allowed; }
 
-.fx-input--error { border-color: #e0a49d; }
+.fx-input--error { border-color: var(--fx-input-error); }
 .fx-input--error:focus { border-color: var(--fx-danger); box-shadow: 0 0 0 3px rgba(180, 35, 24, .1); }
 
 /* Campo con control a la derecha (mostrar contraseña) */
@@ -234,9 +258,9 @@
   line-height: 1.5;
 }
 .fx-alert svg { flex-shrink: 0; margin-top: 1px; }
-.fx-alert--error { border-color: #f2cdc8; background: var(--fx-danger-soft); color: var(--fx-danger); }
-.fx-alert--ok { border-color: #bfe3d1; background: var(--fx-ok-soft); color: var(--fx-ok); }
-.fx-alert--warn { border-color: #ecd9ab; background: var(--fx-warn-soft); color: var(--fx-warn); }
+.fx-alert--error { border-color: var(--fx-danger-line); background: var(--fx-danger-soft); color: var(--fx-danger); }
+.fx-alert--ok { border-color: var(--fx-ok-line); background: var(--fx-ok-soft); color: var(--fx-ok); }
+.fx-alert--warn { border-color: var(--fx-warn-line); background: var(--fx-warn-soft); color: var(--fx-warn); }
 
 /* ── Insignias ────────────────────────────────────────────────────────────── */
 
@@ -253,10 +277,10 @@
   font-weight: 500;
   white-space: nowrap;
 }
-.fx-badge--ok { border-color: #bfe3d1; background: var(--fx-ok-soft); color: var(--fx-ok); }
-.fx-badge--warn { border-color: #ecd9ab; background: var(--fx-warn-soft); color: var(--fx-warn); }
-.fx-badge--danger { border-color: #f2cdc8; background: var(--fx-danger-soft); color: var(--fx-danger); }
-.fx-badge--brand { border-color: #c3dbfa; background: var(--fx-brand-soft); color: var(--fx-brand-dark); }
+.fx-badge--ok { border-color: var(--fx-ok-line); background: var(--fx-ok-soft); color: var(--fx-ok); }
+.fx-badge--warn { border-color: var(--fx-warn-line); background: var(--fx-warn-soft); color: var(--fx-warn); }
+.fx-badge--danger { border-color: var(--fx-danger-line); background: var(--fx-danger-soft); color: var(--fx-danger); }
+.fx-badge--brand { border-color: var(--fx-brand-line); background: var(--fx-brand-soft); color: var(--fx-brand-dark); }
 
 .fx-dot { width: 6px; height: 6px; border-radius: 50%; background: currentColor; }
 
@@ -412,8 +436,8 @@
   background: var(--fx-soft);
   color: var(--fx-copy);
 }
-.fx-auth__mark--ok { border-color: #bfe3d1; background: var(--fx-ok-soft); color: var(--fx-ok); }
-.fx-auth__mark--danger { border-color: #f2cdc8; background: var(--fx-danger-soft); color: var(--fx-danger); }
+.fx-auth__mark--ok { border-color: var(--fx-ok-line); background: var(--fx-ok-soft); color: var(--fx-ok); }
+.fx-auth__mark--danger { border-color: var(--fx-danger-line); background: var(--fx-danger-soft); color: var(--fx-danger); }
 
 /* ── Documentos legales ───────────────────────────────────────────────────── */
 
@@ -531,8 +555,8 @@
   display: flex;
   flex-direction: column;
   width: 236px;
-  background: #0b172a;
-  color: #cdd8e8;
+  background: var(--fx-sidebar);
+  color: var(--fx-sidebar-ink);
 }
 
 .fx-sidebar--desktop { position: sticky; top: 0; height: 100vh; flex-shrink: 0; }
@@ -554,7 +578,7 @@
   backdrop-filter: blur(2px);
 }
 
-.fx-sidebar__brand { padding: 18px 18px 14px; border-bottom: 1px solid rgba(255, 255, 255, .08); }
+.fx-sidebar__brand { padding: 18px 18px 14px; border-bottom: 1px solid var(--fx-sidebar-line); }
 
 .fx-sidebar__nav { flex: 1; overflow-y: auto; padding: 14px 12px; }
 
@@ -563,7 +587,7 @@
 .fx-sidebar__group-label {
   padding: 0 10px;
   margin-bottom: 6px;
-  color: #6b7f99;
+  color: var(--fx-sidebar-dim);
   font-size: 10.5px;
   font-weight: 600;
   letter-spacing: .9px;
@@ -576,18 +600,18 @@
   gap: 10px;
   padding: 8px 10px;
   border-radius: var(--fx-r-sm);
-  color: #b3c2d6;
+  color: var(--fx-sidebar-link);
   font-size: 13.5px;
   font-weight: 500;
   transition: background .15s, color .15s;
 }
 .fx-sidebar__link + .fx-sidebar__link { margin-top: 1px; }
-.fx-sidebar__link:hover { background: rgba(255, 255, 255, .06); color: #fff; }
+.fx-sidebar__link:hover { background: var(--fx-sidebar-hover); color: #fff; }
 .fx-sidebar__link.is-active { background: var(--fx-brand); color: #fff; }
 .fx-sidebar__link.is-locked { color: #7d8ba1; }
-.fx-sidebar__link.is-locked:hover { color: #b3c2d6; }
+.fx-sidebar__link.is-locked:hover { color: var(--fx-sidebar-link); }
 
-.fx-sidebar__foot { padding: 14px 12px; border-top: 1px solid rgba(255, 255, 255, .08); }
+.fx-sidebar__foot { padding: 14px 12px; border-top: 1px solid var(--fx-sidebar-line); }
 
 .fx-sidebar__company {
   display: flex;
@@ -619,14 +643,14 @@
   border: none;
   border-radius: var(--fx-r-sm);
   background: none;
-  color: #93a4bb;
+  color: var(--fx-sidebar-action);
   font-family: inherit;
   font-size: 13px;
   text-align: left;
   cursor: pointer;
   transition: background .15s, color .15s;
 }
-.fx-sidebar__action:hover { background: rgba(255, 255, 255, .06); color: #fff; }
+.fx-sidebar__action:hover { background: var(--fx-sidebar-hover); color: #fff; }
 
 /* Barra superior */
 .fx-topbar {
@@ -696,7 +720,7 @@
   box-shadow: var(--fx-shadow-sm);
   transition: border-color .15s, box-shadow .15s, transform .15s;
 }
-.fx-shortcut:hover { border-color: #c3dbfa; box-shadow: var(--fx-shadow); transform: translateY(-1px); }
+.fx-shortcut:hover { border-color: var(--fx-brand-line); box-shadow: var(--fx-shadow); transform: translateY(-1px); }
 
 .fx-shortcut__icon {
   display: grid;
@@ -1080,4 +1104,99 @@
 @media (max-width: 1000px) {
   .fx-style { grid-template-columns: 1fr; }
   .fx-style__preview { position: static; }
+}
+
+/* ── Tema oscuro ──────────────────────────────────────────────────────────── */
+
+[data-theme='dark'] .fx {
+  color-scheme: dark;
+
+  /* Marca — algo más clara para mantener contraste sobre fondo oscuro */
+  --fx-brand: #4d94f0;
+  --fx-brand-dark: #6aa8f5;
+  --fx-brand-soft: #16253a;
+  --fx-brand-line: #26405f;
+
+  /* Texto */
+  --fx-ink: #e6edf6;
+  --fx-copy: #a9b6c8;
+  --fx-muted: #7d8ba1;
+
+  /* Superficies */
+  --fx-bg: #0b1017;
+  --fx-surface: #141b25;
+  --fx-soft: #1a222d;
+  --fx-line: #232c38;
+  --fx-line-strong: #303b4a;
+
+  /* Estados */
+  --fx-ok: #56d6a0;
+  --fx-ok-soft: #122a20;
+  --fx-ok-line: #1f4736;
+  --fx-warn: #e0b055;
+  --fx-warn-soft: #2a2113;
+  --fx-warn-line: #493a1c;
+  --fx-danger: #f28b80;
+  --fx-danger-soft: #2c1614;
+  --fx-danger-line: #4d2723;
+  --fx-danger-line-strong: #66332d;
+  --fx-input-error: #7a3a33;
+
+  /* Elevación: en oscuro la sombra aporta poco, se apoya en el borde */
+  --fx-shadow-sm: 0 1px 2px rgba(0, 0, 0, .3);
+  --fx-shadow: 0 1px 3px rgba(0, 0, 0, .35), 0 8px 24px rgba(0, 0, 0, .3);
+  --fx-shadow-lg: 0 12px 40px rgba(0, 0, 0, .5);
+
+  /* Barra lateral: un punto más oscura que el fondo para que se distinga */
+  --fx-sidebar: #080c12;
+  --fx-sidebar-ink: #cdd8e8;
+  --fx-sidebar-dim: #64748b;
+  --fx-sidebar-link: #a8b6c8;
+  --fx-sidebar-action: #8494a8;
+  --fx-sidebar-line: rgba(255, 255, 255, .06);
+  --fx-sidebar-hover: rgba(255, 255, 255, .05);
+
+  /* Varios */
+  --fx-placeholder: #5d6b7d;
+  --fx-scroll: #2c3745;
+  --fx-scroll-hover: #3c4a5c;
+}
+
+[data-theme='dark'] .fx-topbar { background: rgba(11, 16, 23, .88); }
+[data-theme='dark'] .fx-legal__nav { background: rgba(11, 16, 23, .9); }
+[data-theme='dark'] .fx-table tbody tr:hover td { background: #18202b; }
+[data-theme='dark'] .fx-plan-tag { background: rgba(255, 255, 255, .08); }
+[data-theme='dark'] .fx-btn--primary { color: #08111d; }
+[data-theme='dark'] .fx-tab--on,
+[data-theme='dark'] .fx-legal__tab--on,
+[data-theme='dark'] .fx-sidebar__link.is-active { color: #08111d; }
+[data-theme='dark'] .fx-tab--on .fx-tab__count { background: rgba(0, 0, 0, .2); color: #08111d; }
+[data-theme='dark'] .fx-shortcut__icon { color: var(--fx-brand); }
+[data-theme='dark'] .fx-notfound__code { color: var(--fx-line-strong); }
+
+/* La imagen de fondo del selector de estilo y la vista previa de la tienda
+   son siempre oscuras por diseño: no se tocan. */
+
+/* ── Transición de tema (revelado circular) ───────────────────────────────── */
+
+/* Sin esto, el navegador hace su fundido cruzado por defecto y tapa el
+   círculo que animamos desde el hook. */
+::view-transition-old(root),
+::view-transition-new(root) {
+  animation: none;
+  mix-blend-mode: normal;
+}
+
+/* Al ir a oscuro, el tema nuevo va encima; al volver a claro, el viejo. */
+html[data-theme-anim='dark']::view-transition-old(root) { z-index: 1; }
+html[data-theme-anim='dark']::view-transition-new(root) { z-index: 2; }
+html[data-theme-anim='light']::view-transition-old(root) { z-index: 2; }
+html[data-theme-anim='light']::view-transition-new(root) { z-index: 1; }
+
+/* Botón del tema: el icono gira al cambiar */
+.fx-theme-toggle svg { transition: transform .45s cubic-bezier(.4, 0, .2, 1); }
+.fx-theme-toggle:hover svg { transform: rotate(35deg); }
+
+@media (prefers-reduced-motion: reduce) {
+  .fx-theme-toggle svg { transition: none; }
 }

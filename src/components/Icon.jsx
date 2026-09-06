@@ -62,6 +62,10 @@ const PATHS = {
   truck:      <><path d="M14 17V5a1 1 0 0 0-1-1H2a1 1 0 0 0-1 1v11a1 1 0 0 0 1 1h1"/><path d="M14 8h4.6a1 1 0 0 1 .8.4L22 12v4a1 1 0 0 1-1 1h-1"/><circle cx="6" cy="17.5" r="2"/><circle cx="17" cy="17.5" r="2"/></>,
   shield:     <><path d="M12 2 4 6v6c0 5 3.4 8.9 8 10 4.6-1.1 8-5 8-10V6z"/></>,
   file:       <><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6"/></>,
+
+  // Tema
+  sun:        <><circle cx="12" cy="12" r="4"/><path d="M12 2v2"/><path d="M12 20v2"/><path d="m4.9 4.9 1.4 1.4"/><path d="m17.7 17.7 1.4 1.4"/><path d="M2 12h2"/><path d="M20 12h2"/><path d="m4.9 19.1 1.4-1.4"/><path d="m17.7 6.3 1.4-1.4"/></>,
+  moon:       <><path d="M21 12.8A9 9 0 1 1 11.2 3a7 7 0 0 0 9.8 9.8z"/></>,
 }
 
 export default function Icon({ name, size = 16, strokeWidth = 1.7, style, className }) {

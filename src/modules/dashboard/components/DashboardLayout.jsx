@@ -5,6 +5,7 @@ import { getCompanyStoreUrl, API_URL } from '@/app/config'
 import BrandLogo from '@/components/BrandLogo'
 import Icon from '@/components/Icon'
 import { usePushNotifications } from '@/hooks/usePushNotifications'
+import { useTheme } from '@/hooks/useTheme'
 
 function getToken() { return localStorage.getItem('token') || '' }
 
@@ -45,6 +46,7 @@ export default function DashboardLayout({ children }) {
   const [plan, setPlan]               = useState('FREE')
 
   usePushNotifications()
+  const { theme, toggleTheme } = useTheme()
 
   useEffect(() => {
     document.body.style.overflow = sidebarOpen ? 'hidden' : ''
@@ -159,6 +161,17 @@ export default function DashboardLayout({ children }) {
           </div>
 
           <div className="fx-topbar__right">
+            <button
+              type="button"
+              className="fx-btn fx-btn--ghost fx-btn--icon fx-theme-toggle"
+              onClick={toggleTheme}
+              title={theme === 'dark' ? 'Cambiar a tema claro' : 'Cambiar a tema oscuro'}
+              aria-label={theme === 'dark' ? 'Cambiar a tema claro' : 'Cambiar a tema oscuro'}
+              aria-pressed={theme === 'dark'}
+            >
+              <Icon name={theme === 'dark' ? 'sun' : 'moon'} size={17} />
+            </button>
+
             {storeUrl && (
               <a href={storeUrl} target="_blank" rel="noreferrer" className="fx-btn fx-btn--secondary fx-btn--sm">
                 <Icon name="store" size={15} />
