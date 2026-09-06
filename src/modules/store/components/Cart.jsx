@@ -1,155 +1,89 @@
-// src/modules/store/components/Cart.jsx
-
 import { useEffect } from 'react'
+import Icon from '@/components/Icon'
 
 export default function Cart({ open, cart, total, onClose, onIncrease, onDecrease, onCheckout }) {
   useEffect(() => {
-    if (open) {
-      document.body.style.overflow = 'hidden'
-    } else {
-      document.body.style.overflow = ''
+    if (!open) return undefined
+    const previousOverflow = document.body.style.overflow
+    const onKeyDown = event => {
+      if (event.key === 'Escape') onClose()
     }
-    return () => { document.body.style.overflow = '' }
-  }, [open])
-  return (
-    <>
-      {open && (
-        <div onClick={onClose} style={{
-          position: 'fixed', inset: 0, zIndex: 500,
-          background: 'rgba(0,0,0,0.75)', backdropFilter: 'blur(4px)',
-        }}/>
-      )}
+    document.body.style.overflow = 'hidden'
+    window.addEventListener('keydown', onKeyDown)
+    return () => {
+      document.body.style.overflow = previousOverflow
+      window.removeEventListener('keydown', onKeyDown)
+    }
+  }, [open, onClose])
 
-      <div style={{
-        position: 'fixed', top: 0,
-        right: open ? 0 : '-100%',
-        width: 'min(100vw, 440px)',
-        height: '100vh',
-        background: '#08080f',
-        borderLeft: '1px solid rgba(255,255,255,0.06)',
-        zIndex: 501,
-        transition: 'right 0.35s cubic-bezier(0.23, 1, 0.32, 1)',
-        display: 'flex', flexDirection: 'column', overflow: 'hidden',
-      }}>
-        {/* Header */}
-        <div style={{
-          padding: '20px',
-          borderBottom: '1px solid rgba(255,255,255,0.06)',
-          display: 'flex', justifyContent: 'space-between', alignItems: 'center',
-          flexShrink: 0,
-        }}>
+  if (!open) return null
+  const count = cart.reduce((sum, item) => sum + item.quantity, 0)
+
+  return (
+    <div className="store-drawer-layer">
+      <button className="store-drawer-backdrop" onClick={onClose} aria-label="Cerrar carrito" />
+      <aside className="store-cart" role="dialog" aria-modal="true" aria-labelledby="cart-title">
+        <div className="store-modal-head">
           <div>
-            <h3 style={{ fontFamily: "'Fraunces', serif", fontSize: 19, color: 'white' }}>Tu pedido</h3>
-            <div style={{ fontSize: 12, color: 'var(--text-muted, #4a4a6a)', marginTop: 2 }}>
-              {cart.reduce((s, i) => s + i.quantity, 0)} producto(s)
-            </div>
+            <span className="store-section-label">Resumen</span>
+            <h2 id="cart-title">Tu carrito</h2>
+            <p>{count} {count === 1 ? 'producto' : 'productos'}</p>
           </div>
-          <button onClick={onClose} style={{
-            width: 36, height: 36, borderRadius: 10,
-            background: 'rgba(255,255,255,0.05)',
-            border: '1px solid rgba(255,255,255,0.1)',
-            color: 'var(--text-muted, #4a4a6a)', fontSize: 16,
-            display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer',
-          }}>✕</button>
+          <button className="store-icon-button" onClick={onClose} aria-label="Cerrar carrito">
+            <Icon name="close" size={19} />
+          </button>
         </div>
 
-        {/* Items */}
-        <div style={{ flex: 1, overflowY: 'auto', padding: '12px 16px', display: 'flex', flexDirection: 'column', gap: 2 }}>
+        <div className="store-cart__items">
           {cart.length === 0 ? (
-            <div style={{
-              display: 'flex', flexDirection: 'column',
-              alignItems: 'center', justifyContent: 'center',
-              height: '100%', color: 'var(--text-muted, #4a4a6a)', gap: 12,
-            }}>
-              <div style={{ fontSize: 48 }}>🛒</div>
-              <div style={{ fontSize: 15 }}>Tu carrito está vacío</div>
-              <div style={{ fontSize: 13 }}>Agrega productos para continuar</div>
+            <div className="store-state store-state--compact">
+              <Icon name="orders" size={34} />
+              <strong>Tu carrito está vacío</strong>
+              <p>Agrega productos del catálogo para continuar.</p>
+              <button type="button" className="store-button store-button--secondary" onClick={onClose}>Volver al catálogo</button>
             </div>
           ) : (
             cart.map(item => (
-              <div key={item.product.id} style={{
-                display: 'flex', gap: 12, alignItems: 'center',
-                padding: '12px 0', borderBottom: '1px solid rgba(255,255,255,0.04)',
-              }}>
-                <div style={{
-                  width: 52, height: 52, borderRadius: 10,
-                  overflow: 'hidden', flexShrink: 0,
-                  background: 'rgba(255,255,255,0.04)',
-                  display: 'flex', alignItems: 'center', justifyContent: 'center',
-                }}>
+              <article className="store-cart-item" key={item.product.id}>
+                <div className="store-cart-item__image">
                   {item.product.imageUrl
-                    ? <img src={item.product.imageUrl} alt={item.product.name} style={{ width: '100%', height: '100%', objectFit: 'cover' }}/>
-                    : <span style={{ fontSize: 22 }}>📦</span>
-                  }
+                    ? <img src={item.product.imageUrl} alt="" />
+                    : <Icon name="package" size={22} />}
                 </div>
-                <div style={{ flex: 1, minWidth: 0 }}>
-                  <div style={{ fontSize: 13, fontWeight: 600, color: 'white', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis', marginBottom: 3 }}>
-                    {item.product.name}
+                <div className="store-cart-item__info">
+                  <h3>{item.product.name}</h3>
+                  <span>S/ {Number(item.product.price || 0).toFixed(2)} por unidad</span>
+                  <div className="store-quantity" aria-label={`Cantidad de ${item.product.name}`}>
+                    <button type="button" onClick={() => onDecrease(item.product.id)} aria-label="Reducir cantidad">−</button>
+                    <strong>{item.quantity}</strong>
+                    <button
+                      type="button"
+                      onClick={() => onIncrease(item.product.id)}
+                      disabled={item.quantity >= Number(item.product.stock)}
+                      aria-label="Aumentar cantidad"
+                    >+</button>
                   </div>
-                  <div style={{ fontSize: 12, color: 'var(--text-muted, #4a4a6a)' }}>
-                    S/ {item.product.price?.toFixed(2)} c/u
-                  </div>
                 </div>
-                <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-                  <button onClick={() => onDecrease(item.product.id)} style={{
-                    width: 30, height: 30, borderRadius: 8,
-                    background: 'rgba(255,255,255,0.06)',
-                    border: '1px solid rgba(255,255,255,0.1)',
-                    color: 'white', fontSize: 16, fontWeight: 700,
-                    display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer',
-                  }}>−</button>
-                  <span style={{ fontSize: 15, fontWeight: 700, minWidth: 18, textAlign: 'center' }}>
-                    {item.quantity}
-                  </span>
-                  <button onClick={() => onIncrease(item.product.id)} style={{
-                    width: 30, height: 30, borderRadius: 8,
-                    background: 'rgba(124,131,253,0.15)',
-                    border: '1px solid rgba(124,131,253,0.25)',
-                    color: 'var(--primary, #7c83fd)', fontSize: 16, fontWeight: 700,
-                    display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer',
-                  }}>+</button>
-                </div>
-                <div style={{
-                  fontFamily: "'Fraunces', serif",
-                  fontSize: 14, fontWeight: 700,
-                  color: 'var(--primary, #7c83fd)',
-                  minWidth: 60, textAlign: 'right', flexShrink: 0,
-                }}>
-                  S/ {(item.product.price * item.quantity).toFixed(2)}
-                </div>
-              </div>
+                <strong className="store-cart-item__total">S/ {(Number(item.product.price || 0) * item.quantity).toFixed(2)}</strong>
+              </article>
             ))
           )}
         </div>
 
-        {/* Footer */}
         {cart.length > 0 && (
-          <div style={{ padding: '16px 20px', borderTop: '1px solid rgba(255,255,255,0.06)', flexShrink: 0 }}>
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 14 }}>
-              <span style={{ fontSize: 14, color: 'var(--text-muted, #4a4a6a)' }}>Total del pedido</span>
-              <span style={{ fontFamily: "'Fraunces', serif", fontSize: 24, fontWeight: 700, color: 'white' }}>
-                S/ {total.toFixed(2)}
-              </span>
+          <div className="store-cart__footer">
+            <div className="store-cart__total">
+              <span>Total del pedido</span>
+              <strong>S/ {total.toFixed(2)}</strong>
             </div>
-            <button onClick={onCheckout} style={{
-              width: '100%', padding: 15,
-              background: 'linear-gradient(135deg, var(--primary, #7c83fd), #4f46e5)',
-              color: 'white', borderRadius: 14, fontSize: 15, fontWeight: 600,
-              border: 'none', cursor: 'pointer',
-              display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8,
-              marginBottom: 10,
-            }}>
-              Confirmar pedido
-              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
-                <path d="M5 12h14M12 5l7 7-7 7"/>
-              </svg>
+            <button type="button" className="store-button store-button--primary" onClick={onCheckout}>
+              Continuar con el pedido
+              <Icon name="arrowRight" size={17} />
             </button>
-            <div style={{ textAlign: 'center', fontSize: 12, color: 'var(--text-muted, #4a4a6a)' }}>
-              También puedes consultar por WhatsApp 💬
-            </div>
+            <p>Revisa tus datos antes de confirmar. El vendedor coordinará la entrega contigo.</p>
           </div>
         )}
-      </div>
-    </>
+      </aside>
+    </div>
   )
 }

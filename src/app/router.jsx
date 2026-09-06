@@ -1,32 +1,44 @@
-// src/app/router.jsx
+import { lazy, Suspense } from 'react'
 import { Navigate, createBrowserRouter, useParams, useSearchParams } from 'react-router-dom'
 import ProtectedRoute from './ProtectedRoute'
-import LandingPage from '@/modules/landing/pages/LandingPage'
-import LoginPage from '@/modules/auth/pages/LoginPage'
-import RegisterBusinessPage from '@/modules/auth/pages/RegisterBusinessPage'
-import StorePage from '@/modules/store/pages/StorePage'
-import DashboardPage from '@/modules/dashboard/pages/DashboardPage'
-import ProductsPage from '@/modules/dashboard/pages/ProductsPage'
-import OrdersPage from '@/modules/dashboard/pages/OrdersPage'
-import SettingsPage from '@/modules/dashboard/pages/SettingsPage'
-import StylePage from '@/modules/dashboard/pages/StylePage'
-import MetricsPage from '@/modules/dashboard/pages/MetricsPage'
-import PlansPage from '@/modules/dashboard/pages/PlansPage'
-import CouponsPage from '@/modules/dashboard/pages/CouponsPage'
-import ForgotPasswordPage from '@/modules/auth/pages/ForgotPasswordPage'
-import ResetPasswordPage from '@/modules/auth/pages/ResetPasswordPage'
-import AdminPage from '@/modules/admin/pages/AdminPage'
-import AdminLoginPage from '@/modules/admin/pages/AdminLoginPage'
-import TermsPage from '@/modules/landing/pages/TermsPage'
-import NotFoundPage from '@/app/NotFoundPage'
+
+const LandingPage = lazy(() => import('@/modules/landing/pages/LandingPage'))
+const LoginPage = lazy(() => import('@/modules/auth/pages/LoginPage'))
+const RegisterBusinessPage = lazy(() => import('@/modules/auth/pages/RegisterBusinessPage'))
+const StorePage = lazy(() => import('@/modules/store/pages/StorePage'))
+const DashboardPage = lazy(() => import('@/modules/dashboard/pages/DashboardPage'))
+const ProductsPage = lazy(() => import('@/modules/dashboard/pages/ProductsPage'))
+const OrdersPage = lazy(() => import('@/modules/dashboard/pages/OrdersPage'))
+const SettingsPage = lazy(() => import('@/modules/dashboard/pages/SettingsPage'))
+const StylePage = lazy(() => import('@/modules/dashboard/pages/StylePage'))
+const MetricsPage = lazy(() => import('@/modules/dashboard/pages/MetricsPage'))
+const PlansPage = lazy(() => import('@/modules/dashboard/pages/PlansPage'))
+const CouponsPage = lazy(() => import('@/modules/dashboard/pages/CouponsPage'))
+const ForgotPasswordPage = lazy(() => import('@/modules/auth/pages/ForgotPasswordPage'))
+const ResetPasswordPage = lazy(() => import('@/modules/auth/pages/ResetPasswordPage'))
+const AdminPage = lazy(() => import('@/modules/admin/pages/AdminPage'))
+const AdminLoginPage = lazy(() => import('@/modules/admin/pages/AdminLoginPage'))
+const TermsPage = lazy(() => import('@/modules/landing/pages/TermsPage'))
+const NotFoundPage = lazy(() => import('@/app/NotFoundPage'))
 
 const PAYMENT_STATUS_MAP = {
-  approved:     'success',
-  rejected:     'failure',
-  cancelled:    'failure',
-  in_process:   'pending',
+  approved: 'success',
+  rejected: 'failure',
+  cancelled: 'failure',
+  in_process: 'pending',
   in_mediation: 'pending',
 }
+
+function PageFallback() {
+  return (
+    <div style={{ display: 'grid', minHeight: '100vh', placeItems: 'center', background: '#080b12', color: 'rgba(255,255,255,.62)', fontFamily: 'DM Sans, sans-serif', fontSize: 13 }}>
+      Cargando página
+    </div>
+  )
+}
+
+const render = component => <Suspense fallback={<PageFallback />}>{component}</Suspense>
+const protect = component => <ProtectedRoute>{render(component)}</ProtectedRoute>
 
 function getNormalizedPaymentStatus(searchParams, fallbackStatus = 'pending') {
   const rawStatus = searchParams.get('payment')
@@ -47,7 +59,7 @@ function RootPage() {
     return <Navigate to={`/dashboard?${params.toString()}`} replace />
   }
 
-  return searchParams.get('store') ? <StorePage /> : <LandingPage />
+  return render(searchParams.get('store') ? <StorePage /> : <LandingPage />)
 }
 
 function PaymentReturnPage() {
@@ -60,27 +72,25 @@ function PaymentReturnPage() {
   return <Navigate to={`/dashboard?${params.toString()}`} replace />
 }
 
-const protect = (element) => <ProtectedRoute>{element}</ProtectedRoute>
-
 export const router = createBrowserRouter([
-  { path: '/',                   element: <RootPage /> },
-  { path: '/login',              element: <LoginPage /> },
-  { path: '/register-business',  element: <RegisterBusinessPage /> },
-  { path: '/store/:slug',        element: <StorePage /> },
-  { path: '/dashboard',          element: protect(<DashboardPage />) },
-  { path: '/dashboard/metrics',  element: protect(<MetricsPage />) },
+  { path: '/', element: <RootPage /> },
+  { path: '/login', element: render(<LoginPage />) },
+  { path: '/register-business', element: render(<RegisterBusinessPage />) },
+  { path: '/store/:slug', element: render(<StorePage />) },
+  { path: '/dashboard', element: protect(<DashboardPage />) },
+  { path: '/dashboard/metrics', element: protect(<MetricsPage />) },
   { path: '/dashboard/products', element: protect(<ProductsPage />) },
-  { path: '/dashboard/orders',   element: protect(<OrdersPage />) },
+  { path: '/dashboard/orders', element: protect(<OrdersPage />) },
   { path: '/dashboard/settings', element: protect(<SettingsPage />) },
-  { path: '/dashboard/style',    element: protect(<StylePage />) },
-  { path: '/dashboard/plans',    element: protect(<PlansPage />) },
-  { path: '/dashboard/coupons',  element: protect(<CouponsPage />) },
-  { path: '/payment/:status',    element: protect(<PaymentReturnPage />) },
-  { path: '/payments/:status',   element: protect(<PaymentReturnPage />) },
-  { path: '/forgot-password',    element: <ForgotPasswordPage /> },
-  { path: '/reset-password',     element: <ResetPasswordPage /> },
-  { path: '/admin',              element: <AdminPage /> },
-  { path: '/admin/login',        element: <AdminLoginPage /> },
-  { path: '/terms',              element: <TermsPage /> },
-  { path: '*',                   element: <NotFoundPage /> },
+  { path: '/dashboard/style', element: protect(<StylePage />) },
+  { path: '/dashboard/plans', element: protect(<PlansPage />) },
+  { path: '/dashboard/coupons', element: protect(<CouponsPage />) },
+  { path: '/payment/:status', element: protect(<PaymentReturnPage />) },
+  { path: '/payments/:status', element: protect(<PaymentReturnPage />) },
+  { path: '/forgot-password', element: render(<ForgotPasswordPage />) },
+  { path: '/reset-password', element: render(<ResetPasswordPage />) },
+  { path: '/admin', element: render(<AdminPage />) },
+  { path: '/admin/login', element: render(<AdminLoginPage />) },
+  { path: '/terms', element: render(<TermsPage />) },
+  { path: '*', element: render(<NotFoundPage />) },
 ])

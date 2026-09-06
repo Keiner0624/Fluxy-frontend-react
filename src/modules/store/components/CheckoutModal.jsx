@@ -1,241 +1,215 @@
-// src/modules/store/components/CheckoutModal.jsx
-import { useState } from 'react'
-import { createOrder } from '@/modules/store/api/storeApi'
+import { useEffect, useState } from 'react'
 import toast from 'react-hot-toast'
-import { useTranslation } from '@/hooks/useTranslation'
+import Icon from '@/components/Icon'
 import { API_URL } from '@/app/config'
+import { useTranslation } from '@/hooks/useTranslation'
+import { createOrder } from '@/modules/store/api/storeApi'
 
 export default function CheckoutModal({ open, cart, total, company, onClose, onSuccess }) {
   const t = useTranslation()
-  const [name, setName]             = useState('')
-  const [phone, setPhone]           = useState('')
-  const [address, setAddress]       = useState('')
-  const [coupon, setCoupon]         = useState('')
-  const [couponData, setCouponData] = useState(null) // { discount, finalTotal, code }
+  const [name, setName] = useState('')
+  const [phone, setPhone] = useState('')
+  const [address, setAddress] = useState('')
+  const [coupon, setCoupon] = useState('')
+  const [couponData, setCouponData] = useState(null)
   const [couponLoading, setCouponLoading] = useState(false)
-  const [couponError, setCouponError]     = useState('')
-  const [loading, setLoading]       = useState(false)
-  const [orderId, setOrderId]       = useState(null)
+  const [couponError, setCouponError] = useState('')
+  const [loading, setLoading] = useState(false)
+  const [orderId, setOrderId] = useState(null)
   const [whatsappUrl, setWhatsappUrl] = useState(null)
 
-  const handleConfirm = async () => {
-    if (!name.trim()) { toast.error(t.fullName.replace(' *', '')); return }
+  const reset = () => {
+    setName('')
+    setPhone('')
+    setAddress('')
+    setCoupon('')
+    setCouponData(null)
+    setCouponError('')
+    setOrderId(null)
+    setWhatsappUrl(null)
+  }
+
+  const handleClose = () => {
+    reset()
+    onClose()
+  }
+
+  useEffect(() => {
+    if (!open) return undefined
+    const previousOverflow = document.body.style.overflow
+    const onKeyDown = event => {
+      if (event.key === 'Escape' && !loading) handleClose()
+    }
+    document.body.style.overflow = 'hidden'
+    window.addEventListener('keydown', onKeyDown)
+    return () => {
+      document.body.style.overflow = previousOverflow
+      window.removeEventListener('keydown', onKeyDown)
+    }
+  // handleClose intentionally uses the latest form state only when Escape is pressed.
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [open, loading])
+
+  if (!open) return null
+
+  const validateCoupon = async () => {
+    if (!coupon.trim() || !company?.id) return
+    setCouponLoading(true)
+    setCouponError('')
+    setCouponData(null)
+    try {
+      const params = new URLSearchParams({
+        code: coupon.trim().toUpperCase(),
+        companyId: String(company.id),
+        orderTotal: String(total),
+      })
+      const response = await fetch(`${API_URL}/coupons/validate?${params.toString()}`)
+      const data = await response.json()
+      if (!response.ok || !data.valid) throw new Error(data.error || 'El cupón no es válido')
+      setCouponData(data)
+    } catch (error) {
+      setCouponError(error.message || 'No se pudo validar el cupón')
+    } finally {
+      setCouponLoading(false)
+    }
+  }
+
+  const handleConfirm = async event => {
+    event.preventDefault()
+    if (!name.trim()) {
+      toast.error(t.fullName.replace(' *', ''))
+      return
+    }
+    if (!company?.id || cart.length === 0) {
+      toast.error('No se pudo preparar el pedido')
+      return
+    }
+
     setLoading(true)
     try {
       const data = await createOrder(company.id, {
-        customerName:    name.trim(),
-        customerPhone:   phone.trim(),
+        customerName: name.trim(),
+        customerPhone: phone.trim(),
         customerAddress: address.trim(),
-        items: cart.map(i => ({ productId: i.product.id, quantity: i.quantity })),
-        couponCode: couponData ? couponData.code : null,
+        items: cart.map(item => ({ productId: item.product.id, quantity: item.quantity })),
+        couponCode: couponData?.code || null,
       })
-
-      // El backend ahora retorna { order, orderId, total, whatsappUrl? }
-      const id  = data.orderId || data.order?.id || data.id
-      const url = data.whatsappUrl || null
-
-      setOrderId(id)
-      setWhatsappUrl(url)
+      setOrderId(data.orderId || data.order?.id || data.id)
+      setWhatsappUrl(data.whatsappUrl || null)
       onSuccess()
-    } catch (e) {
-      toast.error(e.message)
+    } catch (error) {
+      toast.error(error.message || 'No se pudo confirmar el pedido')
     } finally {
       setLoading(false)
     }
   }
 
-  const validateCoupon = async () => {
-    if (!coupon.trim()) return
-    setCouponLoading(true); setCouponError(''); setCouponData(null)
-    try {
-      const res = await fetch(`${API_URL}/coupons/validate?code=${encodeURIComponent(coupon.toUpperCase())}&companyId=${company.id}&orderTotal=${total}`)
-      const data = await res.json()
-      if (!res.ok || !data.valid) throw new Error(data.error || 'Cupón inválido')
-      setCouponData(data)
-    } catch (err) { setCouponError(err.message) }
-    finally { setCouponLoading(false) }
-  }
-
-  const handleClose = () => {
-    setName(''); setPhone(''); setAddress('')
-    setCoupon(''); setCouponData(null); setCouponError('')
-    setOrderId(null); setWhatsappUrl(null)
-    onClose()
-  }
-
-  if (!open) return null
+  const finalTotal = Number(couponData?.finalTotal ?? total)
 
   return (
-    <div style={{
-      position: 'fixed', inset: 0, zIndex: 600,
-      background: 'rgba(0,0,0,0.85)', backdropFilter: 'blur(12px)',
-      display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 20,
-    }}>
-      <div style={{
-        background: '#0a0a18',
-        border: '1px solid rgba(255,255,255,0.08)',
-        borderRadius: 24, width: '100%', maxWidth: 480,
-        boxShadow: '0 40px 80px rgba(0,0,0,0.6)',
-        maxHeight: '90vh', overflowY: 'auto',
-      }}>
-        {/* ── Pantalla de confirmación ── */}
+    <div className="store-modal-layer" role="presentation">
+      <div className="store-checkout" role="dialog" aria-modal="true" aria-labelledby="checkout-title">
         {orderId ? (
-          <div style={{ textAlign: 'center', padding: '48px 36px' }}>
-            <div style={{ fontSize: 52, marginBottom: 18 }}>🎉</div>
-            <h2 style={{ fontFamily: "'Fraunces', serif", fontSize: 26, marginBottom: 12 }}>
-              {t.orderConfirmed}
-            </h2>
-            <p style={{ color: 'var(--text-muted, #4a4a6a)', fontSize: 14, marginBottom: 6 }}>
-              {t.sellerNotified}
-            </p>
-            <div style={{
-              display: 'inline-block',
-              background: 'rgba(124,131,253,0.08)', border: '1px solid rgba(124,131,253,0.2)',
-              borderRadius: 50, padding: '6px 18px',
-              fontSize: 14, color: 'var(--primary, #7c83fd)', fontWeight: 600, marginBottom: 28,
-            }}>Pedido #{orderId}</div>
-
-            <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
-              {/* ✅ Botón WhatsApp — aparece solo si el backend lo retorna (plan PRO/BUSINESS) */}
+          <div className="store-confirmation">
+            <span className="store-confirmation__icon"><Icon name="check" size={30} /></span>
+            <span className="store-section-label">Pedido registrado</span>
+            <h2 id="checkout-title">{t.orderConfirmed}</h2>
+            <p>{t.sellerNotified}</p>
+            <strong className="store-order-number">Pedido #{orderId}</strong>
+            <div className="store-confirmation__actions">
               {whatsappUrl && (
-                <a
-                  href={whatsappUrl}
-                  target="_blank"
-                  rel="noreferrer"
-                  style={{
-                    display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8,
-                    background: 'linear-gradient(135deg, #25d366, #128c7e)',
-                    color: 'white', padding: '13px 24px', borderRadius: 14,
-                    fontSize: 14, fontWeight: 600, textDecoration: 'none',
-                  }}
-                >
+                <a className="store-button store-button--primary" href={whatsappUrl} target="_blank" rel="noreferrer">
+                  <Icon name="message" size={17} />
                   {t.coordinateWhatsApp}
                 </a>
               )}
-
-              <button onClick={handleClose} style={{
-                padding: '13px 24px',
-                background: 'rgba(255,255,255,0.04)',
-                border: '1px solid rgba(255,255,255,0.08)',
-                borderRadius: 14, fontSize: 14, fontWeight: 500,
-                color: 'white', cursor: 'pointer',
-              }}>{t.keepShopping}</button>
+              <button type="button" className="store-button store-button--secondary" onClick={handleClose}>{t.keepShopping}</button>
             </div>
           </div>
         ) : (
-          <>
-            {/* ── Formulario ── */}
-            <div style={{
-              padding: '22px 26px',
-              borderBottom: '1px solid rgba(255,255,255,0.06)',
-              display: 'flex', justifyContent: 'space-between', alignItems: 'center',
-            }}>
-              <h3 style={{ fontFamily: "'Fraunces', serif", fontSize: 20 }}>{t.confirmOrder}</h3>
-              <button onClick={handleClose} style={{
-                width: 36, height: 36, borderRadius: 10,
-                background: 'rgba(255,255,255,0.04)',
-                border: '1px solid rgba(255,255,255,0.08)',
-                color: 'var(--text-muted, #4a4a6a)', fontSize: 16,
-                cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center',
-              }}>✕</button>
-            </div>
-
-            <div style={{ padding: '24px 26px' }}>
-              {/* Resumen del carrito */}
-              <div style={{
-                background: 'rgba(255,255,255,0.02)',
-                border: '1px solid rgba(255,255,255,0.06)',
-                borderRadius: 14, padding: 16, marginBottom: 20,
-              }}>
-                {cart.map(item => (
-                  <div key={item.product.id} style={{
-                    display: 'flex', justifyContent: 'space-between',
-                    fontSize: 13, padding: '6px 0',
-                    borderBottom: '1px solid rgba(255,255,255,0.04)',
-                    color: 'var(--text-soft, #9898b8)',
-                  }}>
-                    <span>{item.product.name} × {item.quantity}</span>
-                    <span>S/ {(item.product.price * item.quantity).toFixed(2)}</span>
-                  </div>
-                ))}
+          <form onSubmit={handleConfirm}>
+            <div className="store-modal-head">
+              <div>
+                <span className="store-section-label">Finalizar compra</span>
+                <h2 id="checkout-title">{t.confirmOrder}</h2>
+                <p>Completa tus datos para que el vendedor pueda contactarte.</p>
               </div>
-
-              {/* Campos del cliente */}
-              {[
-                { label: t.fullName,    value: name,    onChange: setName,    placeholder: t.namePlaceholder },
-                { label: t.phoneField,             value: phone,   onChange: setPhone,   placeholder: t.phonePlaceholder },
-                { label: t.deliveryAddress, value: address, onChange: setAddress, placeholder: t.addressPlaceholder },
-              ].map(field => (
-                <div key={field.label} style={{ marginBottom: 16 }}>
-                  <label style={{
-                    display: 'block', fontSize: 11, color: 'var(--text-muted, #4a4a6a)',
-                    fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.8px', marginBottom: 8,
-                  }}>{field.label}</label>
-                  <input
-                    value={field.value}
-                    onChange={e => field.onChange(e.target.value)}
-                    placeholder={field.placeholder}
-                    style={{
-                      width: '100%', background: 'rgba(255,255,255,0.03)',
-                      border: '1px solid rgba(255,255,255,0.08)',
-                      borderRadius: 12, padding: '12px 16px',
-                      color: 'white', fontSize: 14, outline: 'none',
-                      fontFamily: 'DM Sans, sans-serif',
-                    }}
-                    onFocus={e => e.target.style.borderColor = 'rgba(124,131,253,0.4)'}
-                    onBlur={e => e.target.style.borderColor = 'rgba(255,255,255,0.08)'}
-                  />
-                </div>
-              ))}
-
-              {/* Cupón */}
-              <div style={{ marginBottom: 16 }}>
-                <label style={{ display: 'block', fontSize: 11, color: 'var(--text-muted, #4a4a6a)', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.8px', marginBottom: 8 }}>🎟️ Cupón de descuento</label>
-                <div style={{ display: 'flex', gap: 8 }}>
-                  <input value={coupon} onChange={e => { setCoupon(e.target.value.toUpperCase()); setCouponData(null); setCouponError('') }}
-                    placeholder="Ej: PROMO20"
-                    style={{ flex: 1, background: 'rgba(255,255,255,0.03)', border: `1px solid ${couponData ? 'rgba(52,211,153,0.4)' : 'rgba(255,255,255,0.08)'}`, borderRadius: 12, padding: '11px 14px', color: 'white', fontSize: 14, outline: 'none', fontFamily: 'DM Sans, sans-serif', fontWeight: 600, letterSpacing: '0.5px' }}
-                    onFocus={e => e.target.style.borderColor = 'rgba(124,131,253,0.4)'}
-                    onBlur={e => e.target.style.borderColor = couponData ? 'rgba(52,211,153,0.4)' : 'rgba(255,255,255,0.08)'}
-                    onKeyDown={e => e.key === 'Enter' && validateCoupon()}
-                  />
-                  <button type="button" onClick={validateCoupon} disabled={couponLoading || !coupon.trim()} style={{ padding: '11px 16px', borderRadius: 12, background: 'rgba(124,131,253,0.1)', border: '1px solid rgba(124,131,253,0.25)', color: '#7c83fd', fontSize: 13, fontWeight: 600, cursor: 'pointer', whiteSpace: 'nowrap', opacity: !coupon.trim() ? 0.5 : 1 }}>
-                    {couponLoading ? '...' : 'Aplicar'}
-                  </button>
-                </div>
-                {couponError && <div style={{ fontSize: 12, color: '#f87171', marginTop: 6 }}>⚠️ {couponError}</div>}
-                {couponData && <div style={{ fontSize: 12, color: '#34d399', marginTop: 6, display: 'flex', alignItems: 'center', gap: 6 }}>✅ Cupón aplicado — Descuento: S/ {couponData.discount.toFixed(2)}</div>}
-              </div>
-
-              {/* Total */}
-              <div style={{
-                display: 'flex', justifyContent: 'space-between', alignItems: 'center',
-                marginBottom: 20, padding: '16px 0',
-                borderTop: '1px solid rgba(255,255,255,0.06)',
-              }}>
-                <div>
-                  <span style={{ fontSize: 14, color: 'var(--text-muted, #4a4a6a)' }}>{t.totalToPay}</span>
-                  {couponData && <div style={{ fontSize: 11, color: '#34d399', marginTop: 2 }}>🎟️ Descuento aplicado</div>}
-                </div>
-                <div style={{ textAlign: 'right' }}>
-                  {couponData && <div style={{ fontSize: 13, color: 'rgba(255,255,255,0.3)', textDecoration: 'line-through', marginBottom: 2 }}>S/ {total.toFixed(2)}</div>}
-                  <span style={{ fontFamily: "'Fraunces', serif", fontSize: 28, fontWeight: 700, color: couponData ? '#34d399' : 'white' }}>
-                    S/ {(couponData ? couponData.finalTotal : total).toFixed(2)}
-                  </span>
-                </div>
-              </div>
-
-              <button onClick={handleConfirm} disabled={loading} style={{
-                width: '100%', padding: 15,
-                background: 'linear-gradient(135deg, var(--primary, #7c83fd), #4f46e5)',
-                color: 'white', borderRadius: 14, fontSize: 15, fontWeight: 600,
-                opacity: loading ? 0.7 : 1,
-                cursor: loading ? 'not-allowed' : 'pointer', border: 'none',
-              }}>
-                {loading ? t.processing : t.confirmBtn}
+              <button type="button" className="store-icon-button" onClick={handleClose} disabled={loading} aria-label="Cerrar">
+                <Icon name="close" size={19} />
               </button>
             </div>
-          </>
+
+            <div className="store-checkout__body">
+              <section className="store-order-summary" aria-label="Productos del pedido">
+                <div className="store-order-summary__title">
+                  <span>Tu pedido</span>
+                  <small>{cart.reduce((sum, item) => sum + item.quantity, 0)} unidades</small>
+                </div>
+                {cart.map(item => (
+                  <div className="store-order-summary__row" key={item.product.id}>
+                    <span>{item.product.name} <small>× {item.quantity}</small></span>
+                    <strong>S/ {(Number(item.product.price || 0) * item.quantity).toFixed(2)}</strong>
+                  </div>
+                ))}
+              </section>
+
+              <div className="store-form-grid">
+                <label className="store-field store-field--full">
+                  <span>{t.fullName}</span>
+                  <input value={name} onChange={event => setName(event.target.value)} placeholder={t.namePlaceholder} autoComplete="name" required />
+                </label>
+                <label className="store-field">
+                  <span>{t.phoneField}</span>
+                  <input value={phone} onChange={event => setPhone(event.target.value)} placeholder={t.phonePlaceholder} autoComplete="tel" inputMode="tel" />
+                </label>
+                <label className="store-field">
+                  <span>{t.deliveryAddress}</span>
+                  <input value={address} onChange={event => setAddress(event.target.value)} placeholder={t.addressPlaceholder} autoComplete="street-address" />
+                </label>
+              </div>
+
+              <div className="store-coupon">
+                <label htmlFor="store-coupon">Cupón de descuento</label>
+                <div>
+                  <input
+                    id="store-coupon"
+                    value={coupon}
+                    onChange={event => {
+                      setCoupon(event.target.value.toUpperCase())
+                      setCouponData(null)
+                      setCouponError('')
+                    }}
+                    onKeyDown={event => {
+                      if (event.key === 'Enter') {
+                        event.preventDefault()
+                        validateCoupon()
+                      }
+                    }}
+                    placeholder="Ejemplo: PROMO20"
+                  />
+                  <button type="button" onClick={validateCoupon} disabled={couponLoading || !coupon.trim()}>
+                    {couponLoading ? 'Validando' : 'Aplicar'}
+                  </button>
+                </div>
+                {couponError && <p className="store-coupon__message is-error"><Icon name="alert" size={14} /> {couponError}</p>}
+                {couponData && <p className="store-coupon__message is-success"><Icon name="checkCircle" size={14} /> Cupón aplicado: ahorras S/ {Number(couponData.discount || 0).toFixed(2)}</p>}
+              </div>
+            </div>
+
+            <div className="store-checkout__footer">
+              <div className="store-checkout__total">
+                <span>{t.totalToPay}</span>
+                <div>
+                  {couponData && <small>S/ {total.toFixed(2)}</small>}
+                  <strong>S/ {finalTotal.toFixed(2)}</strong>
+                </div>
+              </div>
+              <button type="submit" className="store-button store-button--primary" disabled={loading}>
+                {loading ? t.processing : t.confirmBtn}
+                {!loading && <Icon name="arrowRight" size={17} />}
+              </button>
+            </div>
+          </form>
         )}
       </div>
     </div>

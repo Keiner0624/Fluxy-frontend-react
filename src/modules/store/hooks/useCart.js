@@ -4,10 +4,12 @@ export function useCart() {
   const [cart, setCart] = useState([])
 
   const addToCart = (product) => {
+    const stock = Number(product.stock) || 0
+    if (stock <= 0) return
     setCart(prev => {
       const existing = prev.find(i => i.product.id === product.id)
       if (existing) {
-        if (existing.quantity >= product.stock) return prev
+        if (existing.quantity >= stock) return prev
         return prev.map(i =>
           i.product.id === product.id
             ? { ...i, quantity: i.quantity + 1 }
@@ -24,7 +26,7 @@ export function useCart() {
 
   const increaseQty = (productId) => {
     setCart(prev => prev.map(i =>
-      i.product.id === productId && i.quantity < i.product.stock
+      i.product.id === productId && i.quantity < (Number(i.product.stock) || 0)
         ? { ...i, quantity: i.quantity + 1 }
         : i
     ))

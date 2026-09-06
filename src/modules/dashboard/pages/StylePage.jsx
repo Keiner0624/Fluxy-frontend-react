@@ -94,7 +94,7 @@ function StorePreview({ style, company }) {
                 <div style={{ fontSize: 8, color: 'rgba(255,255,255,0.35)' }}>via Fluxy</div>
               </div>
             </div>
-            <div style={{ background: primary, borderRadius: 8, padding: '4px 10px', fontSize: 9, fontWeight: 700, color: '#fff' }}>🛒 0</div>
+            <div style={{ background: primary, borderRadius: 8, padding: '4px 10px', fontSize: 9, fontWeight: 700, color: '#fff', display: 'flex', alignItems: 'center', gap: 4 }}><Icon name="orders" size={10} /> 0</div>
           </div>
 
           {/* Hero */}
@@ -115,9 +115,9 @@ function StorePreview({ style, company }) {
 
             <div style={{ fontSize: 9, color: 'rgba(255,255,255,0.3)', textTransform: 'uppercase', letterSpacing: '1px', marginBottom: 8, fontWeight: 700 }}>Catálogo</div>
             <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 8 }}>
-              {['📦', '🛍️', '🎁', '🧴'].map((emoji, i) => (
+              {[0, 1, 2, 3].map(i => (
                 <div key={i} style={{ background: 'rgba(0,0,0,0.3)', backdropFilter: 'blur(8px)', border: '1px solid rgba(255,255,255,0.07)', borderRadius: 10, overflow: 'hidden' }}>
-                  <div style={{ height: 44, background: 'rgba(255,255,255,0.04)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 18 }}>{emoji}</div>
+                  <div style={{ height: 44, background: 'rgba(255,255,255,0.04)', display: 'flex', alignItems: 'center', justifyContent: 'center', color: primary }}><Icon name="package" size={18} /></div>
                   <div style={{ padding: '6px 8px' }}>
                     <div style={{ fontSize: 9, color: 'rgba(255,255,255,0.55)', marginBottom: 2 }}>Producto {i + 1}</div>
                     <div style={{ fontSize: 11, fontWeight: 700, color: primary }}>S/ {(15 + i * 8).toFixed(2)}</div>

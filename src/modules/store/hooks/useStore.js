@@ -9,30 +9,46 @@ export function useStore(slug) {
 
   useEffect(() => {
     if (!slug) return
+    let active = true
 
     async function load() {
+      setLoading(true)
+      setError(null)
       try {
         const [comp, prods] = await Promise.all([
           getCompanyInfo(slug),
           getProducts(slug),
         ])
+        if (!active) return
         setCompany(comp)
-        setProducts(prods)
+        setProducts(Array.isArray(prods) ? prods : [])
       } catch (e) {
-        setError(e.message)
+        if (active) {
+          setCompany(null)
+          setProducts([])
+          setError(e.message)
+        }
       } finally {
-        setLoading(false)
+        if (active) setLoading(false)
       }
     }
 
     load()
+    return () => { active = false }
   }, [slug])
 
-  const reload = () => {
+  const reload = async () => {
+    if (!slug) return
     setLoading(true)
-    getProducts(slug)
-      .then(setProducts)
-      .finally(() => setLoading(false))
+    setError(null)
+    try {
+      const refreshedProducts = await getProducts(slug)
+      setProducts(Array.isArray(refreshedProducts) ? refreshedProducts : [])
+    } catch (e) {
+      setError(e.message)
+    } finally {
+      setLoading(false)
+    }
   }
 
   return { company, products, loading, error, reload }

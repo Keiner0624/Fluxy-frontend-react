@@ -1,24 +1,42 @@
 import { API_URL } from '@/app/config'
 
-export async function getCompanyInfo(slug) {
-    const res = await fetch(`${API_URL}/store/slug/${slug}/info`);
-    if (!res.ok) throw new Error('Tienda no encontrada');
-    return res.json();
+async function requestJson(path, options, fallbackMessage) {
+  let response
+  try {
+    response = await fetch(`${API_URL}${path}`, options)
+  } catch {
+    throw new Error('No se pudo conectar con la tienda. Verifica que el backend local esté encendido.')
+  }
+
+  let data = null
+  try {
+    data = await response.json()
+  } catch {
+    // Algunas respuestas de error del backend no incluyen JSON.
+  }
+
+  if (!response.ok) {
+    throw new Error(data?.message || data?.error || fallbackMessage)
+  }
+  return data
 }
 
-export async function getProducts(slug) {
-    const res = await fetch(`${API_URL}/store/slug/${slug}/products`);
-    if (!res.ok) throw new Error('Error al cargar productos');
-    return res.json();
+export function getCompanyInfo(slug) {
+  return requestJson(`/store/slug/${encodeURIComponent(slug)}/info`, undefined, 'Tienda no encontrada')
 }
 
-export async function createOrder(companyId, orderData) {
-    const res = await fetch(`${API_URL}/store/${companyId}/order`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(orderData)
-    });
-    if (!res.ok) throw new Error('Error al crear el pedido');
-    // Retorna { order, orderId, total, whatsappUrl? }
-    return res.json();
+export function getProducts(slug) {
+  return requestJson(`/store/slug/${encodeURIComponent(slug)}/products`, undefined, 'No se pudieron cargar los productos')
+}
+
+export function createOrder(companyId, orderData) {
+  return requestJson(
+    `/store/${encodeURIComponent(companyId)}/order`,
+    {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(orderData),
+    },
+    'No se pudo crear el pedido',
+  )
 }
