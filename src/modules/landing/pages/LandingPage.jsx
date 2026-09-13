@@ -247,8 +247,9 @@ function DashboardPreview() {
                     <stop offset="1" stopColor="#1769e0" stopOpacity="0" />
                   </linearGradient>
                 </defs>
-                <path className="chart-area" d="M0 157 C24 153 33 128 60 132 S87 103 114 112 146 82 173 92 202 36 232 58 260 120 285 81 309 111 333 66 358 91 382 40 430 27 L430 180 L0 180 Z" />
-                <path className="chart-line" d="M0 157 C24 153 33 128 60 132 S87 103 114 112 146 82 173 92 202 36 232 58 260 120 285 81 309 111 333 66 358 91 382 40 430 27" />
+                {/* Cada tramo de S necesita grupos de 4 números (x2 y2 x y) */}
+                <path className="chart-area" d="M0 157 C24 153 33 128 60 132 S87 103 114 112 146 82 173 92 202 36 232 58 260 120 285 81 309 111 333 66 358 91 382 40 410 30 430 27 L430 180 L0 180 Z" />
+                <path className="chart-line" d="M0 157 C24 153 33 128 60 132 S87 103 114 112 146 82 173 92 202 36 232 58 260 120 285 81 309 111 333 66 358 91 382 40 410 30 430 27" />
               </svg>
               <div className="dashboard-chart__dates"><span>01</span><span>05</span><span>10</span><span>15</span><span>20</span><span>25</span><span>30</span></div>
             </div>
