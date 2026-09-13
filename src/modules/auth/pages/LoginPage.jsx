@@ -4,6 +4,7 @@ import { useNavigate, Link, useSearchParams } from 'react-router-dom'
 import { API_URL, buildStoreUrl } from '@/app/config'
 import BrandLogo from '@/components/BrandLogo'
 import Icon from '@/components/Icon'
+import { getMe, getMyCompany } from '@/app/account'
 
 export default function LoginPage() {
   const navigate = useNavigate()
@@ -42,12 +43,14 @@ export default function LoginPage() {
       localStorage.setItem('token', data.token)
       if (data.user) localStorage.setItem('user', JSON.stringify(data.user))
 
-      const companyRes = await fetch(`${API_URL}/companies/my-company`, {
-        headers: { Authorization: `Bearer ${data.token}` },
-      })
+      // En paralelo y no una detrás de otra. Además quedan en caché, así el
+      // panel se monta con los datos resueltos en vez de volver a pedirlos.
+      const [, company] = await Promise.all([
+        getMe({ force: true }).catch(() => null),
+        getMyCompany({ force: true }).catch(() => null),
+      ])
 
-      if (companyRes.ok) {
-        const company = await companyRes.json()
+      if (company) {
         localStorage.setItem('company', JSON.stringify({
           id:         company.id,
           name:       company.name,

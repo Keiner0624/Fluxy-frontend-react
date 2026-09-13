@@ -1,10 +1,6 @@
 // src/hooks/usePlan.js
 import { useState, useEffect } from 'react'
-import { API_URL } from '@/app/config'
-
-function getToken() {
-  return localStorage.getItem('token') || ''
-}
+import { getMe } from '@/app/account'
 
 export const PLAN_LIMITS = {
   FREE:     { products: 10,     label: 'Free' },
@@ -33,18 +29,13 @@ export default function usePlan() {
   const [loading, setLoading] = useState(true)
 
   useEffect(() => {
-    const load = async () => {
-      try {
-        const res = await fetch(`${API_URL}/me`, {
-          headers: { Authorization: `Bearer ${getToken()}` },
-        })
-        if (!res.ok) return
-        const data = await res.json()
-        if (data.planName) setPlan(data.planName)
-      } catch { /* silencioso */ }
-      finally { setLoading(false) }
-    }
-    load()
+    let vigente = true
+    // Compartido: si el layout o la página ya lo pidieron, no sale otra petición.
+    getMe()
+      .then((data) => { if (vigente && data.planName) setPlan(data.planName) })
+      .catch(() => { /* silencioso */ })
+      .finally(() => { if (vigente) setLoading(false) })
+    return () => { vigente = false }
   }, [])
 
   return {

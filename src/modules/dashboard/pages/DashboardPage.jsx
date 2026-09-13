@@ -2,8 +2,9 @@
 import { useNavigate, useSearchParams, Link } from 'react-router-dom'
 import { useEffect, useState } from 'react'
 import DashboardLayout from '@/modules/dashboard/components/DashboardLayout'
-import { API_URL, getCompanyStoreUrl } from '@/app/config'
+import { getCompanyStoreUrl } from '@/app/config'
 import Icon from '@/components/Icon'
+import { getMe, getMyCompany } from '@/app/account'
 
 const PLAN_NAMES = { PRO: 'Pro', BUSINESS: 'Business' }
 const PAYMENT_STATUS_MAP = {
@@ -16,7 +17,6 @@ const PAYMENT_STATUS_MAP = {
 const PENDING_PLAN_KEY   = 'fluxy_pending_plan_checkout'
 const BIRTHDAY_SHOWN_KEY = 'fluxy_birthday_shown'
 
-function getToken() { return localStorage.getItem('token') || '' }
 function wait(ms)   { return new Promise(r => setTimeout(r, ms)) }
 
 function readStorage(key) {
@@ -42,9 +42,9 @@ function normalizeCompany(company = {}) {
 async function refreshSellerAccount(expectedPlan) {
   for (let attempt = 0; attempt < 4; attempt++) {
     if (attempt > 0) await wait(1200)
-    const res = await fetch(`${API_URL}/me`, { headers: { Authorization: `Bearer ${getToken()}` } })
-    if (!res.ok) continue
-    const data     = await res.json()
+    // force: se espera a que el webhook active el plan, la cache no sirve aqui.
+    let data
+    try { data = await getMe({ force: true }) } catch { continue }
     const planName  = data.planName  || expectedPlan
     const planLimit = data.planLimit
     if (planName || planLimit) {
@@ -85,8 +85,7 @@ export default function DashboardPage() {
 
   useEffect(() => {
     // Cargar datos del usuario
-    fetch(`${API_URL}/me`, { headers: { Authorization: `Bearer ${getToken()}` } })
-      .then(r => r.json())
+    getMe()
       .then(d => {
         if (d.planName)   setPlan(d.planName)
         const nextFirstName = getUserFirstName(d)
@@ -109,8 +108,7 @@ export default function DashboardPage() {
       .catch(() => {})
       .finally(() => setLoadingPlan(false))
 
-    fetch(`${API_URL}/companies/my-company`, { headers: { Authorization: `Bearer ${getToken()}` } })
-      .then(r => (r.ok ? r.json() : null))
+    getMyCompany()
       .then(d => {
         if (!d) return
         const nextCompany = normalizeCompany({ ...readStorage('company'), ...d })
@@ -134,8 +132,7 @@ export default function DashboardPage() {
       if (payment === 'success' && planParam) {
         refreshSellerAccount(planParam).catch(() => {})
           .then(() => {
-            fetch(`${API_URL}/me`, { headers: { Authorization: `Bearer ${getToken()}` } })
-              .then(r => r.json())
+            getMe({ force: true })
               .then(d => { if (d.planName) setPlan(d.planName) })
               .catch(() => {})
           })

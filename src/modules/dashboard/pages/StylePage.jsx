@@ -5,6 +5,7 @@ import PlanGate from '@/components/PlanGate'
 import usePlan from '@/hooks/usePlan'
 import { API_URL, getCompanyStoreUrl } from '@/app/config'
 import Icon from '@/components/Icon'
+import { invalidateAccount } from '@/app/account'
 import { uploadImage } from '@/app/cloudinary'
 
 
@@ -187,6 +188,7 @@ function StyleContent() {
         body: JSON.stringify({ storeStyle: payload }),
       })
     } catch { /* no crítico */ }
+    invalidateAccount('company')
     setSuccess('Estilo guardado y aplicado a tu tienda.')
     setTimeout(() => setSuccess(''), 3000)
     setSaving(false)

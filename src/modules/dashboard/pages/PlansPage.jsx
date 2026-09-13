@@ -4,6 +4,7 @@ import DashboardLayout from '@/modules/dashboard/components/DashboardLayout'
 import { API_URL } from '@/app/config'
 import { useCurrency } from '@/hooks/useCurrency'
 import Icon from '@/components/Icon'
+import { getMe, getMyCompany, invalidateAccount } from '@/app/account'
 
 function getToken() {
   return localStorage.getItem('token') || ''
@@ -88,23 +89,15 @@ export default function PlansPage() {
   useEffect(() => { loadPlan() }, [])
 
   const loadPlan = async () => {
-    try {
-      const res = await fetch(`${API_URL}/me`, {
-        headers: { Authorization: `Bearer ${getToken()}` },
-      })
-      if (!res.ok) return
-      const data = await res.json()
-      if (data.planName) setCurrentPlan(data.planName)
-      if (data.trialUsed !== undefined) setTrialUsed(data.trialUsed)
-      // También revisar en /companies/my-company
-      const cRes = await fetch(`${API_URL}/companies/my-company`, {
-        headers: { Authorization: `Bearer ${getToken()}` },
-      })
-      if (cRes.ok) {
-        const cData = await cRes.json()
-        if (cData.trialUsed !== undefined) setTrialUsed(cData.trialUsed)
-      }
-    } catch { /* silencioso */ }
+    // En paralelo, y compartidas con el layout: antes iban una detrás de otra.
+    const [me, company] = await Promise.all([
+      getMe().catch(() => null),
+      getMyCompany().catch(() => null),
+    ])
+    if (me?.planName) setCurrentPlan(me.planName)
+    if (me?.trialUsed !== undefined) setTrialUsed(me.trialUsed)
+    // La empresa tiene la última palabra sobre trialUsed, como antes.
+    if (company?.trialUsed !== undefined) setTrialUsed(company.trialUsed)
   }
 
   const handleTrial = async () => {
@@ -118,6 +111,7 @@ export default function PlansPage() {
       const data = await res.json()
       if (!res.ok || !data.success) throw new Error(data.message || 'Error al activar prueba')
       setTrialSuccess(true)
+      invalidateAccount()
       setCurrentPlan('PRO')
       setTrialUsed(true)
       // Actualizar localStorage

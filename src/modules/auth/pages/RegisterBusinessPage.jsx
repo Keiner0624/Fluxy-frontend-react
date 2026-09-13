@@ -4,6 +4,7 @@ import { useNavigate, Link } from 'react-router-dom'
 import { API_URL, buildStoreUrl } from '@/app/config'
 import BrandLogo from '@/components/BrandLogo'
 import Icon from '@/components/Icon'
+import { invalidateAccount } from '@/app/account'
 
 function getToken() {
   return localStorage.getItem('token') || ''
@@ -88,6 +89,7 @@ export default function RegisterBusinessPage() {
       })
     } catch { /* si falla el PUT, el perfil igual se persiste en local */ }
     finally {
+      invalidateAccount('me')
       try {
         const user = JSON.parse(localStorage.getItem('user') || '{}')
         localStorage.setItem('user', JSON.stringify({ ...user, ...profile }))

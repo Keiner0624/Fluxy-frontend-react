@@ -6,6 +6,7 @@ import usePlan from '@/hooks/usePlan'
 import { API_URL, getCompanyStoreUrl } from '@/app/config'
 import { useCurrency } from '@/hooks/useCurrency'
 import Icon from '@/components/Icon'
+import { getMyCompany, invalidateAccount } from '@/app/account'
 import { uploadImage } from '@/app/cloudinary'
 
 
@@ -226,9 +227,7 @@ export default function SettingsPage() {
   const loadCompany = async () => {
     setLoading(true)
     try {
-      const res  = await fetch(`${API_URL}/companies/my-company`, { headers: { Authorization: `Bearer ${getToken()}` } })
-      if (!res.ok) throw new Error()
-      const data = await res.json()
+      const data = await getMyCompany()
       setForm({ name: data.name || '', description: data.description || '', phone: data.phone || '', address: data.address || '', email: data.email || '', logoUrl: data.logoUrl || '', paymentMethods: data.paymentMethods ? JSON.parse(data.paymentMethods) : [] })
       setLogoPreview(data.logoUrl || null)
     } catch { setError('Error al cargar la configuración') }
@@ -260,6 +259,7 @@ export default function SettingsPage() {
       const updated = await res.json()
       const merged  = { ...company, name: updated.name, slug: updated.slug, logoUrl: updated.logoUrl }
       localStorage.setItem('company', JSON.stringify({ ...merged, storeUrl: getCompanyStoreUrl(merged) }))
+      invalidateAccount('company')
       setSuccess('Configuración guardada.')
       setTimeout(() => setSuccess(''), 3000)
     } catch (err) { setError(err.message) }

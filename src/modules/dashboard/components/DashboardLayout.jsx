@@ -1,13 +1,13 @@
 // src/modules/dashboard/components/DashboardLayout.jsx
 import { useState, useEffect } from 'react'
 import { Link, useNavigate, useLocation } from 'react-router-dom'
-import { getCompanyStoreUrl, API_URL } from '@/app/config'
+import { getCompanyStoreUrl } from '@/app/config'
+import { invalidateAccount } from '@/app/account'
+import usePlan from '@/hooks/usePlan'
 import BrandLogo from '@/components/BrandLogo'
 import Icon from '@/components/Icon'
 import { usePushNotifications } from '@/hooks/usePushNotifications'
 import { useTheme } from '@/hooks/useTheme'
-
-function getToken() { return localStorage.getItem('token') || '' }
 
 const PLAN_ORDER = { FREE: 0, PRO: 1, BUSINESS: 2 }
 
@@ -43,29 +43,15 @@ export default function DashboardLayout({ children }) {
   const company  = JSON.parse(localStorage.getItem('company') || '{}') || {}
   const storeUrl = getCompanyStoreUrl(company)
   const [sidebarOpen, setSidebarOpen] = useState(false)
-  const [plan, setPlan]               = useState('FREE')
 
   usePushNotifications()
+  const { plan } = usePlan()
   const { theme, toggleTheme } = useTheme()
 
   useEffect(() => {
     document.body.style.overflow = sidebarOpen ? 'hidden' : ''
     return () => { document.body.style.overflow = '' }
   }, [sidebarOpen])
-
-  useEffect(() => {
-    const load = async () => {
-      try {
-        const res = await fetch(`${API_URL}/me`, {
-          headers: { Authorization: `Bearer ${getToken()}` },
-        })
-        if (!res.ok) return
-        const data = await res.json()
-        if (data.planName) setPlan(data.planName)
-      } catch { /* silencioso */ }
-    }
-    load()
-  }, [])
 
   // Cierra el menú móvil al cambiar de ruta
   useEffect(() => { setSidebarOpen(false) }, [location.pathname])
@@ -76,6 +62,7 @@ export default function DashboardLayout({ children }) {
   }
 
   const handleLogout = () => {
+    invalidateAccount()
     localStorage.clear()
     navigate('/login')
   }
