@@ -5,6 +5,7 @@ import ProtectedRoute from './ProtectedRoute'
 const LandingPage = lazy(() => import('@/modules/landing/pages/LandingPage'))
 const LoginPage = lazy(() => import('@/modules/auth/pages/LoginPage'))
 const RegisterBusinessPage = lazy(() => import('@/modules/auth/pages/RegisterBusinessPage'))
+const BusinessOnboardingPage = lazy(() => import('@/modules/auth/pages/BusinessOnboardingPage'))
 const StorePage = lazy(() => import('@/modules/store/pages/StorePage'))
 const DashboardPage = lazy(() => import('@/modules/dashboard/pages/DashboardPage'))
 const ProductsPage = lazy(() => import('@/modules/dashboard/pages/ProductsPage'))
@@ -82,6 +83,7 @@ export const router = createBrowserRouter([
   { path: '/dashboard/products', element: protect(<ProductsPage />) },
   { path: '/dashboard/orders', element: protect(<OrdersPage />) },
   { path: '/dashboard/settings', element: protect(<SettingsPage />) },
+  { path: '/dashboard/onboarding', element: protect(<BusinessOnboardingPage />) },
   { path: '/dashboard/style', element: protect(<StylePage />) },
   { path: '/dashboard/plans', element: protect(<PlansPage />) },
   { path: '/dashboard/coupons', element: protect(<CouponsPage />) },

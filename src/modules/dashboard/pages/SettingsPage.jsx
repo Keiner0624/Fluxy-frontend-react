@@ -1,6 +1,6 @@
 // src/modules/dashboard/pages/SettingsPage.jsx
 import { useState, useEffect, useRef } from 'react'
-import { useNavigate } from 'react-router-dom'
+import { Link, useNavigate } from 'react-router-dom'
 import DashboardLayout from '@/modules/dashboard/components/DashboardLayout'
 import usePlan from '@/hooks/usePlan'
 import { API_URL, getCompanyStoreUrl } from '@/app/config'
@@ -291,6 +291,17 @@ export default function SettingsPage() {
         </div>
       )}
 
+      <div className="fx-card" style={{ marginBottom: 16 }}>
+        <div className="fx-card__body">
+          <h2 className="fx-h3">Perfil del negocio</h2>
+          <p className="fx-hint">Rubro, RUC/DNI, ubicación, horarios, redes sociales y métodos de entrega.</p>
+          <div className="fx-row" style={{ flexWrap: 'wrap', gap: 12, marginTop: 12 }}>
+            <Link to="/dashboard/onboarding?details=1" className="fx-btn fx-btn--secondary">Editar datos del negocio</Link>
+            <Link to="/dashboard/onboarding" className="fx-btn fx-btn--ghost">Retomar configuración inicial</Link>
+          </div>
+        </div>
+      </div>
+
       <form onSubmit={handleSubmit} className="fx-grid" style={{ gap: 16 }}>
         <div className="fx-card">
           <div className="fx-card__head"><h2 className="fx-h3">Datos del negocio</h2></div>
@@ -384,5 +395,4 @@ export default function SettingsPage() {
     </DashboardLayout>
   )
 }
-
 
