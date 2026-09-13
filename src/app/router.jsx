@@ -15,6 +15,15 @@ const StylePage = lazy(() => import('@/modules/dashboard/pages/StylePage'))
 const MetricsPage = lazy(() => import('@/modules/dashboard/pages/MetricsPage'))
 const PlansPage = lazy(() => import('@/modules/dashboard/pages/PlansPage'))
 const CouponsPage = lazy(() => import('@/modules/dashboard/pages/CouponsPage'))
+const CustomersPage = lazy(() => import('@/modules/dashboard/pages/CustomersPage'))
+const PaymentsPage = lazy(() => import('@/modules/dashboard/pages/PaymentsPage'))
+const CategoriesPage = lazy(() => import('@/modules/dashboard/pages/CategoriesPage'))
+const InventoryPage = lazy(() => import('@/modules/dashboard/pages/InventoryPage'))
+const ReportsPage = lazy(() => import('@/modules/dashboard/pages/ReportsPage'))
+const TeamPage = lazy(() => import('@/modules/dashboard/pages/TeamPage'))
+const IntegrationsPage = lazy(() => import('@/modules/dashboard/pages/IntegrationsPage'))
+const AcceptInvitePage = lazy(() => import('@/modules/auth/pages/AcceptInvitePage'))
+const PermissionRoute = lazy(() => import('@/modules/dashboard/components/PermissionRoute'))
 const ForgotPasswordPage = lazy(() => import('@/modules/auth/pages/ForgotPasswordPage'))
 const ResetPasswordPage = lazy(() => import('@/modules/auth/pages/ResetPasswordPage'))
 const AdminPage = lazy(() => import('@/modules/admin/pages/AdminPage'))
@@ -82,11 +91,19 @@ export const router = createBrowserRouter([
   { path: '/dashboard/metrics', element: protect(<MetricsPage />) },
   { path: '/dashboard/products', element: protect(<ProductsPage />) },
   { path: '/dashboard/orders', element: protect(<OrdersPage />) },
-  { path: '/dashboard/settings', element: protect(<SettingsPage />) },
+  { path: '/dashboard/settings', element: protect(<PermissionRoute permission="STORE_MANAGE" module="Configuración"><SettingsPage /></PermissionRoute>) },
   { path: '/dashboard/onboarding', element: protect(<BusinessOnboardingPage />) },
-  { path: '/dashboard/style', element: protect(<StylePage />) },
-  { path: '/dashboard/plans', element: protect(<PlansPage />) },
+  { path: '/dashboard/style', element: protect(<PermissionRoute permission="STORE_MANAGE" module="Estilo"><StylePage /></PermissionRoute>) },
+  { path: '/dashboard/plans', element: protect(<PermissionRoute permission="BILLING_MANAGE" module="Plan y facturación"><PlansPage /></PermissionRoute>) },
   { path: '/dashboard/coupons', element: protect(<CouponsPage />) },
+  { path: '/dashboard/customers', element: protect(<CustomersPage />) },
+  { path: '/dashboard/payments', element: protect(<PaymentsPage />) },
+  { path: '/dashboard/categories', element: protect(<CategoriesPage />) },
+  { path: '/dashboard/inventory', element: protect(<InventoryPage />) },
+  { path: '/dashboard/reports', element: protect(<ReportsPage />) },
+  { path: '/dashboard/team', element: protect(<TeamPage />) },
+  { path: '/dashboard/integrations', element: protect(<IntegrationsPage />) },
+  { path: '/invite/:token', element: render(<AcceptInvitePage />) },
   { path: '/payment/:status', element: protect(<PaymentReturnPage />) },
   { path: '/payments/:status', element: protect(<PaymentReturnPage />) },
   { path: '/forgot-password', element: render(<ForgotPasswordPage />) },

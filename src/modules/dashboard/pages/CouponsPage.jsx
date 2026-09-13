@@ -3,6 +3,8 @@ import { useState, useEffect } from 'react'
 import DashboardLayout from '@/modules/dashboard/components/DashboardLayout'
 import { API_URL } from '@/app/config'
 import Icon from '@/components/Icon'
+import useAccess from '@/hooks/useAccess'
+import { NoAccess } from '@/modules/dashboard/components/ui'
 
 function getToken() { return localStorage.getItem('token') || '' }
 
@@ -11,7 +13,24 @@ function formatDate(value) {
   return new Date(value).toLocaleDateString('es-PE', { day: '2-digit', month: 'short', year: 'numeric' })
 }
 
+/** Un cupón activo puede igual no servir: vencido o sin usos disponibles. */
+function couponState(c) {
+  if (!c.active) return { label: 'Inactivo', badge: '' }
+  if (c.expiresAt && new Date(c.expiresAt) <= new Date()) return { label: 'Vencido', badge: 'fx-badge--danger' }
+  if (c.usageLimit && (c.usageCount || 0) >= c.usageLimit) return { label: 'Agotado', badge: 'fx-badge--warn' }
+  return { label: 'Activo', badge: 'fx-badge--ok' }
+}
+
 export default function CouponsPage() {
+  const access = useAccess()
+  const canManage = access.can('COUPON_MANAGE')
+  if (access.ready && !access.can('COUPON_VIEW')) {
+    return <DashboardLayout><NoAccess module="Cupones" /></DashboardLayout>
+  }
+  return <CouponsContent canManage={canManage} />
+}
+
+function CouponsContent({ canManage }) {
   const [coupons, setCoupons]   = useState([])
   const [loading, setLoading]   = useState(true)
   const [showForm, setShowForm] = useState(false)
@@ -54,7 +73,7 @@ export default function CouponsPage() {
         body: JSON.stringify(body),
       })
       const data = await res.json()
-      if (!res.ok) throw new Error(data.error || 'Error al crear cupón')
+      if (!res.ok) throw new Error(data.error || data.message || 'Error al crear cupón')
       setSuccess('Cupón creado correctamente.')
       setShowForm(false)
       setForm({ code: '', discountType: 'PERCENTAGE', discountValue: '', usageLimit: '', minOrderAmount: '', expiresAt: '' })
@@ -89,12 +108,14 @@ export default function CouponsPage() {
           <h1>Cupones</h1>
           <p>{loading ? 'Cargando…' : `${coupons.length} ${coupons.length === 1 ? 'cupón creado' : 'cupones creados'}`}</p>
         </div>
-        <div className="fx-page-head__actions">
-          <button className="fx-btn fx-btn--primary" onClick={() => { setShowForm(true); setError('') }}>
-            <Icon name="plus" size={16} />
-            Crear cupón
-          </button>
-        </div>
+        {canManage && (
+          <div className="fx-page-head__actions">
+            <button className="fx-btn fx-btn--primary" onClick={() => { setShowForm(true); setError('') }}>
+              <Icon name="plus" size={16} />
+              Crear cupón
+            </button>
+          </div>
+        )}
       </div>
 
       {success && (
@@ -122,10 +143,12 @@ export default function CouponsPage() {
             <p className="fx-empty__text">
               Los cupones te permiten ofrecer descuentos por código en el checkout de tu tienda.
             </p>
-            <button className="fx-btn fx-btn--primary" style={{ marginTop: 18 }} onClick={() => setShowForm(true)}>
-              <Icon name="plus" size={16} />
-              Crear cupón
-            </button>
+            {canManage && (
+              <button className="fx-btn fx-btn--primary" style={{ marginTop: 18 }} onClick={() => setShowForm(true)}>
+                <Icon name="plus" size={16} />
+                Crear cupón
+              </button>
+            )}
           </div>
         ) : (
           <div className="fx-table-wrap">
@@ -153,17 +176,22 @@ export default function CouponsPage() {
                     </td>
                     <td className="fx-table__num fx-table__strong">{discountLabel(c)}</td>
                     <td className="fx-table__num">
-                      {c.usedCount || 0}{c.usageLimit ? ` / ${c.usageLimit}` : ''}
+                      {c.usageCount || 0}{c.usageLimit ? ` / ${c.usageLimit}` : ''}
                     </td>
                     <td style={{ fontSize: 13 }}>{formatDate(c.expiresAt)}</td>
                     <td>
-                      <span className={`fx-badge ${c.active ? 'fx-badge--ok' : ''}`}>
-                        <span className="fx-dot" />
-                        {c.active ? 'Activo' : 'Inactivo'}
-                      </span>
+                      {(() => {
+                        const state = couponState(c)
+                        return (
+                          <span className={`fx-badge ${state.badge}`}>
+                            <span className="fx-dot" />
+                            {state.label}
+                          </span>
+                        )
+                      })()}
                     </td>
                     <td>
-                      <div className="fx-row" style={{ gap: 2, justifyContent: 'flex-end' }}>
+                      {canManage && <div className="fx-row" style={{ gap: 2, justifyContent: 'flex-end' }}>
                         <button
                           className="fx-btn fx-btn--ghost fx-btn--sm"
                           onClick={() => handleToggle(c.id)}
@@ -178,7 +206,7 @@ export default function CouponsPage() {
                         >
                           <Icon name="trash" size={15} />
                         </button>
-                      </div>
+                      </div>}
                     </td>
                   </tr>
                 ))}

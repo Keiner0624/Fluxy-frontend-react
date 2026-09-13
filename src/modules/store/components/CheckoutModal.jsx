@@ -4,9 +4,29 @@ import Icon from '@/components/Icon'
 import { API_URL } from '@/app/config'
 import { useTranslation } from '@/hooks/useTranslation'
 import { createOrder } from '@/modules/store/api/storeApi'
+import { trackPurchase } from '@/modules/store/hooks/useStoreTracking'
+
+const PAYMENT_LABELS = {
+  efectivo: 'Efectivo', yape: 'Yape', plin: 'Plin', tarjeta: 'Tarjeta', transferencia: 'Transferencia',
+  mercadopago: 'Mercado Pago', nequi: 'Nequi', daviplata: 'Daviplata', pse: 'PSE', oxxo: 'OXXO',
+  codi: 'CoDi', modo: 'MODO', webpay: 'Webpay', pix: 'PIX', boleto: 'Boleto',
+}
+
+/** Medios que el vendedor habilitó en Configuración. */
+function getPaymentOptions(company) {
+  try {
+    const raw = company?.paymentMethods
+    const parsed = typeof raw === 'string' ? JSON.parse(raw) : raw
+    return Array.isArray(parsed) ? parsed.filter(key => typeof key === 'string' && /^[a-z0-9_-]{1,40}$/.test(key)) : []
+  } catch {
+    return []
+  }
+}
 
 export default function CheckoutModal({ open, cart, total, company, onClose, onSuccess }) {
   const t = useTranslation()
+  const paymentOptions = getPaymentOptions(company)
+  const [paymentMethod, setPaymentMethod] = useState('')
   const [name, setName] = useState('')
   const [phone, setPhone] = useState('')
   const [address, setAddress] = useState('')
@@ -93,8 +113,10 @@ export default function CheckoutModal({ open, cart, total, company, onClose, onS
         customerAddress: address.trim(),
         items: cart.map(item => ({ productId: item.product.id, quantity: item.quantity })),
         couponCode: couponData?.code || null,
+        paymentMethod: paymentMethod || null,
       })
       setOrderId(data.orderId || data.order?.id || data.id)
+      trackPurchase({ orderId: data.orderId, total: data.total, items: cart })
       setWhatsappUrl(data.whatsappUrl || null)
       onSuccess()
     } catch (error) {
@@ -167,6 +189,20 @@ export default function CheckoutModal({ open, cart, total, company, onClose, onS
                   <input value={address} onChange={event => setAddress(event.target.value)} placeholder={t.addressPlaceholder} autoComplete="street-address" />
                 </label>
               </div>
+
+              {paymentOptions.length > 0 && (
+                <fieldset className="store-payment">
+                  <legend>¿Cómo vas a pagar?</legend>
+                  <div className="store-payment__options">
+                    {paymentOptions.map(key => (
+                      <label key={key} className={`store-payment__option${paymentMethod === key ? ' is-on' : ''}`}>
+                        <input type="radio" name="payment-method" value={key} checked={paymentMethod === key} onChange={() => setPaymentMethod(key)} />
+                        {PAYMENT_LABELS[key] || key}
+                      </label>
+                    ))}
+                  </div>
+                </fieldset>
+              )}
 
               <div className="store-coupon">
                 <label htmlFor="store-coupon">Cupón de descuento</label>

@@ -14,6 +14,12 @@ export default function LoginPage() {
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
   const [showPassword, setShowPassword] = useState(false)
+  const reason = searchParams.get('reason')
+  const notice = reason === 'expired'
+    ? 'Tu sesión venció. Iniciá sesión de nuevo para continuar.'
+    : reason === 'disabled'
+      ? 'Tu acceso a este negocio fue desactivado. Consultá con el dueño.'
+      : ''
 
   const handleChange = (e) => {
     setForm({ ...form, [e.target.name]: e.target.value })
@@ -37,6 +43,11 @@ export default function LoginPage() {
         body: JSON.stringify(form),
       })
 
+      if (res.status === 403) {
+        // Acceso desactivado por el dueño: la contraseña era correcta, se explica el motivo.
+        const body = await res.json().catch(() => ({}))
+        throw new Error(body.message || 'Tu acceso a este negocio fue desactivado.')
+      }
       if (!res.ok) throw new Error('Correo o contraseña incorrectos.')
 
       const data = await res.json()
@@ -89,6 +100,13 @@ export default function LoginPage() {
             <h1 className="fx-h1">Iniciar sesión</h1>
             <p className="fx-hint">Accedé al panel para administrar tu tienda.</p>
           </div>
+
+          {notice && !error && (
+            <div className="fx-alert fx-alert--warn" role="status" style={{ marginBottom: 18 }}>
+              <Icon name="info" size={16} />
+              <span>{notice}</span>
+            </div>
+          )}
 
           <form onSubmit={handleSubmit} noValidate>
             <div className="fx-field">

@@ -79,6 +79,15 @@ export function getMyCompany(opciones) {
 }
 
 /**
+ * Último /me conocido para esta sesión, aunque haya vencido el TTL. Sirve para
+ * pintar el menú al instante mientras llega la versión fresca.
+ */
+export function peekMe() {
+  const entrada = cache.me
+  return entrada.data && entrada.token === getToken() ? entrada.data : null
+}
+
+/**
  * Siembra la caché con datos ya obtenidos. El login los pide antes de navegar,
  * así el panel se monta con todo resuelto en vez de volver a pedirlo.
  */

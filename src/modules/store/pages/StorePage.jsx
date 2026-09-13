@@ -14,6 +14,7 @@ import ProductGrid from '@/modules/store/components/ProductGrid'
 import TrustSection from '@/modules/store/components/TrustSection'
 import { useCart } from '@/modules/store/hooks/useCart'
 import { useStore } from '@/modules/store/hooks/useStore'
+import { useStoreTracking } from '@/modules/store/hooks/useStoreTracking'
 import './StorePage.css'
 
 const DEFAULT_STYLE = {
@@ -81,6 +82,7 @@ export default function StorePage() {
   const storeSlug = slug || searchParams.get('store')
   const { company, products, loading, error, reload } = useStore(storeSlug)
   const { cart, addToCart, increaseQty, decreaseQty, clearCart, total, count } = useCart()
+  useStoreTracking(company)
   const [cartOpen, setCartOpen] = useState(false)
   const [checkoutOpen, setCheckoutOpen] = useState(false)
   const [selectedProduct, setSelectedProduct] = useState(null)

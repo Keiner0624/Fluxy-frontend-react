@@ -407,6 +407,14 @@
 .store-coupon input::placeholder { color: var(--store-muted); }
 .store-field input:focus,
 .store-coupon input:focus { border-color: color-mix(in srgb, var(--store-accent) 45%, transparent); box-shadow: 0 0 0 3px color-mix(in srgb, var(--store-accent) 10%, transparent); }
+.store-payment { margin: 16px 0 0; padding: 0; border: none; }
+.store-payment legend { margin-bottom: 7px; padding: 0; color: var(--store-copy); font-size: 10px; font-weight: 750; letter-spacing: .05em; text-transform: uppercase; }
+.store-payment__options { display: flex; flex-wrap: wrap; gap: 7px; }
+.store-payment__option { display: inline-flex; align-items: center; height: 36px; padding: 0 13px; border: 1px solid var(--store-line); border-radius: 10px; background: rgba(255,255,255,.035); color: var(--store-ink); font-size: 12px; cursor: pointer; transition: border-color .15s, background .15s; }
+.store-payment__option input { position: absolute; opacity: 0; pointer-events: none; }
+.store-payment__option:hover { border-color: color-mix(in srgb, var(--store-accent) 35%, transparent); }
+.store-payment__option.is-on { border-color: color-mix(in srgb, var(--store-accent) 60%, transparent); background: color-mix(in srgb, var(--store-accent) 14%, transparent); color: var(--store-accent); font-weight: 650; }
+.store-payment__option:has(input:focus-visible) { box-shadow: 0 0 0 3px color-mix(in srgb, var(--store-accent) 25%, transparent); }
 .store-coupon { display: grid; gap: 7px; margin-top: 16px; }
 .store-coupon > div { display: flex; gap: 8px; }
 .store-coupon button { min-width: 88px; border: 1px solid color-mix(in srgb, var(--store-accent) 27%, transparent); border-radius: 10px; background: color-mix(in srgb, var(--store-accent) 11%, transparent); color: var(--store-accent); font-size: 11px; font-weight: 700; }
