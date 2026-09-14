@@ -3,8 +3,7 @@
 // cierre de sesión cuando el acceso ya no es válido.
 
 import { API_URL } from '@/app/config'
-import { invalidateAccount } from '@/app/account'
-import { isTokenValid } from '@/app/tokenUtils'
+import { endSession as closeSession, getAccessToken } from '@/app/session'
 
 export class ApiError extends Error {
   constructor(message, status, code, data) {
@@ -21,6 +20,8 @@ const FALLBACK = {
   403: 'No tenés permiso para esta acción.',
   404: 'No encontramos lo que buscabas.',
   409: 'La acción entra en conflicto con otro dato.',
+  423: 'El negocio está archivado. Reactivalo para seguir operando.',
+  429: 'Demasiados intentos. Esperá un momento y probá de nuevo.',
   500: 'El servidor tuvo un problema. Intentá de nuevo en unos segundos.',
 }
 
@@ -36,19 +37,16 @@ function buildQuery(params) {
 }
 
 /** Cierra la sesión y lleva al login con el motivo. */
-export function endSession(reason) {
-  invalidateAccount()
-  ;['token', 'user', 'company'].forEach((key) => localStorage.removeItem(key))
-  const returnTo = window.location.pathname + window.location.search
-  const params = new URLSearchParams({ reason })
-  if (reason === 'expired') params.set('returnTo', returnTo)
-  window.location.assign(`/login?${params}`)
-}
+export const endSession = closeSession
 
-export async function api(path, { method = 'GET', body, params, signal } = {}) {
-  const token = localStorage.getItem('token') || ''
-  const headers = { Authorization: `Bearer ${token}` }
+/**
+ * idempotencyKey: para crear pedidos y registrar o reembolsar cobros. Reintentar
+ * con la misma clave devuelve el resultado original en lugar de duplicarlo.
+ */
+export async function api(path, { method = 'GET', body, params, signal, idempotencyKey } = {}) {
+  const headers = { Authorization: `Bearer ${getAccessToken()}` }
   if (body !== undefined) headers['Content-Type'] = 'application/json'
+  if (idempotencyKey) headers['Idempotency-Key'] = idempotencyKey
 
   let response
   try {
@@ -71,8 +69,8 @@ export async function api(path, { method = 'GET', body, params, signal } = {}) {
 
   if (!response.ok) {
     const code = data && typeof data === 'object' ? data.code : undefined
-    // Spring responde 403 sin cuerpo cuando el token venció o no es válido.
-    if (response.status === 401 || (response.status === 403 && !code && !isTokenValid(token))) {
+    // El interceptor de sesión ya intentó renovar: un 401 acá es definitivo.
+    if (response.status === 401) {
       endSession('expired')
     } else if (code === 'ACCESS_DISABLED') {
       endSession('disabled')

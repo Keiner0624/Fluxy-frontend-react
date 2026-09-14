@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState } from 'react'
 import { useParams, useSearchParams } from 'react-router-dom'
-import { Toaster } from 'react-hot-toast'
+import toast, { Toaster } from 'react-hot-toast'
 import Icon from '@/components/Icon'
 import { API_URL } from '@/app/config'
 import Cart from '@/modules/store/components/Cart'
@@ -165,6 +165,11 @@ export default function StorePage() {
       />
 
       <Header company={company} cartCount={count} onCartOpen={() => setCartOpen(true)} />
+      {company?.acceptingOrders === false && (
+        <div role="status" style={{ padding: '10px 16px', background: '#fff7ed', borderBottom: '1px solid #fed7aa', color: '#9a3412', fontSize: 14, textAlign: 'center' }}>
+          Esta tienda no está recibiendo pedidos por el momento. Podés ver el catálogo y escribirle al negocio.
+        </div>
+      )}
       <main>
         <Hero company={company} loading={loading} cartOpen={cartOpen} featuredProduct={featuredProduct} />
         <div className="store-catalog-layout store-container">
@@ -198,6 +203,10 @@ export default function StorePage() {
         onDecrease={decreaseQty}
         onCheckout={() => {
           setCartOpen(false)
+          if (company?.acceptingOrders === false) {
+            toast.error('Esta tienda no está recibiendo pedidos por el momento.')
+            return
+          }
           setCheckoutOpen(true)
         }}
       />

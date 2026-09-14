@@ -4,6 +4,8 @@ import { Link } from 'react-router-dom'
 import { API_URL } from '@/app/config'
 import BrandLogo from '@/components/BrandLogo'
 import Icon from '@/components/Icon'
+import { IconField } from '../components/AuthUi'
+import '../auth.css'
 
 export default function ForgotPasswordPage() {
   const [email, setEmail]     = useState('')
@@ -21,8 +23,8 @@ export default function ForgotPasswordPage() {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ email: email.trim() }),
       })
-      const data = await res.json()
-      if (!res.ok) throw new Error(data.message || 'Error al enviar el correo')
+      const data = await res.json().catch(() => ({}))
+      if (!res.ok) throw new Error(data.message || 'No pudimos enviar el enlace. Intentá de nuevo.')
       setSent(true)
     } catch (err) {
       setError(err.message)
@@ -32,7 +34,7 @@ export default function ForgotPasswordPage() {
   }
 
   return (
-    <div className="fx fx-auth">
+    <div className="fx fx-auth fx-signin">
       <header className="fx-auth__top">
         <Link to="/">
           <BrandLogo size={28} textSize={18} textColor="var(--fx-ink)" />
@@ -54,7 +56,7 @@ export default function ForgotPasswordPage() {
                 <h1 className="fx-h1">Revisá tu correo</h1>
                 <p className="fx-hint">
                   Si <strong style={{ color: 'var(--fx-ink)' }}>{email.trim()}</strong> está registrado,
-                  te enviamos un enlace para restablecer tu contraseña. El enlace vence en 1 hora.
+                  te enviamos un enlace para restablecer tu contraseña. Sirve una sola vez y vence en 30 minutos.
                 </p>
               </div>
 
@@ -88,18 +90,13 @@ export default function ForgotPasswordPage() {
               </div>
 
               <form onSubmit={handleSubmit} noValidate>
-                <div className="fx-field">
-                  <label className="fx-label" htmlFor="email">Correo electrónico</label>
-                  <input
-                    id="email"
-                    type="email"
-                    autoComplete="email"
-                    className={`fx-input${error ? ' fx-input--error' : ''}`}
-                    placeholder="tu@negocio.com"
-                    value={email}
-                    onChange={(e) => { setEmail(e.target.value); setError('') }}
-                  />
-                </div>
+                <IconField id="email" label="Correo electrónico" icon="mail">
+                  {(aria) => (
+                    <input {...aria} id="email" type="email" autoComplete="email" inputMode="email" maxLength={254}
+                      className={`fx-input${error ? ' fx-input--error' : ''}`} placeholder="tu@negocio.com"
+                      value={email} onChange={(e) => { setEmail(e.target.value); setError('') }} />
+                  )}
+                </IconField>
 
                 {error && (
                   <div className="fx-alert fx-alert--error" role="alert" style={{ marginBottom: 16 }}>
@@ -108,7 +105,7 @@ export default function ForgotPasswordPage() {
                   </div>
                 )}
 
-                <button type="submit" className="fx-btn fx-btn--primary fx-btn--lg fx-btn--block" disabled={loading}>
+                <button type="submit" className="fx-btn fx-btn--primary fx-btn--lg fx-btn--block fx-signin__submit" disabled={loading}>
                   {loading ? <><span className="fx-spinner" /> Enviando…</> : 'Enviar enlace'}
                 </button>
               </form>

@@ -1,7 +1,8 @@
 // src/modules/dashboard/components/PaymentForm.jsx
-import { useState } from 'react'
+import { useRef, useState } from 'react'
 import toast from 'react-hot-toast'
 import { api } from '@/app/api'
+import { newIdempotencyKey } from '@/app/session'
 import { money, PAYMENT_METHODS } from '@/app/format'
 import { Modal } from '@/modules/dashboard/components/ui'
 
@@ -15,6 +16,7 @@ export default function PaymentForm({ orderId, outstanding, defaultMethod, onClo
     note: '',
   })
   const [saving, setSaving] = useState(false)
+  const paymentKey = useRef(newIdempotencyKey('cobro'))
   const [error, setError] = useState('')
   const set = (key) => (e) => setForm((f) => ({ ...f, [key]: e.target.value }))
 
@@ -33,7 +35,7 @@ export default function PaymentForm({ orderId, outstanding, defaultMethod, onClo
         provider: form.method === 'mercadopago' ? 'MERCADO_PAGO' : 'MANUAL',
         providerReference: form.providerReference,
         note: form.note,
-      })
+      }, { idempotencyKey: paymentKey.current })
       toast.success(form.status === 'APPROVED' ? 'Cobro registrado.' : 'Cobro pendiente registrado.')
       onSaved(payment)
     } catch (err) {

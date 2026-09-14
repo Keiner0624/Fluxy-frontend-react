@@ -29,12 +29,16 @@ export function getProducts(slug) {
   return requestJson(`/store/slug/${encodeURIComponent(slug)}/products`, undefined, 'No se pudieron cargar los productos')
 }
 
-export function createOrder(companyId, orderData) {
+/**
+ * idempotencyKey: si la conexión se corta y el comprador vuelve a confirmar,
+ * el backend devuelve el mismo pedido en lugar de crear otro.
+ */
+export function createOrder(companyId, orderData, idempotencyKey) {
   return requestJson(
     `/store/${encodeURIComponent(companyId)}/order`,
     {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
+      headers: { 'Content-Type': 'application/json', ...(idempotencyKey ? { 'Idempotency-Key': idempotencyKey } : {}) },
       body: JSON.stringify(orderData),
     },
     'No se pudo crear el pedido',

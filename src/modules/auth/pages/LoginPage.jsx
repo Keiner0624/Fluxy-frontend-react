@@ -1,169 +1,138 @@
 // src/modules/auth/pages/LoginPage.jsx
 import { useState } from 'react'
 import { useNavigate, Link, useSearchParams } from 'react-router-dom'
-import { API_URL, buildStoreUrl } from '@/app/config'
+import { API_URL } from '@/app/config'
 import BrandLogo from '@/components/BrandLogo'
 import Icon from '@/components/Icon'
-import { getMe, getMyCompany } from '@/app/account'
+import { Divider, IconField, PasswordField, SocialButtons } from '../components/AuthUi'
+import { rememberSignup, safeReturnTo, startSession } from '../authSession'
+import '../auth.css'
+
+const NOTICES = {
+  expired: 'Tu sesión venció. Iniciá sesión de nuevo para continuar.',
+  disabled: 'Tu acceso a este negocio fue desactivado. Consultá con el dueño.',
+  reset: 'Contraseña actualizada. Iniciá sesión con la nueva.',
+}
 
 export default function LoginPage() {
   const navigate = useNavigate()
   const [searchParams] = useSearchParams()
-
-  const [form, setForm] = useState({ email: '', password: '' })
+  const [form, setForm] = useState({ email: '', password: '', rememberMe: true })
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
-  const [showPassword, setShowPassword] = useState(false)
-  const reason = searchParams.get('reason')
-  const notice = reason === 'expired'
-    ? 'Tu sesión venció. Iniciá sesión de nuevo para continuar.'
-    : reason === 'disabled'
-      ? 'Tu acceso a este negocio fue desactivado. Consultá con el dueño.'
-      : ''
+  const notice = NOTICES[searchParams.get('reason')] || ''
+  const returnTo = safeReturnTo(searchParams.get('returnTo'))
 
-  const handleChange = (e) => {
-    setForm({ ...form, [e.target.name]: e.target.value })
+  const handleChange = ({ target }) => {
+    setForm((f) => ({ ...f, [target.name]: target.type === 'checkbox' ? target.checked : target.value }))
     setError('')
+  }
+
+  const enter = async (auth) => {
+    const { company } = await startSession(auth)
+    navigate(company ? returnTo : '/dashboard', { replace: true })
+  }
+
+  const continueSignup = (signup) => {
+    rememberSignup(signup)
+    navigate('/register-business?step=continue', { replace: true })
   }
 
   const handleSubmit = async (e) => {
     e.preventDefault()
-    if (!form.email || !form.password) {
-      setError('Por favor completa todos los campos.')
+    if (!form.email.trim() || !form.password) {
+      setError('Completá tu correo y tu contraseña.')
       return
     }
-
     setLoading(true)
     setError('')
-
     try {
       const res = await fetch(`${API_URL}/auth/login`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(form),
+        body: JSON.stringify({ email: form.email.trim(), password: form.password, rememberMe: form.rememberMe }),
       })
-
-      if (res.status === 403) {
-        // Acceso desactivado por el dueño: la contraseña era correcta, se explica el motivo.
-        const body = await res.json().catch(() => ({}))
-        throw new Error(body.message || 'Tu acceso a este negocio fue desactivado.')
+      const data = await res.json().catch(() => ({}))
+      if (res.ok) {
+        await enter(data)
+        return
       }
-      if (!res.ok) throw new Error('Correo o contraseña incorrectos.')
-
-      const data = await res.json()
-      localStorage.setItem('token', data.token)
-      if (data.user) localStorage.setItem('user', JSON.stringify(data.user))
-
-      // En paralelo y no una detrás de otra. Además quedan en caché, así el
-      // panel se monta con los datos resueltos en vez de volver a pedirlos.
-      const [, company] = await Promise.all([
-        getMe({ force: true }).catch(() => null),
-        getMyCompany({ force: true }).catch(() => null),
-      ])
-
-      if (company) {
-        localStorage.setItem('company', JSON.stringify({
-          id:         company.id,
-          name:       company.name,
-          slug:       company.slug,
-          plan:       company.plan      || 'FREE',
-          logoUrl:    company.logoUrl   || '',
-          storeStyle: company.storeStyle || '',
-          storeUrl:   buildStoreUrl(company.slug),
-        }))
+      if (data.code === 'VERIFICATION_REQUIRED' && data.details?.signupToken) {
+        continueSignup({ signupToken: data.details.signupToken })
+        return
       }
-
-      const returnTo = searchParams.get('returnTo') || '/dashboard'
-      navigate(returnTo)
+      if (res.status === 401) throw new Error('Correo o contraseña incorrectos.')
+      throw new Error(data.message || 'No pudimos iniciar sesión. Intentá de nuevo.')
     } catch (err) {
-      setError(err.message)
+      setError(err instanceof TypeError ? 'No se pudo conectar con el servidor. Revisá tu conexión.' : err.message)
     } finally {
       setLoading(false)
     }
   }
 
+  const handleProvider = async (result) => {
+    if (result.status === 'LOGGED_IN') await enter(result.session)
+    else continueSignup(result.signup)
+  }
+
   return (
-    <div className="fx fx-auth">
+    <div className="fx fx-auth fx-signin">
       <header className="fx-auth__top">
-        <Link to="/">
-          <BrandLogo size={28} textSize={18} textColor="var(--fx-ink)" />
-        </Link>
+        <Link to="/"><BrandLogo size={28} textSize={18} textColor="var(--fx-ink)" /></Link>
         <Link to="/" className="fx-btn fx-btn--ghost fx-btn--sm">
-          <Icon name="arrowLeft" size={15} />
-          Volver al inicio
+          <Icon name="arrowLeft" size={15} /> Volver al inicio
         </Link>
       </header>
 
       <main className="fx-auth__main">
         <div className="fx-auth__panel">
           <div className="fx-auth__head">
-            <h1 className="fx-h1">Iniciar sesión</h1>
+            <h1 className="fx-h1">Inicia sesión</h1>
             <p className="fx-hint">Accedé al panel para administrar tu tienda.</p>
           </div>
 
           {notice && !error && (
-            <div className="fx-alert fx-alert--warn" role="status" style={{ marginBottom: 18 }}>
-              <Icon name="info" size={16} />
-              <span>{notice}</span>
+            <div className={`fx-alert ${searchParams.get('reason') === 'reset' ? 'fx-alert--ok' : 'fx-alert--warn'}`} role="status" style={{ marginBottom: 18 }}>
+              <Icon name="info" size={16} /><span>{notice}</span>
             </div>
           )}
 
-          <form onSubmit={handleSubmit} noValidate>
-            <div className="fx-field">
-              <label className="fx-label" htmlFor="email">Correo electrónico</label>
-              <input
-                id="email"
-                name="email"
-                type="email"
-                autoComplete="email"
-                className={`fx-input${error ? ' fx-input--error' : ''}`}
-                placeholder="tu@negocio.com"
-                value={form.email}
-                onChange={handleChange}
-              />
-            </div>
+          <form onSubmit={handleSubmit} noValidate aria-busy={loading}>
+            <IconField id="email" label="Correo electrónico" icon="mail">
+              {(aria) => (
+                <input {...aria} id="email" name="email" type="email" autoComplete="email" inputMode="email"
+                  className={`fx-input${error ? ' fx-input--error' : ''}`} placeholder="tu@negocio.com"
+                  value={form.email} onChange={handleChange} maxLength={254} />
+              )}
+            </IconField>
 
-            <div className="fx-field">
-              <div className="fx-row fx-row--between" style={{ marginBottom: 6 }}>
-                <label className="fx-label" htmlFor="password" style={{ marginBottom: 0 }}>Contraseña</label>
-                <Link to="/forgot-password" className="fx-auth__link">¿Olvidaste tu contraseña?</Link>
-              </div>
-              <div className="fx-input-wrap">
-                <input
-                  id="password"
-                  name="password"
-                  type={showPassword ? 'text' : 'password'}
-                  autoComplete="current-password"
-                  className={`fx-input${error ? ' fx-input--error' : ''}`}
-                  placeholder="Tu contraseña"
-                  value={form.password}
-                  onChange={handleChange}
-                />
-                <button
-                  type="button"
-                  className="fx-input-affix"
-                  onClick={() => setShowPassword(!showPassword)}
-                  aria-label={showPassword ? 'Ocultar contraseña' : 'Mostrar contraseña'}
-                >
-                  <Icon name={showPassword ? 'eyeOff' : 'eye'} size={16} />
-                </button>
-              </div>
+            <PasswordField value={form.password} onChange={handleChange} autoComplete="current-password"
+              placeholder="Tu contraseña" invalid={Boolean(error)} />
+
+            <div className="fx-signin__row">
+              <label className="fx-check">
+                <input type="checkbox" name="rememberMe" checked={form.rememberMe} onChange={handleChange} />
+                <span>Recordarme en este dispositivo</span>
+              </label>
+              <Link to="/forgot-password" className="fx-auth__link">¿Olvidaste tu contraseña?</Link>
             </div>
 
             {error && (
               <div className="fx-alert fx-alert--error" role="alert" style={{ marginBottom: 16 }}>
-                <Icon name="alert" size={16} />
-                <span>{error}</span>
+                <Icon name="alert" size={16} /><span>{error}</span>
               </div>
             )}
 
-            <button type="submit" className="fx-btn fx-btn--primary fx-btn--lg fx-btn--block" disabled={loading}>
-              {loading ? <><span className="fx-spinner" /> Ingresando…</> : 'Iniciar sesión'}
+            <button type="submit" className="fx-btn fx-btn--primary fx-btn--lg fx-btn--block fx-signin__submit" disabled={loading}>
+              {loading ? <><span className="fx-spinner" /> Ingresando…</> : <>Iniciar sesión <Icon name="arrowRight" size={17} /></>}
             </button>
           </form>
 
+          <Divider>o continúa con</Divider>
+          <SocialButtons rememberMe={form.rememberMe} onResult={handleProvider} onError={(err) => setError(err.message)} googleText="signin_with" />
+
           <p className="fx-auth__foot">
-            ¿No tenés cuenta? <Link to="/register-business" className="fx-auth__link">Creá tu tienda</Link>
+            ¿No tenés cuenta? <Link to="/register-business" className="fx-auth__link">Crear tu tienda</Link>
           </p>
         </div>
       </main>

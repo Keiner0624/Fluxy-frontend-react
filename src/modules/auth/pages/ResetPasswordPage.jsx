@@ -4,6 +4,9 @@ import { Link, useSearchParams, useNavigate } from 'react-router-dom'
 import { API_URL } from '@/app/config'
 import BrandLogo from '@/components/BrandLogo'
 import Icon from '@/components/Icon'
+import { PasswordField } from '../components/AuthUi'
+import { PASSWORD_MIN } from '../registration'
+import '../auth.css'
 
 export default function ResetPasswordPage() {
   const [searchParams]          = useSearchParams()
@@ -12,7 +15,6 @@ export default function ResetPasswordPage() {
 
   const [password, setPassword]     = useState('')
   const [confirm, setConfirm]       = useState('')
-  const [showPass, setShowPass]     = useState(false)
   const [loading, setLoading]       = useState(false)
   const [validating, setValidating] = useState(true)
   const [tokenValid, setTokenValid] = useState(false)
@@ -22,7 +24,7 @@ export default function ResetPasswordPage() {
   // Validar token al cargar
   useEffect(() => {
     if (!token) { setValidating(false); return }
-    fetch(`${API_URL}/auth/reset-password?token=${token}`)
+    fetch(`${API_URL}/auth/reset-password?token=${encodeURIComponent(token)}`)
       .then(r => r.json())
       .then(data => setTokenValid(data.valid === true))
       .catch(() => setTokenValid(false))
@@ -31,7 +33,7 @@ export default function ResetPasswordPage() {
 
   const handleSubmit = async (e) => {
     e.preventDefault()
-    if (password.length < 6) { setError('La contraseña debe tener al menos 6 caracteres.'); return }
+    if (password.length < PASSWORD_MIN) { setError(`La contraseña tiene que tener al menos ${PASSWORD_MIN} caracteres.`); return }
     if (password !== confirm) { setError('Las contraseñas no coinciden.'); return }
 
     setLoading(true); setError('')
@@ -41,10 +43,10 @@ export default function ResetPasswordPage() {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ token, password }),
       })
-      const data = await res.json()
-      if (!res.ok) throw new Error(data.message || 'Error al restablecer la contraseña')
+      const data = await res.json().catch(() => ({}))
+      if (!res.ok) throw new Error(data.message || 'No se pudo restablecer la contraseña.')
       setDone(true)
-      setTimeout(() => navigate('/login'), 3000)
+      setTimeout(() => navigate('/login?reason=reset'), 3000)
     } catch (err) {
       setError(err.message)
     } finally {
@@ -95,7 +97,7 @@ export default function ResetPasswordPage() {
             </div>
             <h1 className="fx-h1">Contraseña actualizada</h1>
             <p className="fx-hint">
-              Ya podés ingresar con tu contraseña nueva. Te vamos a redirigir en unos segundos.
+              Por seguridad cerramos todas las sesiones abiertas. Ya podés ingresar con tu contraseña nueva.
             </p>
           </div>
 
@@ -110,45 +112,14 @@ export default function ResetPasswordPage() {
       <>
         <div className="fx-auth__head">
           <h1 className="fx-h1">Nueva contraseña</h1>
-          <p className="fx-hint">Elegí una contraseña de al menos 6 caracteres.</p>
+          <p className="fx-hint">Elegí una contraseña de al menos {PASSWORD_MIN} caracteres. Al guardarla se cierran todas tus sesiones.</p>
         </div>
 
         <form onSubmit={handleSubmit} noValidate>
-          <div className="fx-field">
-            <label className="fx-label" htmlFor="password">Contraseña</label>
-            <div className="fx-input-wrap">
-              <input
-                id="password"
-                type={showPass ? 'text' : 'password'}
-                autoComplete="new-password"
-                className={`fx-input${error ? ' fx-input--error' : ''}`}
-                placeholder="Mínimo 6 caracteres"
-                value={password}
-                onChange={(e) => { setPassword(e.target.value); setError('') }}
-              />
-              <button
-                type="button"
-                className="fx-input-affix"
-                onClick={() => setShowPass(!showPass)}
-                aria-label={showPass ? 'Ocultar contraseña' : 'Mostrar contraseña'}
-              >
-                <Icon name={showPass ? 'eyeOff' : 'eye'} size={16} />
-              </button>
-            </div>
-          </div>
-
-          <div className="fx-field">
-            <label className="fx-label" htmlFor="confirm">Repetir contraseña</label>
-            <input
-              id="confirm"
-              type={showPass ? 'text' : 'password'}
-              autoComplete="new-password"
-              className={`fx-input${error ? ' fx-input--error' : ''}`}
-              placeholder="Repetí la contraseña"
-              value={confirm}
-              onChange={(e) => { setConfirm(e.target.value); setError('') }}
-            />
-          </div>
+          <PasswordField id="password" label="Contraseña nueva" value={password} autoComplete="new-password" invalid={Boolean(error)}
+            placeholder={`Mínimo ${PASSWORD_MIN} caracteres`} onChange={(e) => { setPassword(e.target.value); setError('') }} autoFocus />
+          <PasswordField id="confirm" label="Repetir contraseña" value={confirm} autoComplete="new-password" invalid={Boolean(error)}
+            placeholder="Repetí la contraseña" onChange={(e) => { setConfirm(e.target.value); setError('') }} />
 
           {error && (
             <div className="fx-alert fx-alert--error" role="alert" style={{ marginBottom: 16 }}>
@@ -170,7 +141,7 @@ export default function ResetPasswordPage() {
   }
 
   return (
-    <div className="fx fx-auth">
+    <div className="fx fx-auth fx-signin">
       <header className="fx-auth__top">
         <Link to="/">
           <BrandLogo size={28} textSize={18} textColor="var(--fx-ink)" />

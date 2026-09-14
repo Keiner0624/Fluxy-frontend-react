@@ -133,9 +133,11 @@ export function paymentMethodLabel(key) {
 
 export const ROLES = {
   OWNER:  { label: 'Dueño',          text: 'Acceso total, incluida la facturación.' },
-  ADMIN:  { label: 'Administrador',  text: 'Todo el negocio salvo el plan y la facturación.' },
-  SELLER: { label: 'Vendedor',       text: 'Pedidos, clientes y cobros. Ve el catálogo y el stock.' },
-  VIEWER: { label: 'Solo lectura',   text: 'Consulta la información sin modificar nada.' },
+  ADMIN:     { label: 'Administrador', text: 'Todo el negocio salvo el plan y la facturación.' },
+  MANAGER:   { label: 'Encargado',     text: 'La operación diaria: catálogo, pedidos, cobros, stock y reportes. Sin equipo ni configuración.' },
+  SELLER:    { label: 'Vendedor',      text: 'Pedidos, clientes y cobros. Ve el catálogo y el stock.' },
+  WAREHOUSE: { label: 'Almacén',       text: 'Stock y preparación de pedidos.' },
+  VIEWER:    { label: 'Solo lectura',  text: 'Consulta la información sin modificar nada.' },
 }
 
 export const PERMISSION_GROUPS = [
@@ -148,5 +150,6 @@ export const PERMISSION_GROUPS = [
   { module: 'Reportes',      items: [['REPORT_VIEW', 'Ver'], ['REPORT_EXPORT', 'Exportar']] },
   { module: 'Equipo',        items: [['TEAM_VIEW', 'Ver'], ['TEAM_INVITE', 'Invitar'], ['TEAM_MANAGE', 'Gestionar']] },
   { module: 'Integraciones', items: [['INTEGRATION_VIEW', 'Ver'], ['INTEGRATION_MANAGE', 'Configurar']] },
-  { module: 'Tienda',        items: [['STORE_MANAGE', 'Configuración y estilo']] },
+  { module: 'Tienda',        items: [['SETTINGS_MANAGE', 'Configuración y estilo']] },
+  { module: 'Actividad',     items: [['AUDIT_VIEW', 'Ver el registro']] },
 ]

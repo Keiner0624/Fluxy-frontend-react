@@ -1,10 +1,11 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import toast from 'react-hot-toast'
 import Icon from '@/components/Icon'
 import { API_URL } from '@/app/config'
 import { useTranslation } from '@/hooks/useTranslation'
 import { createOrder } from '@/modules/store/api/storeApi'
 import { trackPurchase } from '@/modules/store/hooks/useStoreTracking'
+import { newIdempotencyKey } from '@/app/session'
 
 const PAYMENT_LABELS = {
   efectivo: 'Efectivo', yape: 'Yape', plin: 'Plin', tarjeta: 'Tarjeta', transferencia: 'Transferencia',
@@ -27,6 +28,7 @@ export default function CheckoutModal({ open, cart, total, company, onClose, onS
   const t = useTranslation()
   const paymentOptions = getPaymentOptions(company)
   const [paymentMethod, setPaymentMethod] = useState('')
+  const orderKey = useRef(newIdempotencyKey('pedido'))
   const [name, setName] = useState('')
   const [phone, setPhone] = useState('')
   const [address, setAddress] = useState('')
@@ -114,7 +116,8 @@ export default function CheckoutModal({ open, cart, total, company, onClose, onS
         items: cart.map(item => ({ productId: item.product.id, quantity: item.quantity })),
         couponCode: couponData?.code || null,
         paymentMethod: paymentMethod || null,
-      })
+      }, orderKey.current)
+      orderKey.current = newIdempotencyKey('pedido')
       setOrderId(data.orderId || data.order?.id || data.id)
       trackPurchase({ orderId: data.orderId, total: data.total, items: cart })
       setWhatsappUrl(data.whatsappUrl || null)

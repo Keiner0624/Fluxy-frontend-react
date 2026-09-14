@@ -3,7 +3,9 @@ import { useState, useEffect } from 'react'
 import { Link, useNavigate, useLocation } from 'react-router-dom'
 import { Toaster } from 'react-hot-toast'
 import { getCompanyStoreUrl } from '@/app/config'
-import { invalidateAccount } from '@/app/account'
+import { getMe } from '@/app/account'
+import { logout } from '@/app/session'
+import AccountBanners from './AccountBanners'
 import usePlan from '@/hooks/usePlan'
 import useAccess from '@/hooks/useAccess'
 import BrandLogo from '@/components/BrandLogo'
@@ -50,16 +52,23 @@ const NAV_GROUPS = [
   {
     label: 'Tienda',
     items: [
-      { path: '/dashboard/style',      icon: 'style',      label: 'Estilo',             permission: 'STORE_MANAGE', requiredPlan: 'PRO' },
-      { path: '/dashboard/settings',   icon: 'settings',   label: 'Configuración',      permission: 'STORE_MANAGE' },
+      { path: '/dashboard/style',      icon: 'style',      label: 'Estilo',             permission: 'SETTINGS_MANAGE', requiredPlan: 'PRO' },
+      { path: '/dashboard/settings',   icon: 'settings',   label: 'Configuración',      permission: 'SETTINGS_MANAGE' },
     ],
   },
   {
     label: 'Administración',
     items: [
       { path: '/dashboard/team',         icon: 'team',     label: 'Equipo',             permission: 'TEAM_VIEW' },
+      { path: '/dashboard/activity',     icon: 'history',  label: 'Actividad',          permission: 'AUDIT_VIEW' },
       { path: '/dashboard/integrations', icon: 'plug',     label: 'Integraciones',      permission: 'INTEGRATION_VIEW' },
       { path: '/dashboard/plans',        icon: 'plans',    label: 'Plan y facturación', permission: 'BILLING_MANAGE' },
+    ],
+  },
+  {
+    label: 'Cuenta',
+    items: [
+      { path: '/dashboard/security',     icon: 'shield',   label: 'Seguridad' },
     ],
   },
 ]
@@ -101,9 +110,18 @@ export default function DashboardLayout({ children }) {
     return (PLAN_ORDER[plan] || 0) >= (PLAN_ORDER[requiredPlan] || 0)
   }
 
-  const handleLogout = () => {
-    invalidateAccount()
-    localStorage.clear()
+  const [loggingOut, setLoggingOut] = useState(false)
+  const [me, setMe] = useState(null)
+
+  useEffect(() => {
+    let vigente = true
+    getMe().then((data) => { if (vigente) setMe(data) }).catch(() => {})
+    return () => { vigente = false }
+  }, [location.pathname])
+
+  const handleLogout = async () => {
+    setLoggingOut(true)
+    await logout()
     navigate('/login')
   }
 
@@ -112,7 +130,7 @@ export default function DashboardLayout({ children }) {
 
   // Mientras llega /me no se sabe qué puede ver: mejor un menú vacío que uno que cambia.
   const groups = NAV_GROUPS
-    .map((group) => ({ ...group, items: group.items.filter((item) => access.can(item.permission)) }))
+    .map((group) => ({ ...group, items: group.items.filter((item) => !item.permission || access.can(item.permission)) }))
     .filter((group) => group.items.length > 0)
 
   const sidebar = (
@@ -171,7 +189,7 @@ export default function DashboardLayout({ children }) {
           </a>
         )}
 
-        <button type="button" onClick={handleLogout} className="fx-sidebar__action" title={collapsed ? 'Cerrar sesión' : undefined}>
+        <button type="button" onClick={handleLogout} disabled={loggingOut} className="fx-sidebar__action" title={collapsed ? 'Cerrar sesión' : undefined}>
           <Icon name="logout" size={15} />
           <span className="fx-sidebar__label">Cerrar sesión</span>
         </button>
@@ -226,7 +244,10 @@ export default function DashboardLayout({ children }) {
           </div>
         </header>
 
-        <main className="fx-content">{children}</main>
+        <main className="fx-content">
+          <AccountBanners me={me} onChange={() => getMe({ force: true }).then(setMe).catch(() => {})} />
+          {children}
+        </main>
       </div>
 
       <Toaster

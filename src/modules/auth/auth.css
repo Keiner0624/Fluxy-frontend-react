@@ -1,0 +1,173 @@
+/* Acceso y registro: tarjeta centrada, campos con ícono y proveedores. */
+
+.fx-signin .fx-auth__main { align-items: flex-start; padding-top: clamp(12px, 6vh, 64px); }
+.fx-signin .fx-auth__panel {
+  max-width: 440px;
+  padding: 34px 32px 26px;
+  border: 1px solid var(--fx-line);
+  border-radius: 18px;
+  background: var(--fx-surface);
+  box-shadow: 0 1px 2px rgba(15, 23, 42, .04), 0 18px 48px -24px rgba(15, 23, 42, .18);
+}
+.fx-signin .fx-auth__head { margin-bottom: 24px; text-align: center; }
+.fx-signin .fx-auth__head .fx-h1 { font-size: 26px; letter-spacing: -.02em; }
+.fx-signin .fx-auth__foot { margin-top: 20px; }
+
+.fx-signin__badge {
+  display: inline-grid;
+  width: 46px;
+  height: 46px;
+  margin-bottom: 14px;
+  place-items: center;
+  border-radius: 14px;
+  background: var(--fx-brand-soft, rgba(23, 105, 224, .1));
+  color: var(--fx-brand);
+}
+
+/* Campo con ícono a la izquierda */
+.fx-iconfield { position: relative; }
+.fx-iconfield__icon {
+  position: absolute;
+  top: 50%;
+  left: 13px;
+  display: flex;
+  color: var(--fx-muted, var(--fx-copy));
+  pointer-events: none;
+  transform: translateY(-50%);
+}
+.fx-iconfield .fx-input { min-height: 46px; padding-left: 40px; font-size: 15px; }
+.fx-iconfield--affix .fx-input { padding-right: 44px; }
+.fx-iconfield .fx-input-affix { min-width: 40px; min-height: 40px; }
+.fx-iconfield select.fx-input { appearance: none; background-image: none; padding-right: 36px; cursor: pointer; }
+.fx-iconfield__chevron {
+  position: absolute;
+  top: 50%;
+  right: 13px;
+  display: flex;
+  color: var(--fx-copy);
+  pointer-events: none;
+  transform: translateY(-50%);
+}
+
+.fx-iconfield__prefix {
+  position: absolute;
+  top: 50%;
+  left: 40px;
+  color: var(--fx-ink);
+  font-size: 15px;
+  font-weight: 600;
+  pointer-events: none;
+  transform: translateY(-50%);
+}
+.fx-iconfield--prefix .fx-input { padding-left: 76px; }
+.fx-iconfield--prefix .fx-iconfield__prefix::after {
+  content: "";
+  position: absolute;
+  top: 50%;
+  right: -9px;
+  width: 1px;
+  height: 18px;
+  background: var(--fx-line-strong, var(--fx-line));
+  transform: translateY(-50%);
+}
+
+.fx-field__error { margin: 6px 0 0; color: var(--fx-danger); font-size: 12.5px; }
+
+.fx-signin__row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px 16px;
+  margin: 2px 0 20px;
+}
+.fx-signin__row .fx-check { align-items: center; font-size: 13.5px; }
+
+.fx-signin__submit { min-height: 48px; gap: 8px; font-size: 15px; }
+
+.fx-divider {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin: 22px 0 16px;
+  color: var(--fx-copy);
+  font-size: 12.5px;
+}
+.fx-divider::before, .fx-divider::after { content: ""; flex: 1; height: 1px; background: var(--fx-line); }
+
+.fx-social { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; }
+.fx-social__btn {
+  display: flex;
+  min-height: 46px;
+  align-items: center;
+  justify-content: center;
+  gap: 9px;
+  padding: 0 12px;
+  border: 1px solid var(--fx-line-strong, var(--fx-line));
+  border-radius: 10px;
+  background: var(--fx-surface);
+  color: var(--fx-ink);
+  font: inherit;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background .15s, border-color .15s;
+}
+.fx-social__btn:hover:not(:disabled) { border-color: var(--fx-copy); background: var(--fx-soft); }
+.fx-social__btn:disabled { cursor: not-allowed; opacity: .55; }
+.fx-social__btn svg { flex-shrink: 0; }
+.fx-social__google { position: relative; min-height: 46px; }
+.fx-social__google-slot { position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; overflow: hidden; border-radius: 10px; }
+.fx-social__google-slot iframe { margin: 0 !important; }
+.fx-social__hint { margin: 8px 0 0; color: var(--fx-copy); font-size: 12px; text-align: center; }
+
+.fx-signin__legal { margin: 16px 0 0; color: var(--fx-copy); font-size: 12.5px; line-height: 1.6; text-align: center; }
+.fx-signin__legal a { color: var(--fx-brand); text-decoration: underline; }
+
+.fx-signin__consent { display: flex; align-items: flex-start; gap: 10px; margin: 4px 0 18px; color: var(--fx-copy); font-size: 13px; line-height: 1.55; }
+.fx-signin__consent input { flex: 0 0 auto; width: 17px; height: 17px; margin-top: 2px; accent-color: var(--fx-brand); }
+.fx-signin__consent a { color: var(--fx-brand); text-decoration: underline; }
+
+/* Código de verificación */
+.fx-otp { display: grid; grid-template-columns: repeat(6, minmax(0, 1fr)); gap: 8px; margin: 6px 0 14px; }
+.fx-otp input {
+  width: 100%;
+  min-width: 0;
+  height: 54px;
+  border: 1px solid var(--fx-line-strong, var(--fx-line));
+  border-radius: 10px;
+  background: var(--fx-surface);
+  color: var(--fx-ink);
+  font: inherit;
+  font-size: 22px;
+  font-weight: 600;
+  text-align: center;
+  font-variant-numeric: tabular-nums;
+}
+.fx-otp input:focus { border-color: var(--fx-brand); outline: 3px solid var(--fx-focus, rgba(23, 105, 224, .18)); }
+.fx-otp--error input { border-color: var(--fx-danger); }
+
+.fx-verify__channels { display: flex; flex-direction: column; gap: 8px; margin-bottom: 18px; }
+.fx-verify__channel {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 12px;
+  border: 1px solid var(--fx-line);
+  border-radius: 10px;
+  font-size: 13.5px;
+}
+.fx-verify__channel.is-current { border-color: var(--fx-brand); }
+.fx-verify__channel.is-done { color: var(--fx-ok); }
+.fx-verify__channel span { flex: 1; min-width: 0; color: var(--fx-ink); }
+.fx-verify__actions { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 8px; margin-top: 14px; }
+
+@media (max-width: 520px) {
+  .fx-signin .fx-auth__panel { padding: 24px 18px 20px; border: 0; border-radius: 0; background: transparent; box-shadow: none; }
+  .fx-social { grid-template-columns: minmax(0, 1fr); }
+  .fx-otp { gap: 6px; }
+  .fx-otp input { height: 48px; font-size: 20px; }
+}
+
+.fx-signin .fx-auth__link { color: var(--fx-brand); font-weight: 600; }
+.fx-signin .fx-auth__link:hover { color: var(--fx-brand-dark); }

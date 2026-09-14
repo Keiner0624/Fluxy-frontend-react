@@ -1,45 +1,17 @@
 // src/app/authFetch.js
-import { isTokenValid, forceLogout } from './tokenUtils'
+import { getAccessToken } from './session'
 
 /**
- * Wrapper de fetch que:
- * 1. Inyecta el Authorization header automáticamente
- * 2. Si el token expiró antes de hacer la llamada → redirige al login
- * 3. Si el backend responde 401 → redirige al login
+ * fetch con el token de la sesión. La renovación y el reintento ante un 401 los
+ * hace el interceptor de session.js.
  */
 export async function authFetch(url, options = {}) {
-  const token = localStorage.getItem('token')
-
-  // Verificar antes de hacer la llamada
-  if (!isTokenValid(token)) {
-    forceLogout(window.location.pathname)
-    return
-  }
-
-  const headers = {
-    ...options.headers,
-    Authorization: `Bearer ${token}`,
-  }
-
-  const res = await fetch(url, { ...options, headers })
-
-  // Si el backend devuelve 401, el token fue rechazado
-  if (res.status === 401) {
-    forceLogout(window.location.pathname)
-    return
-  }
-
-  return res
+  return fetch(url, { ...options, headers: { ...options.headers, Authorization: `Bearer ${getAccessToken()}` } })
 }
 
-/**
- * Helper para peticiones JSON autenticadas
- */
+/** Petición JSON autenticada. */
 export async function authJson(url, method = 'GET', body = null) {
-  const options = {
-    method,
-    headers: { 'Content-Type': 'application/json' },
-  }
+  const options = { method, headers: { 'Content-Type': 'application/json' } }
   if (body) options.body = JSON.stringify(body)
   return authFetch(url, options)
 }

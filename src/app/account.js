@@ -32,9 +32,14 @@ function getToken() {
   return localStorage.getItem('token') || ''
 }
 
+/** La caché es por sesión, no por access token: el token cambia cada 15 minutos. */
+function cacheKey() {
+  return localStorage.getItem('sessionId') || getToken()
+}
+
 async function cargar(clave, { force = false } = {}) {
   const entrada = cache[clave]
-  const token = getToken()
+  const token = cacheKey()
 
   // Un dato de otra sesión nunca sirve: cubre cualquier forma de cerrar sesión.
   const vigente = entrada.data
@@ -47,7 +52,7 @@ async function cargar(clave, { force = false } = {}) {
   if (!force && entrada.promise && entrada.token === token) return entrada.promise
 
   const promesa = fetch(`${API_URL}${RECURSOS[clave]}`, {
-    headers: { Authorization: `Bearer ${token}` },
+    headers: { Authorization: `Bearer ${getToken()}` },
   })
     .then((res) => {
       if (!res.ok) throw new Error(`${RECURSOS[clave]} respondió ${res.status}`)
@@ -84,7 +89,7 @@ export function getMyCompany(opciones) {
  */
 export function peekMe() {
   const entrada = cache.me
-  return entrada.data && entrada.token === getToken() ? entrada.data : null
+  return entrada.data && entrada.token === cacheKey() ? entrada.data : null
 }
 
 /**
@@ -92,7 +97,7 @@ export function peekMe() {
  * así el panel se monta con todo resuelto en vez de volver a pedirlo.
  */
 export function primeAccount({ me, company } = {}) {
-  const token = getToken()
+  const token = cacheKey()
   const ahora = Date.now()
   if (me)      Object.assign(cache.me,      { data: me,      at: ahora, token })
   if (company) Object.assign(cache.company, { data: company, at: ahora, token })

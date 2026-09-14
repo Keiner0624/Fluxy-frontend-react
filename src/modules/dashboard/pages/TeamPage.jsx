@@ -9,11 +9,13 @@ import useApi from '@/hooks/useApi'
 import useAccess from '@/hooks/useAccess'
 import { date, ROLES, PERMISSION_GROUPS } from '@/app/format'
 import { ConfirmDialog, EmptyState, ErrorState, Modal, NoAccess } from '@/modules/dashboard/components/ui'
+import useReauth from '@/hooks/useReauth'
+import { peekMe, invalidateAccount } from '@/app/account'
 
 function RolePicker({ value, onChange, allowAdmin }) {
   return (
     <div className="fx-roles">
-      {['ADMIN', 'SELLER', 'VIEWER'].map((role) => {
+      {['ADMIN', 'MANAGER', 'SELLER', 'WAREHOUSE', 'VIEWER'].map((role) => {
         const disabled = role === 'ADMIN' && !allowAdmin
         return (
           <button key={role} type="button" disabled={disabled} className={`fx-role${value === role ? ' is-on' : ''}`}
@@ -217,6 +219,51 @@ export default function TeamPage() {
   const [editing, setEditing] = useState(null)
   const [toggling, setToggling] = useState(null)
   const [busy, setBusy] = useState(false)
+  const [transferTo, setTransferTo] = useState(null)
+  const { run, dialog } = useReauth(peekMe()?.hasPassword !== false)
+
+  const transfer = team?.pendingTransfer
+
+  const startTransfer = async () => {
+    setBusy(true)
+    try {
+      await run(() => api.post('/team/ownership-transfer', { userId: transferTo.userId }))
+      toast.success(`Le propusimos a ${transferTo.fullName} ser dueño. Tiene 72 horas para aceptar.`)
+      setTransferTo(null)
+      reload()
+    } catch (err) {
+      if (err.code !== 'REAUTH_CANCELLED') toast.error(err.message)
+    } finally {
+      setBusy(false)
+    }
+  }
+
+  const acceptTransfer = async () => {
+    setBusy(true)
+    try {
+      await run(() => api.post('/team/ownership-transfer/accept'))
+      invalidateAccount()
+      toast.success('Ahora sos el dueño del negocio.')
+      window.location.reload()
+    } catch (err) {
+      if (err.code !== 'REAUTH_CANCELLED') toast.error(err.message)
+    } finally {
+      setBusy(false)
+    }
+  }
+
+  const cancelTransfer = async () => {
+    setBusy(true)
+    try {
+      await api.del('/team/ownership-transfer')
+      toast.success('Transferencia cancelada.')
+      reload()
+    } catch (err) {
+      toast.error(err.message)
+    } finally {
+      setBusy(false)
+    }
+  }
 
   const canManageMember = (m) => access.can('TEAM_MANAGE') && !m.you && m.role !== 'OWNER' && (m.role !== 'ADMIN' || access.isOwner)
 
@@ -284,6 +331,23 @@ export default function TeamPage() {
 
       {error && <div style={{ marginBottom: 14 }}><ErrorState error={error} onRetry={reload} /></div>}
 
+      {transfer && (
+        <div className="fx-alert fx-alert--warn" role="status" style={{ marginBottom: 14, alignItems: 'center', flexWrap: 'wrap' }}>
+          <Icon name="building" size={16} />
+          <span style={{ flex: 1, minWidth: 220 }}>
+            {transfer.incoming
+              ? `${transfer.fromName} te propone ser dueño del negocio. Tendrás acceso total, incluida la facturación. Vence el ${date(transfer.expiresAt)}.`
+              : `Propusiste transferir la propiedad a ${transfer.toName}. Vence el ${date(transfer.expiresAt)}.`}
+          </span>
+          {transfer.incoming && (
+            <button type="button" className="fx-btn fx-btn--primary fx-btn--sm" onClick={acceptTransfer} disabled={busy}>Aceptar</button>
+          )}
+          <button type="button" className="fx-btn fx-btn--secondary fx-btn--sm" onClick={cancelTransfer} disabled={busy}>
+            {transfer.incoming ? 'Rechazar' : 'Cancelar'}
+          </button>
+        </div>
+      )}
+
       <div className="fx-card" style={{ marginBottom: 16 }}>
         {loading && !team ? (
           <div className="fx-card__body">{Array.from({ length: 3 }).map((_, i) => <div key={i} className="fx-skeleton" style={{ height: 44, marginBottom: 8 }} />)}</div>
@@ -321,6 +385,11 @@ export default function TeamPage() {
                           <button className="fx-btn fx-btn--ghost fx-btn--sm" onClick={() => setToggling(m)}>
                             {m.status === 'ACTIVE' ? 'Desactivar' : 'Reactivar'}
                           </button>
+                          {access.isOwner && m.role === 'ADMIN' && m.status === 'ACTIVE' && !transfer && (
+                            <button className="fx-btn fx-btn--ghost fx-btn--sm" onClick={() => setTransferTo(m)} title="Transferir la propiedad del negocio">
+                              Hacer dueño
+                            </button>
+                          )}
                           <button className="fx-btn fx-btn--ghost fx-btn--icon" onClick={() => setEditing(m)} aria-label={`Editar permisos de ${m.fullName}`}>
                             <Icon name="edit" size={15} />
                           </button>
@@ -382,6 +451,17 @@ export default function TeamPage() {
 
       {inviting && team && <InviteModal team={team} onClose={() => setInviting(false)} onInvited={reload} />}
       {editing && team && <EditMemberModal member={editing} team={team} onClose={() => setEditing(null)} onSaved={() => { setEditing(null); reload() }} />}
+      {transferTo && (
+        <ConfirmDialog
+          title={`Transferir la propiedad a ${transferTo.fullName}`}
+          text="Pasará a ser dueño, con acceso a la facturación y a eliminar el negocio. Vos quedás como administrador. Tiene que aceptar desde su cuenta en 72 horas."
+          confirmLabel="Proponer transferencia"
+          busy={busy}
+          onClose={() => setTransferTo(null)}
+          onConfirm={startTransfer}
+        />
+      )}
+      {dialog}
       {toggling && (
         <ConfirmDialog
           title={toggling.status === 'ACTIVE' ? `Desactivar a ${toggling.fullName}` : `Reactivar a ${toggling.fullName}`}

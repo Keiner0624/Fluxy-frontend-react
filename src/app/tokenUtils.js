@@ -38,9 +38,7 @@ export function msUntilExpiry(token) {
  * Limpia el localStorage y redirige al login
  */
 export function forceLogout(returnTo = '') {
-  localStorage.removeItem('token')
-  localStorage.removeItem('company')
-  localStorage.removeItem('user')
+  ;['token', 'refreshToken', 'sessionId', 'company', 'user'].forEach((key) => localStorage.removeItem(key))
   const url = returnTo
     ? `/login?returnTo=${encodeURIComponent(returnTo)}`
     : '/login'

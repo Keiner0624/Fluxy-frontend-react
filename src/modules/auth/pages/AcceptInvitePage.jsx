@@ -2,8 +2,13 @@
 // Aceptar una invitación al equipo: la persona crea su acceso y entra al panel.
 import { useEffect, useState } from 'react'
 import { Link, useNavigate, useParams } from 'react-router-dom'
-import { API_URL, buildStoreUrl } from '@/app/config'
-import { getMe, getMyCompany, invalidateAccount } from '@/app/account'
+import { API_URL } from '@/app/config'
+import { ROLES } from '@/app/format'
+import { IconField, PasswordField } from '../components/AuthUi'
+import { startSession } from '../authSession'
+import { PASSWORD_MIN } from '../registration'
+import { legalUrl } from '@/modules/landing/legal/documents'
+import '../auth.css'
 import BrandLogo from '@/components/BrandLogo'
 import Icon from '@/components/Icon'
 
@@ -21,7 +26,6 @@ export default function AcceptInvitePage() {
   const [loadError, setLoadError] = useState('')
   const [fullName, setFullName] = useState('')
   const [password, setPassword] = useState('')
-  const [showPassword, setShowPassword] = useState(false)
   const [saving, setSaving] = useState(false)
   const [error, setError] = useState('')
 
@@ -35,7 +39,7 @@ export default function AcceptInvitePage() {
   const submit = async (e) => {
     e.preventDefault()
     if (fullName.trim().length < 2) { setError('Ingresá tu nombre completo.'); return }
-    if (password.length < 8) { setError('La contraseña tiene que tener al menos 8 caracteres.'); return }
+    if (password.length < PASSWORD_MIN) { setError(`La contraseña tiene que tener al menos ${PASSWORD_MIN} caracteres.`); return }
     setSaving(true)
     setError('')
     try {
@@ -47,19 +51,7 @@ export default function AcceptInvitePage() {
       const data = await res.json().catch(() => ({}))
       if (!res.ok) throw new Error(data.message || 'No se pudo aceptar la invitación.')
 
-      invalidateAccount()
-      localStorage.setItem('token', data.token)
-      const [me, company] = await Promise.all([
-        getMe({ force: true }).catch(() => null),
-        getMyCompany({ force: true }).catch(() => null),
-      ])
-      if (me) localStorage.setItem('user', JSON.stringify(me))
-      if (company) {
-        localStorage.setItem('company', JSON.stringify({
-          id: company.id, name: company.name, slug: company.slug, plan: company.plan || 'FREE',
-          logoUrl: company.logoUrl || '', storeStyle: company.storeStyle || '', storeUrl: buildStoreUrl(company.slug),
-        }))
-      }
+      await startSession(data)
       navigate('/dashboard', { replace: true })
     } catch (err) {
       setError(err.message)
@@ -69,7 +61,7 @@ export default function AcceptInvitePage() {
   }
 
   return (
-    <div className="fx fx-auth">
+    <div className="fx fx-auth fx-signin">
       <header className="fx-auth__top">
         <Link to="/"><BrandLogo size={28} textSize={18} textColor="var(--fx-ink)" /></Link>
         <Link to="/login" className="fx-btn fx-btn--ghost fx-btn--sm">Iniciar sesión</Link>
@@ -103,30 +95,20 @@ export default function AcceptInvitePage() {
               <div className="fx-auth__head">
                 <h1 className="fx-h1">Sumate a {info.companyName}</h1>
                 <p className="fx-hint">
-                  Te invitaron con el rol <strong style={{ color: 'var(--fx-ink)' }}>{info.role}</strong>. Creá tu acceso para entrar al panel.
+                  Te invitaron con el rol <strong style={{ color: 'var(--fx-ink)' }}>{ROLES[info.role]?.label || info.role}</strong>. Creá tu acceso para entrar al panel.
                 </p>
               </div>
 
               <form onSubmit={submit} noValidate>
-                <div className="fx-field">
-                  <label className="fx-label" htmlFor="inv-email">Correo</label>
-                  <input id="inv-email" className="fx-input" value={info.email} readOnly disabled />
-                </div>
-                <div className="fx-field">
-                  <label className="fx-label" htmlFor="inv-name">Nombre completo</label>
-                  <input id="inv-name" className="fx-input" autoComplete="name" value={fullName} onChange={(e) => setFullName(e.target.value)} maxLength={150} autoFocus />
-                </div>
-                <div className="fx-field">
-                  <label className="fx-label" htmlFor="inv-password">Contraseña</label>
-                  <div className="fx-input-wrap">
-                    <input id="inv-password" className="fx-input" type={showPassword ? 'text' : 'password'} autoComplete="new-password"
-                      value={password} onChange={(e) => setPassword(e.target.value)} maxLength={72} placeholder="Mínimo 8 caracteres" />
-                    <button type="button" className="fx-input-affix" onClick={() => setShowPassword((v) => !v)}
-                      aria-label={showPassword ? 'Ocultar contraseña' : 'Mostrar contraseña'}>
-                      <Icon name={showPassword ? 'eyeOff' : 'eye'} size={16} />
-                    </button>
-                  </div>
-                </div>
+                <IconField id="inv-email" label="Correo" icon="mail">
+                  {(aria) => <input {...aria} id="inv-email" className="fx-input" value={info.email} readOnly disabled />}
+                </IconField>
+                <IconField id="inv-name" label="Nombre completo" icon="user">
+                  {(aria) => <input {...aria} id="inv-name" className="fx-input" autoComplete="name" value={fullName}
+                    onChange={(e) => setFullName(e.target.value)} maxLength={80} autoFocus placeholder="Tu nombre y apellido" />}
+                </IconField>
+                <PasswordField id="inv-password" value={password} onChange={(e) => setPassword(e.target.value)}
+                  autoComplete="new-password" placeholder={`Mínimo ${PASSWORD_MIN} caracteres`} />
 
                 {error && (
                   <div className="fx-alert fx-alert--error" role="alert" style={{ marginBottom: 16 }}>
@@ -134,13 +116,13 @@ export default function AcceptInvitePage() {
                   </div>
                 )}
 
-                <button type="submit" className="fx-btn fx-btn--primary fx-btn--lg fx-btn--block" disabled={saving}>
+                <button type="submit" className="fx-btn fx-btn--primary fx-btn--lg fx-btn--block fx-signin__submit" disabled={saving}>
                   {saving ? <><span className="fx-spinner" /> Creando tu acceso…</> : 'Aceptar invitación'}
                 </button>
               </form>
 
               <p className="fx-auth__foot">
-                Al aceptar, aceptás los <Link to="/terms" className="fx-auth__link">términos y la política de privacidad</Link>.
+                Al aceptar, aceptás los <Link to={legalUrl('terms')} className="fx-auth__link">términos</Link> y la <Link to={legalUrl('privacy')} className="fx-auth__link">política de privacidad</Link>.
               </p>
             </>
           )}

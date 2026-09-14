@@ -1,11 +1,12 @@
 // src/modules/dashboard/pages/PaymentsPage.jsx
 // Control de cobros: qué entró, qué falta y qué hay que devolver.
-import { useState } from 'react'
+import { useRef, useState } from 'react'
 import toast from 'react-hot-toast'
 import DashboardLayout from '@/modules/dashboard/components/DashboardLayout'
 import OrderDetailModal from '@/modules/dashboard/components/OrderDetailModal'
 import Icon from '@/components/Icon'
 import { api } from '@/app/api'
+import { newIdempotencyKey } from '@/app/session'
 import useApi, { useDebounced } from '@/hooks/useApi'
 import useAccess from '@/hooks/useAccess'
 import { money, dateTime, integer, PAYMENT_STATUS, PAYMENT_METHODS, ORDER_STATUS, paymentMethodLabel, rangeFromPreset, count } from '@/app/format'
@@ -32,6 +33,7 @@ function RefundModal({ payment, onClose, onDone }) {
   const [amount, setAmount] = useState(remaining.toFixed(2))
   const [reason, setReason] = useState('')
   const [saving, setSaving] = useState(false)
+  const refundKey = useRef(newIdempotencyKey('reembolso'))
   const [error, setError] = useState('')
 
   const submit = async (e) => {
@@ -40,7 +42,7 @@ function RefundModal({ payment, onClose, onDone }) {
     setSaving(true)
     setError('')
     try {
-      await api.post(`/payments/${payment.id}/refund`, { amount: Number(amount), reason })
+      await api.post(`/payments/${payment.id}/refund`, { amount: Number(amount), reason }, { idempotencyKey: refundKey.current })
       toast.success('Reembolso registrado.')
       onDone()
     } catch (err) {
