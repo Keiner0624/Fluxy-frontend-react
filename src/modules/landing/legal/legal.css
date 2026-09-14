@@ -1,0 +1,18 @@
+.fx-legal__tools { display: flex; align-items: center; flex-wrap: wrap; gap: 12px; margin-top: 22px; }
+.fx-legal__tools label { font-size: 14px; color: var(--fx-copy); }
+.fx-legal__tools .fx-input { width: auto; max-width: 100%; min-height: 44px; font-size: 16px; }
+.fx-legal__draft { display: block; margin-top: 20px; }
+.fx-legal__doc { min-width: 0; overflow-wrap: anywhere; }
+.fx-legal__section p { white-space: pre-line; }
+@media (max-width: 560px) {
+  .fx-legal__tools { align-items: stretch; flex-direction: column; }
+  .fx-legal__tools .fx-input { width: 100%; }
+  .fx-legal__tabs { display: flex; flex-wrap: wrap; }
+  .fx-legal__tab { white-space: normal; min-height: 44px; }
+}
+@media print {
+  .fx-legal__nav, .fx-legal__tools, .fx-legal__tabs, .fx-legal__toc, .fx-legal__foot { display: none !important; }
+  .fx-legal, .fx-legal__shell, .fx-legal__body { display: block !important; background: white !important; color: black !important; padding: 0 !important; max-width: none !important; }
+  .fx-legal__section h2 { break-after: avoid; color: black !important; }
+  .fx-legal__section p, .fx-legal__section li { color: black !important; orphans: 3; widows: 3; }
+}
