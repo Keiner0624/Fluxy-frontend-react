@@ -1,87 +1,83 @@
+// Carrito lateral.
 import { useEffect } from 'react'
 import Icon from '@/components/Icon'
+import { ProductPlaceholder, QuantityStepper } from './ProductCard'
+import { money, productImages, stockOf } from '../lib/storeFormat'
 
-export default function Cart({ open, cart, total, onClose, onIncrease, onDecrease, onCheckout }) {
+export default function Cart({ open, cart, total, count, ordersPaused, onClose, onSetQuantity, onRemove, onCheckout, onShop, onOpenProduct }) {
   useEffect(() => {
     if (!open) return undefined
-    const previousOverflow = document.body.style.overflow
-    const onKeyDown = event => {
-      if (event.key === 'Escape') onClose()
-    }
+    const previous = document.body.style.overflow
     document.body.style.overflow = 'hidden'
-    window.addEventListener('keydown', onKeyDown)
+    const onKey = (event) => { if (event.key === 'Escape') onClose() }
+    window.addEventListener('keydown', onKey)
     return () => {
-      document.body.style.overflow = previousOverflow
-      window.removeEventListener('keydown', onKeyDown)
+      document.body.style.overflow = previous
+      window.removeEventListener('keydown', onKey)
     }
   }, [open, onClose])
 
   if (!open) return null
-  const count = cart.reduce((sum, item) => sum + item.quantity, 0)
 
   return (
-    <div className="store-drawer-layer">
-      <button className="store-drawer-backdrop" onClick={onClose} aria-label="Cerrar carrito" />
-      <aside className="store-cart" role="dialog" aria-modal="true" aria-labelledby="cart-title">
-        <div className="store-modal-head">
+    <div className="sf-drawer-layer">
+      <button type="button" className="sf-backdrop" onClick={onClose} aria-label="Cerrar carrito" />
+      <aside className="sf-drawer" role="dialog" aria-modal="true" aria-labelledby="sf-cart-title">
+        <header className="sf-drawer__head">
           <div>
-            <span className="store-section-label">Resumen</span>
-            <h2 id="cart-title">Tu carrito</h2>
+            <h2 id="sf-cart-title">Tu carrito</h2>
             <p>{count} {count === 1 ? 'producto' : 'productos'}</p>
           </div>
-          <button className="store-icon-button" onClick={onClose} aria-label="Cerrar carrito">
-            <Icon name="close" size={19} />
-          </button>
-        </div>
+          <button type="button" className="sf-icon-btn" onClick={onClose} aria-label="Cerrar carrito"><Icon name="close" size={20} /></button>
+        </header>
 
-        <div className="store-cart__items">
-          {cart.length === 0 ? (
-            <div className="store-state store-state--compact">
-              <Icon name="orders" size={34} />
-              <strong>Tu carrito está vacío</strong>
-              <p>Agrega productos del catálogo para continuar.</p>
-              <button type="button" className="store-button store-button--secondary" onClick={onClose}>Volver al catálogo</button>
-            </div>
-          ) : (
-            cart.map(item => (
-              <article className="store-cart-item" key={item.product.id}>
-                <div className="store-cart-item__image">
-                  {item.product.imageUrl
-                    ? <img src={item.product.imageUrl} alt="" />
-                    : <Icon name="package" size={22} />}
-                </div>
-                <div className="store-cart-item__info">
-                  <h3>{item.product.name}</h3>
-                  <span>S/ {Number(item.product.price || 0).toFixed(2)} por unidad</span>
-                  <div className="store-quantity" aria-label={`Cantidad de ${item.product.name}`}>
-                    <button type="button" onClick={() => onDecrease(item.product.id)} aria-label="Reducir cantidad">−</button>
-                    <strong>{item.quantity}</strong>
-                    <button
-                      type="button"
-                      onClick={() => onIncrease(item.product.id)}
-                      disabled={item.quantity >= Number(item.product.stock)}
-                      aria-label="Aumentar cantidad"
-                    >+</button>
-                  </div>
-                </div>
-                <strong className="store-cart-item__total">S/ {(Number(item.product.price || 0) * item.quantity).toFixed(2)}</strong>
-              </article>
-            ))
-          )}
-        </div>
-
-        {cart.length > 0 && (
-          <div className="store-cart__footer">
-            <div className="store-cart__total">
-              <span>Total del pedido</span>
-              <strong>S/ {total.toFixed(2)}</strong>
-            </div>
-            <button type="button" className="store-button store-button--primary" onClick={onCheckout}>
-              Continuar con el pedido
-              <Icon name="arrowRight" size={17} />
-            </button>
-            <p>Revisa tus datos antes de confirmar. El vendedor coordinará la entrega contigo.</p>
+        {cart.length === 0 ? (
+          <div className="sf-empty sf-empty--drawer">
+            <span className="sf-empty__icon"><Icon name="cart" size={30} /></span>
+            <strong>Tu carrito está vacío</strong>
+            <p>Agregá productos del catálogo y armá tu pedido.</p>
+            <button type="button" className="sf-btn sf-btn--primary" onClick={onShop}>Ver productos <Icon name="arrowRight" size={16} /></button>
           </div>
+        ) : (
+          <>
+            <ul className="sf-drawer__items">
+              {cart.map(({ product, quantity }) => {
+                const image = productImages(product)[0]
+                return (
+                  <li key={product.id} className="sf-line">
+                    <button type="button" className="sf-line__img" onClick={() => onOpenProduct(product)} aria-label={`Ver ${product.name}`}>
+                      {image ? <img src={image} alt="" /> : <ProductPlaceholder product={product} size={24} />}
+                    </button>
+                    <div className="sf-line__info">
+                      <div className="sf-line__top">
+                        <strong>{product.name}</strong>
+                        <button type="button" className="sf-line__remove" onClick={() => onRemove(product.id)} aria-label={`Quitar ${product.name}`}>
+                          <Icon name="trash" size={15} />
+                        </button>
+                      </div>
+                      <small>{money(product.price)} c/u</small>
+                      <div className="sf-line__bottom">
+                        <QuantityStepper size="sm" value={quantity} max={stockOf(product)} onChange={(next) => onSetQuantity(product, next)} label={`Cantidad de ${product.name}`} />
+                        <strong>{money(Number(product.price) * quantity)}</strong>
+                      </div>
+                    </div>
+                  </li>
+                )
+              })}
+            </ul>
+
+            <footer className="sf-drawer__foot">
+              <div className="sf-summary-row"><span>Subtotal</span><strong>{money(total)}</strong></div>
+              <div className="sf-summary-row sf-summary-row--muted"><span>Entrega</span><span>Se coordina con el negocio</span></div>
+              {ordersPaused && (
+                <p className="sf-note sf-note--warn"><Icon name="info" size={15} /> La tienda no está recibiendo pedidos por ahora.</p>
+              )}
+              <button type="button" className="sf-btn sf-btn--primary sf-btn--lg sf-btn--block" onClick={onCheckout} disabled={ordersPaused}>
+                Continuar con el pedido <Icon name="arrowRight" size={18} />
+              </button>
+              <button type="button" className="sf-btn sf-btn--text sf-btn--block" onClick={onShop}>Seguir comprando</button>
+            </footer>
+          </>
         )}
       </aside>
     </div>

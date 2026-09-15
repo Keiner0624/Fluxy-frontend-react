@@ -1,252 +1,244 @@
+// Confirmación del pedido: datos de contacto, pago, cupón y resumen.
 import { useEffect, useRef, useState } from 'react'
-import toast from 'react-hot-toast'
 import Icon from '@/components/Icon'
-import { API_URL } from '@/app/config'
-import { useTranslation } from '@/hooks/useTranslation'
-import { createOrder } from '@/modules/store/api/storeApi'
+import { createOrder, validateCoupon } from '@/modules/store/api/storeApi'
 import { trackPurchase } from '@/modules/store/hooks/useStoreTracking'
 import { newIdempotencyKey } from '@/app/session'
+import { ProductPlaceholder } from './ProductCard'
+import { PAYMENT_LABELS, money, paymentMethods, productImages } from '../lib/storeFormat'
 
-const PAYMENT_LABELS = {
-  efectivo: 'Efectivo', yape: 'Yape', plin: 'Plin', tarjeta: 'Tarjeta', transferencia: 'Transferencia',
-  mercadopago: 'Mercado Pago', nequi: 'Nequi', daviplata: 'Daviplata', pse: 'PSE', oxxo: 'OXXO',
-  codi: 'CoDi', modo: 'MODO', webpay: 'Webpay', pix: 'PIX', boleto: 'Boleto',
-}
+const BUYER_KEY = 'fluxy_buyer'
 
-/** Medios que el vendedor habilitó en Configuración. */
-function getPaymentOptions(company) {
+function readBuyer() {
   try {
-    const raw = company?.paymentMethods
-    const parsed = typeof raw === 'string' ? JSON.parse(raw) : raw
-    return Array.isArray(parsed) ? parsed.filter(key => typeof key === 'string' && /^[a-z0-9_-]{1,40}$/.test(key)) : []
+    const saved = JSON.parse(localStorage.getItem(BUYER_KEY) || 'null')
+    return saved && typeof saved === 'object' ? saved : null
   } catch {
-    return []
+    return null
   }
 }
 
-export default function CheckoutModal({ open, cart, total, company, onClose, onSuccess }) {
-  const t = useTranslation()
-  const paymentOptions = getPaymentOptions(company)
-  const [paymentMethod, setPaymentMethod] = useState('')
+export default function CheckoutModal({ open, cart, total, count, company, onClose, onSuccess }) {
+  const methods = paymentMethods(company)
   const orderKey = useRef(newIdempotencyKey('pedido'))
-  const [name, setName] = useState('')
-  const [phone, setPhone] = useState('')
-  const [address, setAddress] = useState('')
+  const [form, setForm] = useState(() => {
+    const saved = readBuyer()
+    return { name: saved?.name || '', phone: saved?.phone || '', address: saved?.address || '', note: '' }
+  })
+  const [remember, setRemember] = useState(true)
+  const [payment, setPayment] = useState('')
   const [coupon, setCoupon] = useState('')
   const [couponData, setCouponData] = useState(null)
-  const [couponLoading, setCouponLoading] = useState(false)
-  const [couponError, setCouponError] = useState('')
-  const [loading, setLoading] = useState(false)
-  const [orderId, setOrderId] = useState(null)
-  const [whatsappUrl, setWhatsappUrl] = useState(null)
+  const [couponState, setCouponState] = useState({ loading: false, error: '' })
+  const [errors, setErrors] = useState({})
+  const [submitting, setSubmitting] = useState(false)
+  const [failure, setFailure] = useState('')
+  const [order, setOrder] = useState(null)
 
-  const reset = () => {
-    setName('')
-    setPhone('')
-    setAddress('')
-    setCoupon('')
-    setCouponData(null)
-    setCouponError('')
-    setOrderId(null)
-    setWhatsappUrl(null)
-  }
+  useEffect(() => {
+    if (!open) return undefined
+    const previous = document.body.style.overflow
+    document.body.style.overflow = 'hidden'
+    return () => { document.body.style.overflow = previous }
+  }, [open])
 
-  const handleClose = () => {
-    reset()
+  const close = () => {
+    setOrder(null)
+    setFailure('')
+    setErrors({})
     onClose()
   }
 
   useEffect(() => {
     if (!open) return undefined
-    const previousOverflow = document.body.style.overflow
-    const onKeyDown = event => {
-      if (event.key === 'Escape' && !loading) handleClose()
-    }
-    document.body.style.overflow = 'hidden'
-    window.addEventListener('keydown', onKeyDown)
-    return () => {
-      document.body.style.overflow = previousOverflow
-      window.removeEventListener('keydown', onKeyDown)
-    }
-  // handleClose intentionally uses the latest form state only when Escape is pressed.
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [open, loading])
+    const onKey = (event) => { if (event.key === 'Escape' && !submitting) close() }
+    window.addEventListener('keydown', onKey)
+    return () => window.removeEventListener('keydown', onKey)
+  })
+
+  // El cupón se validó contra otro total: se vuelve a aplicar.
+  useEffect(() => { setCouponData(null) }, [total])
 
   if (!open) return null
 
-  const validateCoupon = async () => {
-    if (!coupon.trim() || !company?.id) return
-    setCouponLoading(true)
-    setCouponError('')
+  const set = (field) => (event) => {
+    setForm((f) => ({ ...f, [field]: event.target.value }))
+    setErrors((e) => ({ ...e, [field]: undefined }))
+  }
+
+  const applyCoupon = async () => {
+    const code = coupon.trim().toUpperCase()
+    if (!code || !company?.id) return
+    setCouponState({ loading: true, error: '' })
     setCouponData(null)
     try {
-      const params = new URLSearchParams({
-        code: coupon.trim().toUpperCase(),
-        companyId: String(company.id),
-        orderTotal: String(total),
-      })
-      const response = await fetch(`${API_URL}/coupons/validate?${params.toString()}`)
-      const data = await response.json()
-      if (!response.ok || !data.valid) throw new Error(data.error || 'El cupón no es válido')
+      const data = await validateCoupon(company.id, code, total)
+      if (!data?.valid) throw new Error(data?.error || 'El cupón no es válido')
       setCouponData(data)
+      setCouponState({ loading: false, error: '' })
     } catch (error) {
-      setCouponError(error.message || 'No se pudo validar el cupón')
-    } finally {
-      setCouponLoading(false)
+      setCouponState({ loading: false, error: error.message })
     }
   }
 
-  const handleConfirm = async event => {
+  const submit = async (event) => {
     event.preventDefault()
-    if (!name.trim()) {
-      toast.error(t.fullName.replace(' *', ''))
-      return
-    }
-    if (!company?.id || cart.length === 0) {
-      toast.error('No se pudo preparar el pedido')
+    const found = {}
+    if (form.name.trim().length < 2) found.name = 'Ingresá tu nombre.'
+    if (form.phone.replace(/\D/g, '').length < 7) found.phone = 'Ingresá un número para coordinar la entrega.'
+    if (methods.length > 0 && !payment) found.payment = 'Elegí cómo vas a pagar.'
+    setErrors(found)
+    if (Object.keys(found).length) {
+      document.getElementById(`sf-checkout-${Object.keys(found)[0]}`)?.focus()
       return
     }
 
-    setLoading(true)
+    setSubmitting(true)
+    setFailure('')
     try {
+      const address = [form.address.trim(), form.note.trim() && `Nota: ${form.note.trim()}`].filter(Boolean).join(' · ')
       const data = await createOrder(company.id, {
-        customerName: name.trim(),
-        customerPhone: phone.trim(),
-        customerAddress: address.trim(),
-        items: cart.map(item => ({ productId: item.product.id, quantity: item.quantity })),
+        customerName: form.name.trim(),
+        customerPhone: form.phone.trim(),
+        customerAddress: address.slice(0, 300),
+        items: cart.map((item) => ({ productId: item.product.id, quantity: item.quantity })),
         couponCode: couponData?.code || null,
-        paymentMethod: paymentMethod || null,
+        paymentMethod: payment || null,
       }, orderKey.current)
       orderKey.current = newIdempotencyKey('pedido')
-      setOrderId(data.orderId || data.order?.id || data.id)
+      try {
+        if (remember) localStorage.setItem(BUYER_KEY, JSON.stringify({ name: form.name.trim(), phone: form.phone.trim(), address: form.address.trim() }))
+        else localStorage.removeItem(BUYER_KEY)
+      } catch { /* sin almacenamiento */ }
       trackPurchase({ orderId: data.orderId, total: data.total, items: cart })
-      setWhatsappUrl(data.whatsappUrl || null)
+      setOrder({ id: data.orderId || data.order?.id, total: data.total, whatsappUrl: data.whatsappUrl })
       onSuccess()
     } catch (error) {
-      toast.error(error.message || 'No se pudo confirmar el pedido')
+      setFailure(error.message || 'No se pudo confirmar el pedido. Intentá de nuevo.')
     } finally {
-      setLoading(false)
+      setSubmitting(false)
     }
   }
 
   const finalTotal = Number(couponData?.finalTotal ?? total)
 
   return (
-    <div className="store-modal-layer" role="presentation">
-      <div className="store-checkout" role="dialog" aria-modal="true" aria-labelledby="checkout-title">
-        {orderId ? (
-          <div className="store-confirmation">
-            <span className="store-confirmation__icon"><Icon name="check" size={30} /></span>
-            <span className="store-section-label">Pedido registrado</span>
-            <h2 id="checkout-title">{t.orderConfirmed}</h2>
-            <p>{t.sellerNotified}</p>
-            <strong className="store-order-number">Pedido #{orderId}</strong>
-            <div className="store-confirmation__actions">
-              {whatsappUrl && (
-                <a className="store-button store-button--primary" href={whatsappUrl} target="_blank" rel="noreferrer">
-                  <Icon name="message" size={17} />
-                  {t.coordinateWhatsApp}
+    <div className="sf-overlay" role="presentation" onMouseDown={(e) => e.target === e.currentTarget && !submitting && !order && close()}>
+      <div className={`sf-checkout${order ? ' sf-checkout--done' : ''}`} role="dialog" aria-modal="true" aria-labelledby="sf-checkout-title">
+        {order ? (
+          <div className="sf-done">
+            <span className="sf-done__icon"><Icon name="check" size={34} strokeWidth={2.4} /></span>
+            <h2 id="sf-checkout-title">¡Pedido recibido!</h2>
+            <p>{company?.name} ya tiene tu pedido y te va a contactar al <strong>{form.phone}</strong> para coordinar la entrega y el pago.</p>
+            <div className="sf-done__ticket">
+              <div><small>Pedido</small><strong>#{order.id}</strong></div>
+              <div><small>Total</small><strong>{money(order.total)}</strong></div>
+            </div>
+            <div className="sf-done__actions">
+              {order.whatsappUrl && (
+                <a className="sf-btn sf-btn--whatsapp sf-btn--lg sf-btn--block" href={order.whatsappUrl} target="_blank" rel="noreferrer">
+                  <Icon name="whatsapp" size={18} /> Enviar pedido por WhatsApp
                 </a>
               )}
-              <button type="button" className="store-button store-button--secondary" onClick={handleClose}>{t.keepShopping}</button>
+              <button type="button" className="sf-btn sf-btn--ghost sf-btn--lg sf-btn--block" onClick={close}>Seguir comprando</button>
             </div>
           </div>
         ) : (
-          <form onSubmit={handleConfirm}>
-            <div className="store-modal-head">
+          <form className="sf-checkout__form" onSubmit={submit} noValidate>
+            <header className="sf-checkout__head">
               <div>
-                <span className="store-section-label">Finalizar compra</span>
-                <h2 id="checkout-title">{t.confirmOrder}</h2>
-                <p>Completa tus datos para que el vendedor pueda contactarte.</p>
+                <h2 id="sf-checkout-title">Finalizar pedido</h2>
+                <p>Sin crear cuenta. El negocio te contacta para coordinar.</p>
               </div>
-              <button type="button" className="store-icon-button" onClick={handleClose} disabled={loading} aria-label="Cerrar">
-                <Icon name="close" size={19} />
-              </button>
-            </div>
+              <button type="button" className="sf-icon-btn" onClick={close} disabled={submitting} aria-label="Cerrar"><Icon name="close" size={20} /></button>
+            </header>
 
-            <div className="store-checkout__body">
-              <section className="store-order-summary" aria-label="Productos del pedido">
-                <div className="store-order-summary__title">
-                  <span>Tu pedido</span>
-                  <small>{cart.reduce((sum, item) => sum + item.quantity, 0)} unidades</small>
-                </div>
-                {cart.map(item => (
-                  <div className="store-order-summary__row" key={item.product.id}>
-                    <span>{item.product.name} <small>× {item.quantity}</small></span>
-                    <strong>S/ {(Number(item.product.price || 0) * item.quantity).toFixed(2)}</strong>
-                  </div>
-                ))}
-              </section>
-
-              <div className="store-form-grid">
-                <label className="store-field store-field--full">
-                  <span>{t.fullName}</span>
-                  <input value={name} onChange={event => setName(event.target.value)} placeholder={t.namePlaceholder} autoComplete="name" required />
-                </label>
-                <label className="store-field">
-                  <span>{t.phoneField}</span>
-                  <input value={phone} onChange={event => setPhone(event.target.value)} placeholder={t.phonePlaceholder} autoComplete="tel" inputMode="tel" />
-                </label>
-                <label className="store-field">
-                  <span>{t.deliveryAddress}</span>
-                  <input value={address} onChange={event => setAddress(event.target.value)} placeholder={t.addressPlaceholder} autoComplete="street-address" />
-                </label>
-              </div>
-
-              {paymentOptions.length > 0 && (
-                <fieldset className="store-payment">
-                  <legend>¿Cómo vas a pagar?</legend>
-                  <div className="store-payment__options">
-                    {paymentOptions.map(key => (
-                      <label key={key} className={`store-payment__option${paymentMethod === key ? ' is-on' : ''}`}>
-                        <input type="radio" name="payment-method" value={key} checked={paymentMethod === key} onChange={() => setPaymentMethod(key)} />
-                        {PAYMENT_LABELS[key] || key}
-                      </label>
-                    ))}
-                  </div>
+            <div className="sf-checkout__body">
+              <div className="sf-checkout__fields">
+                <fieldset className="sf-fieldset">
+                  <legend><span>1</span> Tus datos</legend>
+                  <label className="sf-field">
+                    <span>Nombre y apellido</span>
+                    <input id="sf-checkout-name" value={form.name} onChange={set('name')} autoComplete="name" maxLength={150}
+                      placeholder="Ej.: Ana Pérez" aria-invalid={Boolean(errors.name)} />
+                    {errors.name && <em>{errors.name}</em>}
+                  </label>
+                  <label className="sf-field">
+                    <span>WhatsApp o teléfono</span>
+                    <input id="sf-checkout-phone" value={form.phone} onChange={set('phone')} autoComplete="tel" inputMode="tel" maxLength={30}
+                      placeholder="999 888 777" aria-invalid={Boolean(errors.phone)} />
+                    {errors.phone && <em>{errors.phone}</em>}
+                  </label>
+                  <label className="sf-field sf-field--full">
+                    <span>Dirección de entrega <small>(opcional si recogés)</small></span>
+                    <input value={form.address} onChange={set('address')} autoComplete="street-address" maxLength={220} placeholder="Av. Ejemplo 123, distrito" />
+                  </label>
+                  <label className="sf-field sf-field--full">
+                    <span>Nota para el negocio <small>(opcional)</small></span>
+                    <input value={form.note} onChange={set('note')} maxLength={70} placeholder="Referencia, horario, sin cebolla…" />
+                  </label>
                 </fieldset>
-              )}
 
-              <div className="store-coupon">
-                <label htmlFor="store-coupon">Cupón de descuento</label>
-                <div>
-                  <input
-                    id="store-coupon"
-                    value={coupon}
-                    onChange={event => {
-                      setCoupon(event.target.value.toUpperCase())
-                      setCouponData(null)
-                      setCouponError('')
-                    }}
-                    onKeyDown={event => {
-                      if (event.key === 'Enter') {
-                        event.preventDefault()
-                        validateCoupon()
-                      }
-                    }}
-                    placeholder="Ejemplo: PROMO20"
-                  />
-                  <button type="button" onClick={validateCoupon} disabled={couponLoading || !coupon.trim()}>
-                    {couponLoading ? 'Validando' : 'Aplicar'}
+                {methods.length > 0 && (
+                  <fieldset className="sf-fieldset">
+                    <legend><span>2</span> ¿Cómo vas a pagar?</legend>
+                    <div className="sf-pay">
+                      {methods.map((key, index) => (
+                        <label key={key} className={`sf-pay__option${payment === key ? ' is-on' : ''}`}>
+                          <input id={index === 0 ? 'sf-checkout-payment' : undefined} type="radio" name="sf-payment" value={key}
+                            checked={payment === key} onChange={() => { setPayment(key); setErrors((e) => ({ ...e, payment: undefined })) }} />
+                          <Icon name={key === 'efectivo' ? 'money' : key === 'yape' || key === 'plin' ? 'phone' : 'card'} size={16} />
+                          {PAYMENT_LABELS[key] || key}
+                        </label>
+                      ))}
+                    </div>
+                    {errors.payment && <em className="sf-field-error">{errors.payment}</em>}
+                  </fieldset>
+                )}
+              </div>
+
+              <aside className="sf-checkout__summary" aria-label="Resumen del pedido">
+                <p className="sf-checkout__summary-title">Tu pedido <small>{count} {count === 1 ? 'producto' : 'productos'}</small></p>
+                <ul>
+                  {cart.map(({ product, quantity }) => {
+                    const image = productImages(product)[0]
+                    return (
+                      <li key={product.id}>
+                        <span className="sf-mini-img">{image ? <img src={image} alt="" /> : <ProductPlaceholder product={product} size={18} />}<b>{quantity}</b></span>
+                        <span className="sf-mini-name">{product.name}</span>
+                        <strong>{money(Number(product.price) * quantity)}</strong>
+                      </li>
+                    )
+                  })}
+                </ul>
+
+                <div className="sf-coupon">
+                  <input value={coupon} placeholder="Cupón de descuento" aria-label="Cupón de descuento"
+                    onChange={(e) => { setCoupon(e.target.value.toUpperCase()); setCouponData(null); setCouponState({ loading: false, error: '' }) }}
+                    onKeyDown={(e) => { if (e.key === 'Enter') { e.preventDefault(); applyCoupon() } }} />
+                  <button type="button" onClick={applyCoupon} disabled={couponState.loading || !coupon.trim()}>
+                    {couponState.loading ? '…' : 'Aplicar'}
                   </button>
                 </div>
-                {couponError && <p className="store-coupon__message is-error"><Icon name="alert" size={14} /> {couponError}</p>}
-                {couponData && <p className="store-coupon__message is-success"><Icon name="checkCircle" size={14} /> Cupón aplicado: ahorras S/ {Number(couponData.discount || 0).toFixed(2)}</p>}
-              </div>
-            </div>
+                {couponState.error && <p className="sf-note sf-note--error"><Icon name="alert" size={14} /> {couponState.error}</p>}
 
-            <div className="store-checkout__footer">
-              <div className="store-checkout__total">
-                <span>{t.totalToPay}</span>
-                <div>
-                  {couponData && <small>S/ {total.toFixed(2)}</small>}
-                  <strong>S/ {finalTotal.toFixed(2)}</strong>
-                </div>
-              </div>
-              <button type="submit" className="store-button store-button--primary" disabled={loading}>
-                {loading ? t.processing : t.confirmBtn}
-                {!loading && <Icon name="arrowRight" size={17} />}
-              </button>
+                <div className="sf-summary-row"><span>Subtotal</span><span>{money(total)}</span></div>
+                {couponData && <div className="sf-summary-row sf-summary-row--ok"><span>Cupón {couponData.code}</span><span>− {money(couponData.discount)}</span></div>}
+                <div className="sf-summary-row sf-summary-row--muted"><span>Entrega</span><span>A coordinar</span></div>
+                <div className="sf-summary-row sf-summary-row--total"><span>Total</span><strong>{money(finalTotal)}</strong></div>
+
+                <label className="sf-check">
+                  <input type="checkbox" checked={remember} onChange={(e) => setRemember(e.target.checked)} />
+                  Recordar mis datos en este dispositivo
+                </label>
+
+                {failure && <p className="sf-note sf-note--error" role="alert"><Icon name="alert" size={14} /> {failure}</p>}
+
+                <button type="submit" className="sf-btn sf-btn--primary sf-btn--lg sf-btn--block" disabled={submitting || cart.length === 0}>
+                  {submitting ? <><span className="sf-spinner" /> Enviando pedido…</> : <>Confirmar pedido · {money(finalTotal)}</>}
+                </button>
+                <p className="sf-checkout__legal"><Icon name="shield" size={13} /> Tus datos solo se comparten con {company?.name || 'el negocio'}.</p>
+              </aside>
             </div>
           </form>
         )}

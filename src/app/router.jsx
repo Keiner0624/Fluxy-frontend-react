@@ -49,7 +49,13 @@ function PageFallback() {
   )
 }
 
+/** La tienda es clara: su espera no puede ser la pantalla oscura del resto. */
+function StoreFallback() {
+  return <div style={{ minHeight: '100vh', background: '#f7f5f2' }} aria-busy="true" />
+}
+
 const render = component => <Suspense fallback={<PageFallback />}>{component}</Suspense>
+const renderStore = component => <Suspense fallback={<StoreFallback />}>{component}</Suspense>
 const protect = component => <ProtectedRoute>{render(component)}</ProtectedRoute>
 
 function getNormalizedPaymentStatus(searchParams, fallbackStatus = 'pending') {
@@ -71,7 +77,7 @@ function RootPage() {
     return <Navigate to={`/dashboard?${params.toString()}`} replace />
   }
 
-  return render(searchParams.get('store') ? <StorePage /> : <LandingPage />)
+  return searchParams.get('store') ? renderStore(<StorePage />) : render(<LandingPage />)
 }
 
 function PaymentReturnPage() {
@@ -88,7 +94,7 @@ export const router = createBrowserRouter([
   { path: '/', element: <RootPage /> },
   { path: '/login', element: render(<LoginPage />) },
   { path: '/register-business', element: render(<RegisterBusinessPage />) },
-  { path: '/store/:slug', element: render(<StorePage />) },
+  { path: '/store/:slug', element: renderStore(<StorePage />) },
   { path: '/dashboard', element: protect(<DashboardPage />) },
   { path: '/dashboard/metrics', element: protect(<MetricsPage />) },
   { path: '/dashboard/products', element: protect(<ProductsPage />) },

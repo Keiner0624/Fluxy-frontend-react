@@ -1,74 +1,64 @@
-import { useEffect, useState } from 'react'
+// Tarjeta de producto: foto, favorito, precio y agregar al carrito sin salir del catálogo.
 import Icon from '@/components/Icon'
+import { money, productImages, stockOf } from '../lib/storeFormat'
 
-export default function ProductCard({ product, onAddToCart, onViewDetail, index, company }) {
-  const [adding, setAdding] = useState(false)
-  const stock = Number(product.stock) || 0
-  const isOut = stock <= 0
-  const isLowStock = stock > 0 && stock <= 5
-  const phone = company?.phone?.replace(/[^0-9]/g, '')
-  const waMsg = encodeURIComponent(
-    `Hola, estoy interesado en ${product.name} de la tienda ${company?.name || ''}. ¿Está disponible?`
+export function QuantityStepper({ value, max, onChange, size = 'md', label }) {
+  return (
+    <div className={`sf-stepper sf-stepper--${size}`} role="group" aria-label={label || 'Cantidad'}>
+      <button type="button" onClick={() => onChange(value - 1)} aria-label="Quitar uno">
+        <Icon name={value <= 1 && size !== 'lg' ? 'trash' : 'minus'} size={size === 'sm' ? 14 : 16} />
+      </button>
+      <output aria-live="polite">{value}</output>
+      <button type="button" onClick={() => onChange(value + 1)} disabled={value >= max} aria-label="Agregar uno">
+        <Icon name="plus" size={size === 'sm' ? 14 : 16} />
+      </button>
+    </div>
   )
+}
 
-  useEffect(() => {
-    if (!adding) return undefined
-    const timeout = window.setTimeout(() => setAdding(false), 900)
-    return () => window.clearTimeout(timeout)
-  }, [adding])
+export function ProductPlaceholder({ product, size = 40 }) {
+  const emoji = product?.category?.emoji
+  return (
+    <span className="sf-placeholder" aria-hidden="true">
+      {emoji ? <span style={{ fontSize: size }}>{emoji}</span> : <Icon name="package" size={size} strokeWidth={1.3} />}
+    </span>
+  )
+}
 
-  const handleAdd = () => {
-    if (isOut) return
-    onAddToCart(product)
-    setAdding(true)
-  }
+export default function ProductCard({ product, quantity, favorite, ordersPaused, onOpen, onAdd, onSetQuantity, onToggleFavorite }) {
+  const stock = stockOf(product)
+  const isOut = stock <= 0
+  const isLow = !isOut && stock <= 5
+  const image = productImages(product)[0]
 
   return (
-    <article className={`store-product${isOut ? ' is-out' : ''}`} style={{ '--product-order': index }}>
-      <button type="button" className="store-product__media" onClick={() => onViewDetail(product)} aria-label={`Ver detalles de ${product.name}`}>
-        {product.imageUrl ? (
-          <img src={product.imageUrl} alt={product.name} loading="lazy" />
+    <article className={`sf-card${isOut ? ' is-out' : ''}`}>
+      <div className="sf-card__media">
+        <button type="button" className="sf-card__open" onClick={() => onOpen(product)} aria-label={`Ver ${product.name}`}>
+          {image ? <img src={image} alt="" loading="lazy" /> : <ProductPlaceholder product={product} />}
+        </button>
+        <button type="button" className={`sf-fav${favorite ? ' is-on' : ''}`} onClick={() => onToggleFavorite(product.id)}
+          aria-pressed={favorite} aria-label={favorite ? `Quitar ${product.name} de favoritos` : `Guardar ${product.name} en favoritos`}>
+          <Icon name="heart" size={17} strokeWidth={2} />
+        </button>
+        {isOut && <span className="sf-badge sf-badge--muted">Agotado</span>}
+        {isLow && <span className="sf-badge">Últimas {stock}</span>}
+      </div>
+
+      <div className="sf-card__body">
+        <button type="button" className="sf-card__title" onClick={() => onOpen(product)}>{product.name}</button>
+        <p className="sf-card__desc">{product.description || product.category?.name || ' '}</p>
+        <div className="sf-card__price">{money(product.price)}</div>
+
+        {quantity > 0 ? (
+          <QuantityStepper value={quantity} max={stock} onChange={(next) => onSetQuantity(product, next)} label={`Cantidad de ${product.name}`} />
         ) : (
-          <span className="store-product__placeholder"><Icon name="package" size={36} /></span>
-        )}
-        {isLowStock && <span className="store-product__badge">Últimas {stock} unidades</span>}
-        {isOut && <span className="store-product__badge store-product__badge--out">Agotado</span>}
-        <span className="store-product__view">Ver producto <Icon name="arrowRight" size={15} /></span>
-      </button>
-
-      <div className="store-product__content">
-        <div className="store-product__title-row">
-          <div>
-            {product.category?.name && <small>{product.category.name}</small>}
-            <h3>{product.name}</h3>
-          </div>
-          <strong>S/ {Number(product.price || 0).toFixed(2)}</strong>
-        </div>
-
-        {product.description && <p>{product.description}</p>}
-
-        <div className="store-product__availability">
-          <span className={isOut ? 'is-out' : isLowStock ? 'is-low' : ''} />
-          {isOut ? 'Sin disponibilidad' : isLowStock ? `Quedan ${stock} unidades` : `${stock} unidades disponibles`}
-        </div>
-
-        <div className="store-product__actions">
-          <button type="button" className="store-product__add" onClick={handleAdd} disabled={isOut || adding}>
-            <Icon name={adding ? 'check' : 'plus'} size={17} />
-            {isOut ? 'No disponible' : adding ? 'Agregado' : 'Agregar al carrito'}
+          <button type="button" className="sf-btn sf-btn--primary sf-btn--block sf-card__add" onClick={() => onAdd(product)}
+            disabled={isOut || ordersPaused}>
+            <Icon name="cart" size={16} />
+            {isOut ? 'Sin stock' : ordersPaused ? 'No disponible' : 'Agregar'}
           </button>
-          {phone && company?.plan !== 'FREE' && (
-            <a
-              href={`https://wa.me/${phone}?text=${waMsg}`}
-              target="_blank"
-              rel="noreferrer"
-              className="store-product__consult"
-              aria-label={`Consultar por ${product.name}`}
-            >
-              <Icon name="message" size={17} />
-            </a>
-          )}
-        </div>
+        )}
       </div>
     </article>
   )

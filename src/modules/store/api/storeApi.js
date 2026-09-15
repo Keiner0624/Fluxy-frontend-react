@@ -5,7 +5,7 @@ async function requestJson(path, options, fallbackMessage) {
   try {
     response = await fetch(`${API_URL}${path}`, options)
   } catch {
-    throw new Error('No se pudo conectar con la tienda. Verifica que el backend local esté encendido.')
+    throw new Error('No pudimos conectar con la tienda. Revisá tu conexión e intentá de nuevo.')
   }
 
   let data = null
@@ -23,6 +23,15 @@ async function requestJson(path, options, fallbackMessage) {
 
 export function getCompanyInfo(slug) {
   return requestJson(`/store/slug/${encodeURIComponent(slug)}/info`, undefined, 'Tienda no encontrada')
+}
+
+export function getCategories(slug) {
+  return requestJson(`/store/slug/${encodeURIComponent(slug)}/categories`, undefined, 'No se pudieron cargar las categorías')
+}
+
+export function validateCoupon(companyId, code, orderTotal) {
+  const params = new URLSearchParams({ code, companyId: String(companyId), orderTotal: String(orderTotal) })
+  return requestJson(`/coupons/validate?${params}`, undefined, 'El cupón no es válido')
 }
 
 export function getProducts(slug) {
