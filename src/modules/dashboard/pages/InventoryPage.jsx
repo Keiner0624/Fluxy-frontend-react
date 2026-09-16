@@ -230,7 +230,7 @@ export default function InventoryPage() {
             ) : (
               <>
                 <div className="fx-table-wrap" style={{ opacity: stock.loading ? .6 : 1 }}>
-                  <table className="fx-table">
+                  <table className="fx-table fx-table--stack">
                     <thead>
                       <tr>
                         <th>Producto</th>
@@ -244,23 +244,24 @@ export default function InventoryPage() {
                     <tbody>
                       {stockResult.content.map((item) => (
                         <tr key={item.id}>
-                          <td>
+                          <td className="fx-cell--main">
                             <div className="fx-row" style={{ gap: 10 }}>
                               <div className="fx-thumb">{item.imageUrl ? <img src={item.imageUrl} alt="" /> : <Icon name="image" size={14} />}</div>
                               <div style={{ minWidth: 0 }}>
-                                <div className="fx-table__strong fx-truncate" style={{ maxWidth: 240 }}>{item.name}</div>
+                                <div className="fx-table__strong fx-truncate fx-table__name" style={{ maxWidth: 240 }}>{item.name}</div>
                                 <div className="fx-hint" style={{ fontSize: 12 }}>{item.sku ? `SKU ${item.sku}` : 'Sin SKU'}{item.status === 'HIDDEN' ? ' · Oculto' : ''}</div>
                               </div>
                             </div>
                           </td>
                           <td className="fx-hide-md">{item.category || <span className="fx-hint">—</span>}</td>
-                          <td className="fx-table__num fx-table__strong" style={{ fontSize: 15 }}>{integer(item.stock)}</td>
-                          <td className="fx-table__num">
+                          <td className="fx-table__num fx-table__strong fx-cell--sub" style={{ fontSize: 15 }}><span className="fx-show-sm fx-hint">Stock </span>{integer(item.stock)}</td>
+                          <td className="fx-table__num fx-cell--end">
+                            <span className="fx-show-sm fx-hint">Mínimo </span>
                             <MinStockCell key={`${item.id}-${item.minStock}`} item={item} canEdit={canAdjust}
                               onSaved={(updated) => { stock.setData((d) => ({ ...d, content: d.content.map((x) => (x.id === updated.id ? updated : x)) })); summary.refresh() }} />
                           </td>
                           <td className="fx-hide-sm"><span className={`fx-badge ${STOCK_STATUS[item.stockStatus].badge}`}>{STOCK_STATUS[item.stockStatus].label}</span></td>
-                          <td>
+                          <td className="fx-cell--actions">
                             <div className="fx-row" style={{ gap: 2, justifyContent: 'flex-end' }}>
                               {canAdjust && (
                                 <>

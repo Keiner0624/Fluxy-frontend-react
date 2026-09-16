@@ -149,7 +149,8 @@
   color: var(--landing-navy);
 }
 
-.landing-mobile-nav {
+.landing-mobile-nav,
+.landing-mobile-backdrop {
   display: none;
 }
 
@@ -1755,6 +1756,21 @@
     margin-top: 9px;
   }
 
+  .landing-mobile-nav {
+    box-shadow: 0 18px 30px rgba(15, 23, 42, .12);
+  }
+
+  .landing-mobile-backdrop {
+    display: block;
+    position: fixed;
+    inset: 0;
+    z-index: 99;
+    border: 0;
+    padding: 0;
+    background: rgba(15, 23, 42, .35);
+    cursor: default;
+  }
+
   .landing-hero {
     padding-top: 130px;
   }
@@ -1861,7 +1877,11 @@
   }
 
   .landing-hero {
-    padding: 112px 0 74px;
+    padding: 100px 0 56px;
+  }
+
+  .landing-hero__grid {
+    gap: 40px;
   }
 
   .landing-eyebrow {
@@ -1897,14 +1917,71 @@
     margin-left: 4px;
   }
 
-  .landing-hero__visual {
-    margin-inline: -46px;
-    transform: scale(.82);
+  /* La maqueta se rearma para el celular: escalar la de escritorio la cortaba
+     y dejaba un hueco, porque transform no achica el espacio que ocupa. */
+  .dashboard-preview {
+    min-height: 0;
+    border-radius: 16px;
+    grid-template-columns: minmax(0, 1fr);
+    transform: none;
   }
 
-  .dashboard-preview {
-    min-width: 680px;
-    transform: none;
+  .dashboard-sidebar,
+  .dashboard-orders,
+  .dashboard-metric:nth-child(3) {
+    display: none;
+  }
+
+  .dashboard-topbar {
+    min-height: 52px;
+    padding: 0 14px;
+  }
+
+  .dashboard-topbar strong {
+    font-size: 15px;
+  }
+
+  .dashboard-topbar small {
+    font-size: 10px;
+  }
+
+  .dashboard-avatar {
+    font-size: 10px;
+  }
+
+  .dashboard-metrics {
+    padding: 12px;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 8px;
+  }
+
+  .dashboard-metric {
+    padding: 12px;
+  }
+
+  .dashboard-metric > span {
+    font-size: 11px;
+  }
+
+  .dashboard-metric strong {
+    font-size: 19px;
+  }
+
+  .dashboard-metric small {
+    font-size: 10px;
+  }
+
+  .dashboard-panels {
+    padding: 0 12px 12px;
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .dashboard-chart__body {
+    height: 180px;
+  }
+
+  .dashboard-chart__body svg {
+    height: 125px;
   }
 
   .floating-card {
@@ -1953,11 +2030,16 @@
   }
 
   .benefit-row + .benefit-row {
-    margin-top: 105px;
+    margin-top: 80px;
+  }
+
+  .benefit-row,
+  .benefit-row--reverse {
+    gap: 40px;
   }
 
   .benefit-visual {
-    min-height: 390px;
+    min-height: 0;
   }
 
   .benefit-visual--orders {
@@ -2066,11 +2148,6 @@
 }
 
 @media (max-width: 420px) {
-  .landing-hero__visual {
-    margin-inline: -90px;
-    transform: scale(.7);
-  }
-
   .landing-audience .landing-shell > div {
     grid-template-columns: 1fr;
   }
@@ -2087,11 +2164,7 @@
   }
 
   .landing-footer__main {
-    grid-template-columns: 1fr;
-  }
-
-  .landing-footer__main > div:first-child {
-    grid-column: auto;
+    gap: 28px 20px;
   }
 }
 

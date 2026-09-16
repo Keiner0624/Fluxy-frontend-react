@@ -147,7 +147,7 @@ export default function OrdersPage() {
         ) : (
           <>
             <div className="fx-table-wrap" style={{ opacity: orders.loading ? .6 : 1, transition: 'opacity .15s' }}>
-              <table className="fx-table">
+              <table className="fx-table fx-table--stack">
                 <thead>
                   <tr>
                     <th>Pedido</th>
@@ -163,21 +163,21 @@ export default function OrdersPage() {
                 <tbody>
                   {result.content.map((order) => (
                     <tr key={order.id} className="is-clickable" onClick={() => openOrder(order.id)}>
-                      <td className="fx-table__strong">#{order.id}</td>
-                      <td>
-                        <div className="fx-truncate" style={{ maxWidth: 220, color: 'var(--fx-ink)' }}>{order.customerName || 'Sin nombre'}</div>
+                      <td className="fx-table__strong fx-cell--lead">#{order.id}</td>
+                      <td className="fx-cell--main">
+                        <div className="fx-truncate fx-table__name" style={{ maxWidth: 220, color: 'var(--fx-ink)' }}>{order.customerName || 'Sin nombre'}</div>
                         {order.customerPhone && <div className="fx-hint" style={{ fontSize: 12 }}>{order.customerPhone}</div>}
                       </td>
                       <td className="fx-hide-md" style={{ fontSize: 13 }}>{dateTime(order.createdAt)}</td>
                       <td className="fx-table__num fx-hide-md">{order.units}</td>
-                      <td className="fx-table__num fx-table__strong">{money(order.total)}</td>
+                      <td className="fx-table__num fx-table__strong fx-cell--end">{money(order.total)}</td>
                       <td className="fx-hide-sm">
                         {order.status === 'CANCELLED'
                           ? <span className="fx-hint">—</span>
                           : <Badge config={ORDER_PAYMENT_STATUS[order.paymentStatus]} fallback={order.paymentStatus} />}
                       </td>
-                      <td><Badge config={ORDER_STATUS[order.status]} fallback={order.status} /></td>
-                      <td><Icon name="chevronRight" size={15} style={{ color: 'var(--fx-muted)' }} /></td>
+                      <td className="fx-cell--sub"><Badge config={ORDER_STATUS[order.status]} fallback={order.status} /></td>
+                      <td className="fx-cell--actions"><Icon name="chevronRight" size={15} style={{ color: 'var(--fx-muted)' }} /></td>
                     </tr>
                   ))}
                 </tbody>

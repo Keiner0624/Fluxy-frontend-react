@@ -142,7 +142,7 @@ function ProductForm({ product, categories, onClose, onSaved }) {
         </>
       )}
     >
-      <div className="fx-grid" style={{ gridTemplateColumns: '2fr 1fr', gap: 12 }}>
+      <div className="fx-grid fx-grid--main-side" style={{ gap: 12 }}>
         <div className="fx-field">
           <label className="fx-label" htmlFor="p-name">Nombre</label>
           <input id="p-name" className="fx-input" value={form.name} onChange={set('name')} maxLength={200} placeholder="Nombre del producto" />
@@ -351,12 +351,12 @@ export default function ProductsPage() {
           <input className="fx-input" placeholder="Buscar por nombre o SKU" value={query} onChange={filter(setQuery)} />
         </div>
         <select className="fx-select" style={{ maxWidth: 190 }} value={category} onChange={filter(setCategory)} aria-label="Categoría">
-          <option value="">Todas las categorías</option>
+          <option value="">Categorías</option>
           <option value="none">Sin categoría</option>
           {(categories.data || []).map((c) => <option key={c.id} value={c.id}>{c.name}</option>)}
         </select>
         <select className="fx-select" style={{ maxWidth: 150 }} value={status} onChange={filter(setStatus)} aria-label="Estado">
-          <option value="">Todos los estados</option>
+          <option value="">Estados</option>
           <option value="ACTIVE">Activos</option>
           <option value="HIDDEN">Ocultos</option>
         </select>
@@ -415,13 +415,13 @@ export default function ProductsPage() {
         ) : (
           <>
             <div className="fx-table-wrap" style={{ opacity: list.loading ? .6 : 1 }}>
-              <table className="fx-table">
+              <table className="fx-table fx-table--stack">
                 <thead>
                   <tr>
                     {(canUpdate || canDelete) && (
                       <th className="fx-table__check"><input type="checkbox" checked={allSelected} onChange={toggleAll} aria-label="Seleccionar todos" /></th>
                     )}
-                    <th style={{ width: 52 }} />
+                    <th className="fx-hide-sm" style={{ width: 52 }} />
                     <th>Producto</th>
                     <th className="fx-hide-md">Categoría</th>
                     <th className="fx-table__num">Precio</th>
@@ -438,25 +438,25 @@ export default function ProductsPage() {
                         {(canUpdate || canDelete) && (
                           <td className="fx-table__check"><input type="checkbox" checked={selected.has(p.id)} onChange={() => toggle(p.id)} aria-label={`Seleccionar ${p.name}`} /></td>
                         )}
-                        <td><div className="fx-thumb">{p.imageUrl ? <img src={p.imageUrl} alt="" /> : <Icon name="image" size={15} />}</div></td>
-                        <td>
-                          <div className="fx-table__strong fx-truncate" style={{ maxWidth: 280 }}>{p.name}</div>
+                        <td className="fx-hide-sm"><div className="fx-thumb">{p.imageUrl ? <img src={p.imageUrl} alt="" /> : <Icon name="image" size={15} />}</div></td>
+                        <td className="fx-cell--main">
+                          <div className="fx-table__strong fx-truncate fx-table__name">{p.name}</div>
                           <div className="fx-hint" style={{ fontSize: 12 }}>{p.sku ? `SKU ${p.sku}` : 'Sin SKU'}</div>
                         </td>
                         <td className="fx-hide-md">
                           {p.category ? <span className="fx-badge">{p.category.name}</span> : <span className="fx-hint">—</span>}
                         </td>
-                        <td className="fx-table__num">
+                        <td className="fx-table__num fx-cell--sub">
                           <PriceCell key={`${p.id}-${p.price}`} product={p} canEdit={canUpdate} onSaved={(u) => { replaceRow(u); stats.refresh() }} />
                         </td>
-                        <td className="fx-table__num"><span className={`fx-badge ${st.badge}`}>{st.label}</span></td>
+                        <td className="fx-table__num fx-cell--end"><span className={`fx-badge ${st.badge}`}>{st.label}</span></td>
                         <td className="fx-hide-sm">
                           {p.status === 'HIDDEN'
                             ? <span className="fx-badge">Oculto</span>
                             : p.stock <= 0 ? <span className="fx-badge fx-badge--danger">Agotado</span>
                               : <span className="fx-badge fx-badge--ok"><span className="fx-dot" />Activo</span>}
                         </td>
-                        <td>
+                        <td className="fx-cell--actions">
                           <div className="fx-row" style={{ gap: 2, justifyContent: 'flex-end' }}>
                             {canUpdate && (
                               <button className="fx-btn fx-btn--ghost fx-btn--icon" onClick={() => toggleStatus(p)}

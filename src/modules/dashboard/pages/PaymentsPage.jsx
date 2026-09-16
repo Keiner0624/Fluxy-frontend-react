@@ -218,7 +218,7 @@ export default function PaymentsPage() {
             ) : (
               <>
                 <div className="fx-table-wrap" style={{ opacity: list.loading ? .6 : 1 }}>
-                  <table className="fx-table">
+                  <table className="fx-table fx-table--stack">
                     <thead>
                       <tr>
                         <th>Pedido</th>
@@ -233,7 +233,7 @@ export default function PaymentsPage() {
                     <tbody>
                       {result.content.map((p) => (
                         <tr key={p.id}>
-                          <td>
+                          <td className="fx-cell--main">
                             <button type="button" className="fx-link" onClick={() => setOrderId(p.orderId)}>#{p.orderId}</button>
                             <div className="fx-hint fx-truncate" style={{ fontSize: 12, maxWidth: 170 }}>{p.customerName || '—'}</div>
                           </td>
@@ -246,12 +246,12 @@ export default function PaymentsPage() {
                                 ? <button type="button" className="fx-link" style={{ fontSize: 13 }} onClick={() => setEditingRef(p)}>Agregar</button>
                                 : <span className="fx-hint">—</span>}
                           </td>
-                          <td className="fx-table__num">
+                          <td className="fx-table__num fx-cell--end">
                             <div className="fx-table__strong">{money(p.amount)}</div>
                             {p.refundedAmount > 0 && <div className="fx-hint" style={{ fontSize: 12 }}>− {money(p.refundedAmount)}</div>}
                           </td>
-                          <td><Badge config={PAYMENT_STATUS[p.status]} fallback={p.status} /></td>
-                          <td>
+                          <td className="fx-cell--sub"><Badge config={PAYMENT_STATUS[p.status]} fallback={p.status} /></td>
+                          <td className="fx-cell--actions">
                             <div className="fx-row" style={{ gap: 4, justifyContent: 'flex-end' }}>
                               {p.status === 'PENDING' && canUpdate && p.orderStatus !== 'CANCELLED' && (
                                 <>

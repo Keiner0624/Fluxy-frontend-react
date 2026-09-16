@@ -287,17 +287,17 @@ export default function DashboardPage() {
                   text="Compartí el enlace de tu tienda: los pedidos van a aparecer acá apenas lleguen." />
               ) : (
                 <div className="fx-table-wrap">
-                  <table className="fx-table">
+                  <table className="fx-table fx-table--stack">
                     <tbody>
                       {o.recentOrders.map((order) => (
                         <tr key={order.id} className="is-clickable" onClick={() => navigate(`/dashboard/orders?order=${order.id}`)}>
-                          <td className="fx-table__strong">#{order.id}</td>
-                          <td>
-                            <div className="fx-truncate" style={{ maxWidth: 200, color: 'var(--fx-ink)' }}>{order.customerName || 'Sin nombre'}</div>
+                          <td className="fx-table__strong fx-cell--lead">#{order.id}</td>
+                          <td className="fx-cell--main">
+                            <div className="fx-truncate fx-table__name" style={{ maxWidth: 200, color: 'var(--fx-ink)' }}>{order.customerName || 'Sin nombre'}</div>
                             <div className="fx-hint" style={{ fontSize: 12 }}>{dateTime(order.createdAt)}</div>
                           </td>
-                          <td><Badge config={ORDER_STATUS[order.status]} fallback={order.status} /></td>
-                          <td className="fx-table__num fx-table__strong">{money(order.total)}</td>
+                          <td className="fx-cell--sub"><Badge config={ORDER_STATUS[order.status]} fallback={order.status} /></td>
+                          <td className="fx-table__num fx-table__strong fx-cell--end">{money(order.total)}</td>
                         </tr>
                       ))}
                     </tbody>

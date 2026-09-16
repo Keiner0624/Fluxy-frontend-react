@@ -141,7 +141,7 @@ function CustomerDetail({ customerId, onClose, onChanged }) {
               <StatCard label="Última compra" value={<span style={{ fontSize: 16 }}>{c.lastOrderAt ? date(c.lastOrderAt) : '—'}</span>} />
             </div>
 
-            <div className="fx-grid" style={{ gridTemplateColumns: 'repeat(auto-fit, minmax(260px, 1fr))', gap: 20 }}>
+            <div className="fx-grid" style={{ gridTemplateColumns: 'repeat(auto-fit, minmax(min(260px, 100%), 1fr))', gap: 20 }}>
               <section>
                 <p className="fx-eyebrow" style={{ marginBottom: 8 }}>Contacto</p>
                 <dl className="fx-deflist">
@@ -304,7 +304,7 @@ export default function CustomersPage() {
         ) : (
           <>
             <div className="fx-table-wrap" style={{ opacity: list.loading ? .6 : 1 }}>
-              <table className="fx-table">
+              <table className="fx-table fx-table--stack">
                 <thead>
                   <tr>
                     <th>Cliente</th>
@@ -318,18 +318,18 @@ export default function CustomersPage() {
                 <tbody>
                   {result.content.map((c) => (
                     <tr key={c.id} className="is-clickable" onClick={() => openCustomer(c.id)}>
-                      <td>
-                        <div className="fx-table__strong fx-truncate" style={{ maxWidth: 240 }}>{c.name}</div>
+                      <td className="fx-cell--main">
+                        <div className="fx-table__strong fx-truncate fx-table__name" style={{ maxWidth: 240 }}>{c.name}</div>
                         <Tags tags={c.tags} />
                       </td>
                       <td className="fx-hide-sm" style={{ fontSize: 13 }}>
                         <div>{c.phone || '—'}</div>
                         {c.email && <div className="fx-hint" style={{ fontSize: 12 }}>{c.email}</div>}
                       </td>
-                      <td className="fx-table__num">{integer(c.saleOrders)}</td>
-                      <td className="fx-table__num fx-table__strong">{money(c.totalSpent)}</td>
+                      <td className="fx-table__num fx-cell--sub"><span className="fx-show-sm fx-hint">Compras </span>{integer(c.saleOrders)}</td>
+                      <td className="fx-table__num fx-table__strong fx-cell--end">{money(c.totalSpent)}</td>
                       <td className="fx-hide-md" style={{ fontSize: 13 }}>{c.lastOrderAt ? date(c.lastOrderAt) : '—'}</td>
-                      <td><Icon name="chevronRight" size={15} style={{ color: 'var(--fx-muted)' }} /></td>
+                      <td className="fx-cell--actions"><Icon name="chevronRight" size={15} style={{ color: 'var(--fx-muted)' }} /></td>
                     </tr>
                   ))}
                 </tbody>

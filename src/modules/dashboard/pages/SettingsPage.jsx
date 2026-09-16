@@ -332,7 +332,7 @@ export default function SettingsPage() {
               <textarea id="s-desc" className="fx-textarea" value={form.description} onChange={(e) => setForm({ ...form, description: e.target.value })} placeholder="Contá brevemente qué vendés" />
             </div>
 
-            <div className="fx-grid" style={{ gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: 12 }}>
+            <div className="fx-grid" style={{ gridTemplateColumns: 'repeat(auto-fit, minmax(min(200px, 100%), 1fr))', gap: 12 }}>
               <div className="fx-field">
                 <label className="fx-label" htmlFor="s-phone">WhatsApp</label>
                 <input id="s-phone" className="fx-input" value={form.phone} onChange={(e) => setForm({ ...form, phone: e.target.value })} placeholder="999888777" />

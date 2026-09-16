@@ -276,6 +276,7 @@
   font-size: 12px;
   font-weight: 500;
   white-space: nowrap;
+  flex-shrink: 0;
 }
 .fx-badge--ok { border-color: var(--fx-ok-line); background: var(--fx-ok-soft); color: var(--fx-ok); }
 .fx-badge--warn { border-color: var(--fx-warn-line); background: var(--fx-warn-soft); color: var(--fx-warn); }
@@ -307,7 +308,9 @@
 .fx-table tbody tr:last-child td { border-bottom: none; }
 .fx-table tbody tr:hover td { background: #fafcfe; }
 .fx-table__strong { color: var(--fx-ink); font-weight: 500; }
-.fx-table__num { font-variant-numeric: tabular-nums; text-align: right; }
+.fx-table__num { font-variant-numeric: tabular-nums; text-align: right; white-space: nowrap; }
+.fx-table__name { max-width: 280px; }
+.fx-show-sm { display: none; }
 
 /* ── Estado vacío ─────────────────────────────────────────────────────────── */
 
@@ -355,10 +358,11 @@
 
 .fx-row { display: flex; align-items: center; gap: 10px; }
 .fx-row--between { justify-content: space-between; }
-.fx-grid { display: grid; gap: 16px; }
+.fx-grid { display: grid; gap: 16px; grid-template-columns: minmax(0, 1fr); }
+.fx-grid--main-side { grid-template-columns: minmax(0, 2fr) minmax(0, 1fr); }
 .fx-stack { display: flex; flex-direction: column; gap: 4px; }
 .fx-num { font-variant-numeric: tabular-nums; }
-.fx-truncate { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.fx-truncate { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 
 @media (max-width: 720px) {
   .fx-hide-sm { display: none !important; }
@@ -536,7 +540,7 @@
 }
 
 @media (max-width: 900px) {
-  .fx-legal__body { grid-template-columns: 1fr; gap: 26px; }
+  .fx-legal__body { grid-template-columns: minmax(0, 1fr); gap: 26px; }
   .fx-legal__toc { position: static; }
   .fx-legal__doc { padding: 26px 22px; }
   .fx-legal__foot { align-items: flex-start; flex-direction: column; }
@@ -559,15 +563,18 @@
   color: var(--fx-sidebar-ink);
 }
 
-.fx-sidebar--desktop { position: sticky; top: 0; height: 100vh; flex-shrink: 0; }
+.fx-sidebar--desktop { position: sticky; top: 0; height: 100vh; height: 100dvh; flex-shrink: 0; }
 
 .fx-sidebar--mobile {
   position: fixed;
   z-index: 60;
   top: 0;
   left: 0;
+  width: min(272px, 86vw);
   height: 100vh;
+  height: 100dvh;
   box-shadow: var(--fx-shadow-lg);
+  animation: fx-slide-in .2s ease;
 }
 
 .fx-sidebar__overlay {
@@ -757,7 +764,9 @@
   width: 100%;
   max-width: 560px;
   max-height: calc(100vh - 40px);
+  max-height: calc(100dvh - 40px);
   overflow-y: auto;
+  overscroll-behavior: contain;
   border-radius: var(--fx-r-lg);
   background: var(--fx-surface);
   box-shadow: var(--fx-shadow-lg);
@@ -790,6 +799,8 @@
 }
 
 @keyframes fx-fade { from { opacity: 0 } to { opacity: 1 } }
+@keyframes fx-slide-in { from { transform: translateX(-100%) } to { transform: translateX(0) } }
+@keyframes fx-sheet { from { transform: translateY(24px); opacity: 0 } to { transform: translateY(0); opacity: 1 } }
 @keyframes fx-pop { from { opacity: 0; transform: translateY(8px) } to { opacity: 1; transform: translateY(0) } }
 
 /* ── Bloqueo por plan ─────────────────────────────────────────────────────── */
@@ -904,6 +915,7 @@
 .fx-tabs {
   display: flex;
   overflow-x: auto;
+  scrollbar-width: none;
   gap: 3px;
   padding: 4px;
   border: 1px solid var(--fx-line);
@@ -911,8 +923,11 @@
   background: var(--fx-surface);
 }
 
+.fx-tabs::-webkit-scrollbar { display: none; }
+
 .fx-tab {
   display: inline-flex;
+  flex-shrink: 0;
   align-items: center;
   gap: 7px;
   padding: 7px 13px;
@@ -1102,7 +1117,7 @@
 .fx-preview-frame--mobile { width: 320px; margin-inline: auto; }
 
 @media (max-width: 1000px) {
-  .fx-style { grid-template-columns: 1fr; }
+  .fx-style { grid-template-columns: minmax(0, 1fr); }
   .fx-style__preview { position: static; }
 }
 
@@ -1232,7 +1247,7 @@ html[data-theme-anim='light']::view-transition-new(root) { z-index: 1; }
 .fx-share__fill { height: 100%; border-radius: 4px; background: var(--fx-brand); }
 
 .fx-split { display: grid; align-items: start; gap: 16px; grid-template-columns: minmax(0, 1.6fr) minmax(0, 1fr); }
-@media (max-width: 1000px) { .fx-split { grid-template-columns: 1fr; } }
+@media (max-width: 1000px) { .fx-split { grid-template-columns: minmax(0, 1fr); } }
 
 /* Etiquetas de cliente */
 .fx-chips { display: flex; flex-wrap: wrap; gap: 5px; }
@@ -1405,4 +1420,91 @@ html[data-theme-anim='light']::view-transition-new(root) { z-index: 1; }
   .fx-stat__foot { font-size: 11.5px; }
   .fx-toolbar .fx-select { max-width: none !important; flex: 1 1 140px; }
   .fx-page-head__actions { flex-wrap: wrap; }
+}
+
+/* En teléfonos: campos a 16px para que iOS no haga zoom al enfocarlos, y los pares
+   "campo principal + secundario" se apilan para no dejar un campo demasiado angosto. */
+@media (max-width: 720px) {
+  .fx-input,
+  .fx-select,
+  .fx-textarea,
+  .fx-inline-edit { font-size: 16px; }
+  .fx-input--sm,
+  .fx-select--sm { font-size: 15px; }
+}
+
+@media (max-width: 480px) {
+  .fx-grid--main-side { grid-template-columns: minmax(0, 1fr); }
+  .fx-content { padding-inline: 14px; }
+}
+
+/* En teléfonos los modales salen desde abajo (hoja) y usan todo el ancho. */
+@media (max-width: 560px) {
+  .fx-modal { align-items: flex-end; padding: 0; }
+  .fx-modal__panel {
+    max-width: none;
+    max-height: calc(100vh - 24px);
+    max-height: calc(100dvh - 24px);
+    border-radius: var(--fx-r-lg) var(--fx-r-lg) 0 0;
+    animation: fx-sheet .2s ease;
+  }
+  .fx-modal__head { padding: 15px 18px; }
+  .fx-modal__body { padding: 18px; }
+  .fx-modal__foot { padding: 12px 18px calc(12px + env(safe-area-inset-bottom)); }
+  .fx-modal__foot > .fx-btn { flex: 1; justify-content: center; }
+  .fx-order-foot > * { flex: 1 1 0; min-width: 0; justify-content: center; margin-right: 0 !important; }
+  .fx-order-foot > .fx-order-foot__main { flex-basis: 100%; }
+}
+
+/* Tablas compactas en teléfono: menos relleno para que quepan sin desplazar tanto. */
+@media (max-width: 560px) {
+  .fx-table { font-size: 13.5px; }
+  .fx-table th,
+  .fx-table td { padding: 10px 8px; }
+  .fx-table th:first-child,
+  .fx-table td:first-child { padding-left: 14px; }
+  .fx-table th:last-child,
+  .fx-table td:last-child { padding-right: 12px; }
+  .fx-table__name { max-width: 42vw; }
+  .fx-table .fx-inline-edit { width: 76px; }
+  .fx-toolbar .fx-search { flex-basis: 100%; }
+  .fx-toolbar > .fx-row { flex: 1 1 140px; min-width: 0; }
+  .fx-toolbar > .fx-row > .fx-input { width: auto !important; min-width: 0; flex: 1; }
+  .fx-toolbar .fx-select { padding-left: 10px; padding-right: 28px; background-position: right 9px center; }
+}
+
+/* Tablas "apilables": en teléfono cada fila es una tarjeta de dos líneas
+   (principal + acciones arriba, precio + estado abajo) en vez de desplazarse de lado. */
+@media (max-width: 560px) {
+  .fx-table--stack,
+  .fx-table--stack tbody { display: block; }
+  .fx-table--stack thead { display: none; }
+  .fx-table--stack tbody tr {
+    display: grid;
+    align-items: center;
+    gap: 6px 10px;
+    grid-template-areas: "check main actions" "check sub end";
+    grid-template-columns: auto minmax(0, 1fr) auto;
+    padding: 12px 12px 12px 14px;
+    border-bottom: 1px solid var(--fx-line);
+  }
+  .fx-table--stack tbody tr:last-child { border-bottom: none; }
+  .fx-table--stack tbody tr.is-selected { background: var(--fx-brand-soft); }
+  .fx-table--stack tbody td,
+  .fx-table--stack tbody td:first-child,
+  .fx-table--stack tbody td:last-child { padding: 0; border: none; background: none !important; }
+  .fx-table--stack .fx-table__check,
+  .fx-table--stack .fx-cell--lead { grid-area: check; width: auto; }
+  .fx-table--stack .fx-cell--lead { align-self: start; line-height: 1.45; }
+  .fx-table--stack .fx-cell--main { grid-area: main; }
+  .fx-table--stack .fx-cell--actions { grid-area: actions; }
+  .fx-table--stack tbody tr:not(:has(.fx-table__check, .fx-cell--lead)) {
+    grid-template-areas: "main actions" "sub end";
+    grid-template-columns: minmax(0, 1fr) auto;
+  }
+  .fx-table--stack .fx-cell--sub { grid-area: sub; justify-self: start; }
+  .fx-table--stack .fx-cell--end { grid-area: end; justify-self: end; }
+  .fx-table--stack .fx-table__name { max-width: none !important; }
+  .fx-table--stack .fx-cell--main .fx-row { min-width: 0; }
+  .fx-show-sm { display: inline !important; }
 }

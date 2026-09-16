@@ -92,7 +92,13 @@ export default function DashboardLayout({ children }) {
 
   useEffect(() => {
     document.body.style.overflow = sidebarOpen ? 'hidden' : ''
-    return () => { document.body.style.overflow = '' }
+    if (!sidebarOpen) return undefined
+    const onKey = (event) => { if (event.key === 'Escape') setSidebarOpen(false) }
+    window.addEventListener('keydown', onKey)
+    return () => {
+      document.body.style.overflow = ''
+      window.removeEventListener('keydown', onKey)
+    }
   }, [sidebarOpen])
 
   // Cierra el menú móvil al cambiar de ruta
@@ -251,7 +257,8 @@ export default function DashboardLayout({ children }) {
       </div>
 
       <Toaster
-        position="bottom-right"
+        // En teléfono arriba: abajo tapaba los botones de las hojas y la barra del navegador.
+        position={window.matchMedia?.('(max-width: 720px)').matches ? 'top-center' : 'bottom-right'}
         toastOptions={{
           duration: 3500,
           style: {

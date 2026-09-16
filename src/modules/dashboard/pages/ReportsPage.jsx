@@ -116,7 +116,7 @@ function ReportsContent() {
           </div>
         </ReportCard>
 
-        <div className="fx-grid" style={{ gridTemplateColumns: 'repeat(auto-fit, minmax(340px, 1fr))', gap: 16 }}>
+        <div className="fx-grid" style={{ gridTemplateColumns: 'repeat(auto-fit, minmax(min(340px, 100%), 1fr))', gap: 16 }}>
           <ReportCard title="Ventas por categoría" type="categories" range={range}>
             {!categories.data ? <Loading /> : categories.data.length === 0 ? (
               <EmptyState icon="categories" title="Sin ventas en el período" />
@@ -144,7 +144,7 @@ function ReportsContent() {
           </ReportCard>
         </div>
 
-        <div className="fx-grid" style={{ gridTemplateColumns: 'repeat(auto-fit, minmax(340px, 1fr))', gap: 16 }}>
+        <div className="fx-grid" style={{ gridTemplateColumns: 'repeat(auto-fit, minmax(min(340px, 100%), 1fr))', gap: 16 }}>
           <ReportCard title="Clientes frecuentes" type="customers" range={range}>
             {!customers.data ? <Loading /> : customers.data.length === 0 ? (
               <EmptyState icon="customers" title="Sin compras en el período" />

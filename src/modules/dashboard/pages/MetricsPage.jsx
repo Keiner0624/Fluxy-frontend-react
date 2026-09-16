@@ -54,7 +54,7 @@ function MetricsContent() {
         </div>
       </div>
 
-      <div className="fx-grid" style={{ gridTemplateColumns: 'repeat(auto-fit, minmax(320px, 1fr))', gap: 16 }}>
+      <div className="fx-grid" style={{ gridTemplateColumns: 'repeat(auto-fit, minmax(min(320px, 100%), 1fr))', gap: 16 }}>
         <div className="fx-card">
           <div className="fx-card__head"><h2 className="fx-h3">Pedidos por estado</h2></div>
           <div className="fx-card__body">

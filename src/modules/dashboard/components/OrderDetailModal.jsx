@@ -83,7 +83,7 @@ export default function OrderDetailModal({ orderId, onClose, onChanged }) {
   const outstanding = order ? Math.max(order.total - order.paidAmount, 0) : 0
 
   const footer = order && (canUpdate || canCancel) && order.nextStatuses.length > 0 ? (
-    <div className="fx-row" style={{ flexWrap: 'wrap', justifyContent: 'flex-end', gap: 8, width: '100%' }}>
+    <div className="fx-row fx-order-foot" style={{ flexWrap: 'wrap', justifyContent: 'flex-end', gap: 8, width: '100%' }}>
       {canCancel && (
         <button type="button" className="fx-btn fx-btn--danger" onClick={() => setCancelling(true)} disabled={Boolean(busy)} style={{ marginRight: 'auto' }}>
           Cancelar pedido
@@ -103,7 +103,7 @@ export default function OrderDetailModal({ orderId, onClose, onChanged }) {
         </select>
       )}
       {canUpdate && primaryNext && (
-        <button type="button" className="fx-btn fx-btn--primary" onClick={() => move(primaryNext)} disabled={Boolean(busy)}>
+        <button type="button" className="fx-btn fx-btn--primary fx-order-foot__main" onClick={() => move(primaryNext)} disabled={Boolean(busy)}>
           {busy === primaryNext ? <><span className="fx-spinner" /> Guardando…</> : <><Icon name="check" size={15} /> {ORDER_ACTION[primaryNext]}</>}
         </button>
       )}
@@ -140,7 +140,7 @@ export default function OrderDetailModal({ orderId, onClose, onChanged }) {
               </div>
             )}
 
-            <div className="fx-grid" style={{ gridTemplateColumns: 'repeat(auto-fit, minmax(250px, 1fr))', gap: 20 }}>
+            <div className="fx-grid" style={{ gridTemplateColumns: 'repeat(auto-fit, minmax(min(250px, 100%), 1fr))', gap: 20 }}>
               <section>
                 <p className="fx-eyebrow" style={{ marginBottom: 8 }}>Cliente</p>
                 <dl className="fx-deflist">

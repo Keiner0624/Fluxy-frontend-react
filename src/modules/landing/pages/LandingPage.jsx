@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { Link } from 'react-router-dom'
 import './LandingPage.css'
 
@@ -137,45 +137,55 @@ function Navbar() {
     ['Precios', '#pricing'],
   ]
 
+  useEffect(() => {
+    if (!open) return undefined
+    const onKey = (event) => { if (event.key === 'Escape') setOpen(false) }
+    window.addEventListener('keydown', onKey)
+    return () => window.removeEventListener('keydown', onKey)
+  }, [open])
+
   return (
-    <header className="landing-nav">
-      <div className="landing-shell landing-nav__inner">
-        <Link to="/" aria-label="Fluxy, página principal"><BrandMark /></Link>
+    <>
+      {open && <button className="landing-mobile-backdrop" type="button" aria-label="Cerrar menú" onClick={() => setOpen(false)} />}
+      <header className="landing-nav">
+        <div className="landing-shell landing-nav__inner">
+          <Link to="/" aria-label="Fluxy, página principal"><BrandMark /></Link>
 
-        <nav className="landing-nav__links" aria-label="Navegación principal">
-          {links.map(([label, href]) => <a key={href} href={href}>{label}</a>)}
-        </nav>
+          <nav className="landing-nav__links" aria-label="Navegación principal">
+            {links.map(([label, href]) => <a key={href} href={href}>{label}</a>)}
+          </nav>
 
-        <div className="landing-nav__actions">
-          <Link className="landing-login" to="/login">Iniciar sesión</Link>
-          <Link className="landing-button landing-button--small" to="/register-business">
-            Comenzar gratis
-          </Link>
+          <div className="landing-nav__actions">
+            <Link className="landing-login" to="/login">Iniciar sesión</Link>
+            <Link className="landing-button landing-button--small" to="/register-business">
+              Comenzar gratis
+            </Link>
+          </div>
+
+          <button
+            className="landing-menu"
+            type="button"
+            aria-label={open ? 'Cerrar menú' : 'Abrir menú'}
+            aria-expanded={open}
+            onClick={() => setOpen(value => !value)}
+          >
+            <Icon name={open ? 'close' : 'menu'} />
+          </button>
         </div>
 
-        <button
-          className="landing-menu"
-          type="button"
-          aria-label={open ? 'Cerrar menú' : 'Abrir menú'}
-          aria-expanded={open}
-          onClick={() => setOpen(value => !value)}
-        >
-          <Icon name={open ? 'close' : 'menu'} />
-        </button>
-      </div>
-
-      {open && (
-        <div className="landing-mobile-nav">
-          {links.map(([label, href]) => (
-            <a key={href} href={href} onClick={() => setOpen(false)}>{label}</a>
-          ))}
-          <Link to="/login" onClick={() => setOpen(false)}>Iniciar sesión</Link>
-          <Link className="landing-button" to="/register-business" onClick={() => setOpen(false)}>
-            Comenzar gratis
-          </Link>
-        </div>
-      )}
-    </header>
+        {open && (
+          <div className="landing-mobile-nav">
+            {links.map(([label, href]) => (
+              <a key={href} href={href} onClick={() => setOpen(false)}>{label}</a>
+            ))}
+            <Link to="/login" onClick={() => setOpen(false)}>Iniciar sesión</Link>
+            <Link className="landing-button" to="/register-business" onClick={() => setOpen(false)}>
+              Comenzar gratis
+            </Link>
+          </div>
+        )}
+      </header>
+    </>
   )
 }
 
