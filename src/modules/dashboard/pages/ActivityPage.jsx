@@ -53,11 +53,13 @@ const ACTIONS = {
 
 const DETAIL_LABELS = { method: 'Método', from: 'De', to: 'A', by: 'Origen', provider: 'Proveedor', revoked: 'Sesiones', sessionsRevoked: 'Sesiones cerradas', total: 'Total', months: 'Meses', flow: 'Flujo', updated: 'Actualizados', deleted: 'Eliminados', name: 'Nombre', device: 'Dispositivo' }
 
+const DETAIL_VALUES = { AUTO_EMAIL: 'Acceso con el mismo correo', GOOGLE: 'Google', APPLE: 'Apple', PASSWORD: 'Contraseña' }
+
 function details(metadata) {
   if (!metadata) return ''
   return Object.entries(metadata)
     .filter(([key]) => DETAIL_LABELS[key])
-    .map(([key, value]) => `${DETAIL_LABELS[key]}: ${value}`)
+    .map(([key, value]) => `${DETAIL_LABELS[key]}: ${DETAIL_VALUES[value] || value}`)
     .join(' · ')
 }
 

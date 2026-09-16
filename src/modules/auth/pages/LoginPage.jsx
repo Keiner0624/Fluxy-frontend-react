@@ -1,5 +1,5 @@
 // src/modules/auth/pages/LoginPage.jsx
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { useNavigate, Link, useSearchParams } from 'react-router-dom'
 import { API_URL } from '@/app/config'
 import BrandLogo from '@/components/BrandLogo'
@@ -14,6 +14,17 @@ const NOTICES = {
   reset: 'Contraseña actualizada. Iniciá sesión con la nueva.',
 }
 
+// Gestor de contraseñas del navegador (Chrome y Edge). Si el usuario lo configuró, el
+// navegador pide Windows Hello, Touch ID o el PIN antes de entregar la contraseña.
+const canUseSavedPasswords = () => typeof window !== 'undefined' && 'PasswordCredential' in window && Boolean(navigator.credentials)
+
+function savePassword(email, password) {
+  if (!canUseSavedPasswords()) return
+  try {
+    navigator.credentials.store(new window.PasswordCredential({ id: email, password, name: email })).catch(() => {})
+  } catch { /* el navegador no lo permite */ }
+}
+
 export default function LoginPage() {
   const navigate = useNavigate()
   const [searchParams] = useSearchParams()
@@ -22,6 +33,19 @@ export default function LoginPage() {
   const [error, setError] = useState('')
   const notice = NOTICES[searchParams.get('reason')] || ''
   const returnTo = safeReturnTo(searchParams.get('returnTo'))
+
+  // Ofrece las cuentas guardadas al entrar y rellena correo y contraseña con la elegida.
+  useEffect(() => {
+    if (!canUseSavedPasswords()) return undefined
+    let vigente = true
+    navigator.credentials.get({ password: true, mediation: 'optional' })
+      .then((credential) => {
+        if (!vigente || credential?.type !== 'password' || !credential.password) return
+        setForm((f) => ({ ...f, email: credential.id, password: credential.password }))
+      })
+      .catch(() => { /* sin cuentas guardadas o el usuario cerró el selector */ })
+    return () => { vigente = false }
+  }, [])
 
   const handleChange = ({ target }) => {
     setForm((f) => ({ ...f, [target.name]: target.type === 'checkbox' ? target.checked : target.value }))
@@ -54,6 +78,7 @@ export default function LoginPage() {
       })
       const data = await res.json().catch(() => ({}))
       if (res.ok) {
+        if (form.rememberMe) savePassword(form.email.trim(), form.password)
         await enter(data)
         return
       }
@@ -100,7 +125,7 @@ export default function LoginPage() {
           <form onSubmit={handleSubmit} noValidate aria-busy={loading}>
             <IconField id="email" label="Correo electrónico" icon="mail">
               {(aria) => (
-                <input {...aria} id="email" name="email" type="email" autoComplete="email" inputMode="email"
+                <input {...aria} id="email" name="email" type="email" autoComplete="username" inputMode="email"
                   className={`fx-input${error ? ' fx-input--error' : ''}`} placeholder="tu@negocio.com"
                   value={form.email} onChange={handleChange} maxLength={254} />
               )}

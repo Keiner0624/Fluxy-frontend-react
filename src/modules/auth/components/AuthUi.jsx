@@ -134,11 +134,11 @@ export function SocialButtons({ rememberMe = true, onResult, onError, disabled, 
     <>
       <div className="fx-social" style={only ? { gridTemplateColumns: 'minmax(0, 1fr)' } : undefined}>
         {only === 'APPLE' ? null : googleId ? (
-          <div className="fx-social__google">
+          <div className={`fx-social__google${busy === 'google' ? ' is-busy' : ''}`}>
             <button type="button" className="fx-social__btn" tabIndex={-1} aria-hidden="true" style={{ width: '100%' }}>
-              <GoogleLogo /> Google
+              {busy === 'google' ? <span className="fx-spinner" /> : <GoogleLogo />} Google
             </button>
-            <div ref={googleSlot} className="fx-social__google-slot" aria-label="Continuar con Google" style={{ opacity: busy === 'google' ? .5 : 1 }} />
+            <div ref={googleSlot} className="fx-social__google-slot" aria-label="Continuar con Google" />
           </div>
         ) : (
           <button type="button" className="fx-social__btn" disabled title={loading ? 'Cargando…' : 'Todavía no disponible'}>

@@ -116,9 +116,25 @@
 .fx-social__btn:hover:not(:disabled) { border-color: var(--fx-copy); background: var(--fx-soft); }
 .fx-social__btn:disabled { cursor: not-allowed; opacity: .55; }
 .fx-social__btn svg { flex-shrink: 0; }
+/* El botón visible es el nuestro (igual al de Apple). El oficial de Google va encima,
+   casi transparente y estirado a toda la caja, para que el toque le llegue a Google. */
 .fx-social__google { position: relative; min-height: 46px; }
-.fx-social__google-slot { position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; overflow: hidden; border-radius: 10px; }
+.fx-social__google-slot {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+  border-radius: 10px;
+  opacity: .011;
+  cursor: pointer;
+}
+.fx-social__google-slot > div { transform: scale(1.1, 1.25); }
 .fx-social__google-slot iframe { margin: 0 !important; }
+.fx-social__google:hover .fx-social__btn { border-color: var(--fx-copy); background: var(--fx-soft); }
+.fx-social__google:focus-within .fx-social__btn { outline: 2px solid var(--fx-brand); outline-offset: 2px; }
+.fx-social__google.is-busy .fx-social__google-slot { pointer-events: none; }
 .fx-social__hint { margin: 8px 0 0; color: var(--fx-copy); font-size: 12px; text-align: center; }
 
 .fx-signin__legal { margin: 16px 0 0; color: var(--fx-copy); font-size: 12.5px; line-height: 1.6; text-align: center; }
