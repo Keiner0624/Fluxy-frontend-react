@@ -1,5 +1,5 @@
 // src/modules/auth/pages/RegisterBusinessPage.jsx
-// Registro verificado: datos → código por correo (y WhatsApp) → tienda creada.
+// Registro verificado: datos → código por correo (y SMS al celular) → tienda creada.
 // Quien llega con Google o Apple completa primero los datos del negocio.
 import { useEffect, useRef, useState } from 'react'
 import { useNavigate, Link, useSearchParams } from 'react-router-dom'
@@ -63,8 +63,8 @@ function BusinessFields({ form, errors, onChange, onPhoneBlur }) {
           </select>
         )}
       </IconField>
-      <IconField id="whatsapp" label="WhatsApp" icon="phone" prefix="+51" error={errors.whatsapp}
-        hint="Celular donde recibís consultas y pedidos.">
+      <IconField id="whatsapp" label="Celular (WhatsApp)" icon="phone" prefix="+51" error={errors.whatsapp}
+        hint="Donde recibís consultas y pedidos. Puede que te enviemos un código por SMS.">
         {(aria) => <input {...aria} id="whatsapp" name="whatsapp" type="tel" inputMode="tel" autoComplete="tel-national"
           className={cls('whatsapp')} value={form.whatsapp} onChange={onChange} onBlur={onPhoneBlur} maxLength={18} placeholder="999 888 777" />}
       </IconField>
@@ -117,10 +117,10 @@ function VerifyStep({ state, signupToken, onState, onRestart }) {
   return (
     <>
       <div className="fx-auth__head">
-        <span className="fx-signin__badge"><Icon name={channel === 'EMAIL' ? 'mail' : 'message'} size={22} /></span>
-        <h1 className="fx-h1">{channel === 'EMAIL' ? 'Verificá tu correo' : 'Verificá tu WhatsApp'}</h1>
+        <span className="fx-signin__badge"><Icon name={channel === 'EMAIL' ? 'mail' : 'phone'} size={22} /></span>
+        <h1 className="fx-h1">{channel === 'EMAIL' ? 'Verificá tu correo' : 'Verificá tu celular'}</h1>
         <p className="fx-hint">
-          Ingresá el código de 6 dígitos que enviamos a <strong style={{ color: 'var(--fx-ink)' }}>{destination}</strong>. Vence en 10 minutos.
+          {channel === 'EMAIL' ? 'Ingresá el código de 6 dígitos que enviamos a' : 'Ingresá el código de 6 dígitos que te enviamos por SMS al'} <strong style={{ color: 'var(--fx-ink)' }}>{destination}</strong>. Vence en 10 minutos.
         </p>
       </div>
 
@@ -131,7 +131,7 @@ function VerifyStep({ state, signupToken, onState, onRestart }) {
             {state.emailVerified && 'Verificado'}
           </div>
           <div className={`fx-verify__channel${channel === 'PHONE' ? ' is-current' : ''}${state.phoneVerified ? ' is-done' : ''}`}>
-            <Icon name={state.phoneVerified ? 'checkCircle' : 'phone'} size={16} /><span>WhatsApp</span>
+            <Icon name={state.phoneVerified ? 'checkCircle' : 'phone'} size={16} /><span>Celular (SMS)</span>
             {state.phoneVerified && 'Verificado'}
           </div>
         </div>
@@ -152,7 +152,11 @@ function VerifyStep({ state, signupToken, onState, onRestart }) {
         </button>
         {onRestart && <button type="button" className="fx-btn fx-btn--ghost fx-btn--sm" onClick={onRestart}>Cambiar datos</button>}
       </div>
-      <p className="fx-signin__legal">¿No llega? Revisá la carpeta de spam o promociones.</p>
+      <p className="fx-signin__legal">
+        {channel === 'EMAIL'
+          ? '¿No llega? Revisá la carpeta de spam o promociones.'
+          : '¿No llega el SMS? Puede tardar un minuto. Si el número está mal, tocá "Cambiar datos".'}
+      </p>
     </>
   )
 }

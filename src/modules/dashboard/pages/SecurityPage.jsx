@@ -1,5 +1,5 @@
 // src/modules/dashboard/pages/SecurityPage.jsx
-// Seguridad de la cuenta: correo y WhatsApp verificados, contraseña, cuentas
+// Seguridad de la cuenta: correo y celular verificados, contraseña, cuentas
 // vinculadas, sesiones abiertas y, para el dueño, exportar o eliminar el negocio.
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
@@ -346,7 +346,7 @@ export default function SecurityPage() {
             ) : <div className="fx-skeleton" style={{ height: 22 }} />}
           </Section>
 
-          <Section id="whatsapp" icon="phone" title="WhatsApp" text="Para avisos de seguridad y verificar cambios."
+          <Section id="celular" icon="phone" title="Celular" text="Lo verificamos con un código por SMS."
             action={s?.phoneVerificationAvailable && <button type="button" className="fx-btn fx-btn--secondary fx-btn--sm" onClick={() => setModal('phone-change')}>{s.phone ? 'Cambiar' : 'Agregar'}</button>}>
             {s ? (
               <div className="fx-row fx-row--between" style={{ flexWrap: 'wrap', gap: 10 }}>
@@ -356,7 +356,7 @@ export default function SecurityPage() {
                   : <span className="fx-badge">Sin verificar</span>)}
               </div>
             ) : <div className="fx-skeleton" style={{ height: 22 }} />}
-            {s && !s.phoneVerificationAvailable && <p className="fx-hint" style={{ marginTop: 8 }}>La verificación por WhatsApp estará disponible pronto.</p>}
+            {s && !s.phoneVerificationAvailable && <p className="fx-hint" style={{ marginTop: 8 }}>La verificación del celular por SMS estará disponible pronto.</p>}
           </Section>
 
           <Section id="contrasena" icon="lock" title="Contraseña"
@@ -462,10 +462,10 @@ export default function SecurityPage() {
           onClose={() => setModal(null)} onDone={() => { setModal(null); toast.success('Correo actualizado.'); refreshAll() }} />
       )}
       {modal === 'phone-change' && (
-        <CodeFlowModal title="WhatsApp" intro="Te enviaremos un código por WhatsApp al número nuevo." inputLabel="Celular (9 dígitos)" inputType="tel"
+        <CodeFlowModal title="Celular" intro="Te enviaremos un código por SMS al número nuevo." inputLabel="Celular (9 dígitos)" inputType="tel"
           requestPath="/me/phone/change" confirmPath="/me/phone/change/confirm" run={run}
           extra={access.can('SETTINGS_MANAGE') ? 'Usarlo también como WhatsApp de la tienda' : null}
-          onClose={() => setModal(null)} onDone={() => { setModal(null); toast.success('WhatsApp actualizado.'); refreshAll() }} />
+          onClose={() => setModal(null)} onDone={() => { setModal(null); toast.success('Celular actualizado.'); refreshAll() }} />
       )}
       {modal === 'password' && (
         <PasswordModal hasPassword={hasPassword} run={run} onClose={() => setModal(null)}
