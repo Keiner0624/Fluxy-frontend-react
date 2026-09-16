@@ -1,7 +1,14 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { Link } from 'react-router-dom'
 import { openCookiePreferences } from '@/app/consent'
 import { CURRENT_PROVIDER, legalUrl } from '../legal/documents'
+import { canReveal, initialPhase, markIntroPlayed, useReveal } from '../motion'
+import waves1024 from '../assets/waves-1024.webp'
+import waves1672 from '../assets/waves-1672.webp'
+import glass1024 from '../assets/glass-1024.webp'
+import glass1672 from '../assets/glass-1672.webp'
+import earth1024 from '../assets/earth-1024.webp'
+import earth1672 from '../assets/earth-1672.webp'
 import './LandingPage.css'
 
 const features = [
@@ -96,6 +103,33 @@ function Icon({ name, size = 22 }) {
     arrow: <path d="M5 12h14m-5-5 5 5-5 5" />,
     menu: <path d="M4 7h16M4 12h16M4 17h16" />,
     close: <path d="m6 6 12 12M18 6 6 18" />,
+    chat: <path d="M21 12a8 8 0 0 1-11.6 7.1L4 20l1-4.6A8 8 0 1 1 21 12Z" />,
+    wallet: (
+      <>
+        <path d="M4 7h14a2 2 0 0 1 2 2v9a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V7Z" />
+        <path d="M4 7V6a2 2 0 0 1 2-2h10v3M16 13h4" />
+      </>
+    ),
+    box: (
+      <>
+        <path d="m12 3 8 4.5v9L12 21l-8-4.5v-9L12 3Z" />
+        <path d="m4 7.5 8 4.5 8-4.5M12 12v9" />
+      </>
+    ),
+    shield: (
+      <>
+        <path d="M12 3 5 6v5c0 4.5 3 8.3 7 10 4-1.7 7-5.5 7-10V6l-7-3Z" />
+        <path d="m9 12 2 2 4-4" />
+      </>
+    ),
+    heart: <path d="M12 20s-7-4.4-7-10a4 4 0 0 1 7-2.6A4 4 0 0 1 19 10c0 5.6-7 10-7 10Z" />,
+    pin: (
+      <>
+        <path d="M12 21s7-6.2 7-12a7 7 0 1 0-14 0c0 5.8 7 12 7 12Z" />
+        <circle cx="12" cy="9" r="2.5" />
+      </>
+    ),
+    plus: <path d="M12 5v14M5 12h14" />,
     book: (
       <>
         <path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20V3H6.5A2.5 2.5 0 0 0 4 5.5z" />
@@ -139,10 +173,11 @@ function BrandMark({ compact = false }) {
 function Navbar() {
   const [open, setOpen] = useState(false)
   const links = [
+    ['Nosotros', '#about'],
+    ['Para qué sirve', '#uses'],
     ['Características', '#features'],
-    ['Cómo funciona', '#how'],
-    ['Beneficios', '#benefits'],
     ['Precios', '#pricing'],
+    ['Preguntas', '#faq'],
   ]
 
   useEffect(() => {
@@ -155,7 +190,7 @@ function Navbar() {
   return (
     <>
       {open && <button className="landing-mobile-backdrop" type="button" aria-label="Cerrar menú" onClick={() => setOpen(false)} />}
-      <header className="landing-nav">
+      <header className="landing-nav" data-enter style={{ '--enter': 0 }}>
         <div className="landing-shell landing-nav__inner">
           <Link to="/" aria-label="Fluxy, página principal"><BrandMark /></Link>
 
@@ -298,15 +333,21 @@ function Hero() {
   return (
     <main>
       <section className="landing-hero">
+        <div className="landing-hero__bg" aria-hidden="true">
+          <img src={waves1672} srcSet={`${waves1024} 1024w, ${waves1672} 1672w`} sizes="100vw" alt="" fetchPriority="high" />
+        </div>
         <div className="landing-shell landing-hero__grid">
           <div className="landing-hero__copy">
-            <div className="landing-eyebrow"><span><Icon name="spark" size={15} /></span> Sistema de ventas para tu negocio</div>
-            <h1>Gestiona tu tienda.<br /><span>Vende más. Fácil.</span></h1>
-            <p>
+            <div className="landing-eyebrow" data-enter style={{ '--enter': 1 }}><span><Icon name="spark" size={15} /></span> Sistema de ventas para tu negocio</div>
+            <h1>
+              <span className="landing-hero__line" data-enter style={{ '--enter': 2 }}>Gestiona tu tienda.</span><br />
+              <span data-enter style={{ '--enter': 3 }}>Vende más. Fácil.</span>
+            </h1>
+            <p data-enter style={{ '--enter': 4 }}>
               Centraliza tus productos, pedidos y clientes en un solo lugar.
               Fluxy te ayuda a vender online sin procesos complicados.
             </p>
-            <div className="landing-hero__actions">
+            <div className="landing-hero__actions" data-enter style={{ '--enter': 5 }}>
               <Link className="landing-button landing-button--hero" to="/register-business">
                 Comenzar gratis <Icon name="arrow" size={18} />
               </Link>
@@ -315,13 +356,13 @@ function Hero() {
                 Ver cómo funciona
               </a>
             </div>
-            <div className="landing-assurances">
+            <div className="landing-assurances" data-enter style={{ '--enter': 6 }}>
               {['Sin tarjeta de crédito', 'Configura en minutos', 'Soporte incluido'].map(item => (
                 <span key={item}><Icon name="check" size={16} /> {item}</span>
               ))}
             </div>
           </div>
-          <div className="landing-hero__visual">
+          <div className="landing-hero__visual" data-enter="rise" style={{ '--enter': 3 }}>
             <div className="landing-hero__glow" />
             <DashboardPreview />
             <div className="floating-card floating-card--order">
@@ -337,10 +378,13 @@ function Hero() {
       </section>
 
       <AudienceStrip />
+      <About />
+      <UseCases />
       <Features />
       <Benefits />
       <HowItWorks />
       <Pricing />
+      <Faq />
       <FinalCta />
     </main>
   )
@@ -370,7 +414,7 @@ function AudienceStrip() {
 
 function SectionHeading({ eyebrow, title, description, align = 'center' }) {
   return (
-    <header className={`landing-section-heading landing-section-heading--${align}`}>
+    <header className={`landing-section-heading landing-section-heading--${align}`} data-reveal>
       <span>{eyebrow}</span>
       <h2>{title}</h2>
       {description && <p>{description}</p>}
@@ -389,7 +433,7 @@ function Features() {
         />
         <div className="landing-features">
           {features.map((feature, index) => (
-            <article key={feature.title}>
+            <article key={feature.title} data-reveal style={{ '--reveal': `${index * 90}ms` }}>
               <span className={`feature-icon feature-icon--${index + 1}`}><Icon name={feature.icon} /></span>
               <h3>{feature.title}</h3>
               <p>{feature.description}</p>
@@ -452,7 +496,7 @@ function Benefits() {
     <section className="landing-benefits" id="benefits">
       <div className="landing-shell">
         <div className="benefit-row">
-          <div className="benefit-visual benefit-visual--orders"><OrderFlowCard /></div>
+          <div className="benefit-visual benefit-visual--orders" data-reveal><OrderFlowCard /></div>
           <div className="benefit-copy">
             <span className="benefit-number">01</span>
             <SectionHeading
@@ -484,7 +528,7 @@ function Benefits() {
               <li><Icon name="check" size={17} /> Comparte tu tienda con un enlace</li>
             </ul>
           </div>
-          <div className="benefit-visual benefit-visual--store">
+          <div className="benefit-visual benefit-visual--store" data-reveal>
             <div className="store-backdrop-card store-backdrop-card--one" />
             <div className="store-backdrop-card store-backdrop-card--two" />
             <StorePhone />
@@ -511,7 +555,7 @@ function HowItWorks() {
         />
         <div className="landing-steps">
           {steps.map(([number, title, text], index) => (
-            <article key={number}>
+            <article key={number} data-reveal style={{ '--reveal': `${index * 120}ms` }}>
               <div><span>{number}</span>{index < steps.length - 1 && <i />}</div>
               <h3>{title}</h3>
               <p>{text}</p>
@@ -532,7 +576,7 @@ function Pricing() {
           title="Empieza gratis. Crece a tu ritmo."
           description="Sin costos ocultos. Cambia de plan cuando tu negocio lo necesite."
         />
-        <div className="pricing-grid">
+        <div className="pricing-grid" data-reveal>
           {plans.map(plan => (
             <article className={plan.featured ? 'is-featured' : ''} key={plan.name}>
               {plan.featured && <span className="pricing-badge">Más popular</span>}
@@ -554,25 +598,144 @@ function Pricing() {
   )
 }
 
+function About() {
+  const values = [
+    ['heart', 'Simple de verdad', 'Si sabes usar WhatsApp, sabes usar Fluxy. Sin instalaciones, sin contratos y sin programadores.'],
+    ['shield', 'Seguro por diseño', 'Verificación de cuenta, permisos por persona y registro de cada cambio importante de tu negocio.'],
+    ['pin', 'Hecho para el Perú', 'Precios en soles, cobros por Yape, Plin o transferencia y un Libro de Reclamaciones propio.'],
+  ]
+  return (
+    <section className="landing-about" id="about">
+      <div className="landing-about__bg" aria-hidden="true">
+        <img src={glass1672} srcSet={`${glass1024} 1024w, ${glass1672} 1672w`} sizes="100vw" alt="" loading="lazy" decoding="async" />
+      </div>
+      <div className="landing-shell landing-about__grid">
+        <div className="landing-about__copy">
+          <SectionHeading
+            align="left"
+            eyebrow="Quiénes somos"
+            title="Tecnología peruana para negocios que quieren crecer"
+            description="Fluxy nació para que emprendedores y comercios vendan online sin depender de herramientas complicadas. Reunimos tu tienda, tus pedidos, tus cobros, tu inventario y tus clientes en una sola plataforma."
+          />
+          <p className="landing-about__mission" data-reveal style={{ '--reveal': '120ms' }}>
+            <strong>Nuestra misión:</strong> que vender por internet sea tan simple como abrir la puerta de tu tienda.
+            Fluxy es un producto de {CURRENT_PROVIDER.name}.
+          </p>
+        </div>
+        <div className="landing-about__values">
+          {values.map(([icon, title, text], index) => (
+            <article key={title} data-reveal style={{ '--reveal': `${120 + index * 110}ms` }}>
+              <span><Icon name={icon} size={20} /></span>
+              <div>
+                <h3>{title}</h3>
+                <p>{text}</p>
+              </div>
+            </article>
+          ))}
+        </div>
+      </div>
+    </section>
+  )
+}
+
+function UseCases() {
+  const uses = [
+    ['chat', 'Vender por WhatsApp y redes', 'Comparte el enlace de tu tienda y recibe cada pedido ordenado, con los datos del cliente y el total.'],
+    ['wallet', 'Registrar tus cobros', 'Anota pagos por Yape, Plin, transferencia, tarjeta o efectivo y mira qué falta cobrar.'],
+    ['box', 'Controlar tu stock', 'Entradas, salidas y avisos de stock bajo para no vender lo que ya no tienes.'],
+    ['users', 'Trabajar en equipo', 'Invita a tu equipo con permisos por rol: ventas, almacén o solo lectura.'],
+    ['heart', 'Conocer a tus clientes', 'Historial de compras, etiquetas y notas de cada cliente en un solo lugar.'],
+    ['chart', 'Decidir con datos', 'Métricas, reportes de ventas y cupones de descuento para vender más.', 'Pro'],
+  ]
+  return (
+    <section className="landing-section landing-uses" id="uses">
+      <div className="landing-shell">
+        <SectionHeading
+          eyebrow="¿Para qué sirve Fluxy?"
+          title="Todo lo que pasa en tu negocio, en orden"
+          description="Desde el primer mensaje del cliente hasta el cobro y la entrega."
+        />
+        <div className="landing-uses__grid">
+          {uses.map(([icon, title, text, badge], index) => (
+            <article key={title} data-reveal style={{ '--reveal': `${(index % 3) * 90}ms` }}>
+              <span className="landing-uses__icon"><Icon name={icon} size={21} /></span>
+              <h3>{title}{badge && <em>Desde {badge}</em>}</h3>
+              <p>{text}</p>
+            </article>
+          ))}
+        </div>
+      </div>
+    </section>
+  )
+}
+
+const FAQ = [
+  ['¿Necesito saber de tecnología?', 'No. Creas tu cuenta, cargas tus productos con fotos y precios, y compartes el enlace de tu tienda. Todo se maneja desde el panel, en el celular o en la computadora.'],
+  ['¿Puedo empezar gratis?', 'Sí. El plan Free no pide tarjeta e incluye tu tienda pública con hasta 10 productos, pedidos y métricas básicas. Cambias de plan cuando lo necesites.'],
+  ['¿Fluxy cobra comisión por mis ventas?', 'No. Pagas solo tu plan. El dinero de tus ventas lo recibes directamente por los medios de pago que tú elijas.'],
+  ['¿Cómo me pagan mis clientes?', 'Tú decides los medios: Yape, Plin, transferencia, efectivo o tarjeta con tu proveedor. En Fluxy registras cada cobro y ves qué pedidos faltan pagar.'],
+  ['¿Los planes se renuevan solos?', 'No. Los planes se renuevan de forma manual y no hacemos cobros automáticos. Si no renuevas, tu cuenta pasa al plan Free y conservas tu información.'],
+  ['¿Puedo usar mi propio dominio?', 'Sí, con el plan Business puedes conectar un dominio propio a tu tienda.'],
+  ['¿Mis datos están seguros?', 'Verificamos cada cuenta, cada persona de tu equipo tiene solo los permisos que le das y las acciones importantes quedan registradas.', true],
+]
+
+function Faq() {
+  return (
+    <section className="landing-section landing-faq" id="faq">
+      <div className="landing-shell landing-faq__grid">
+        <div>
+          <SectionHeading
+            align="left"
+            eyebrow="Preguntas frecuentes"
+            title="Lo que más nos preguntan"
+            description="¿Tienes otra duda? Escríbenos y te respondemos."
+          />
+          <a className="landing-faq__mail" href={`mailto:${CURRENT_PROVIDER.supportEmail}`} data-reveal>
+            <Icon name="chat" size={17} /> {CURRENT_PROVIDER.supportEmail}
+          </a>
+        </div>
+        <div className="landing-faq__list" data-reveal style={{ '--reveal': '120ms' }}>
+          {FAQ.map(([question, answer, privacyLink]) => (
+            <details key={question}>
+              <summary>{question}<span aria-hidden="true"><Icon name="plus" size={18} /></span></summary>
+              <p>
+                {answer}
+                {privacyLink && <> Los detalles están en la <Link to={legalUrl('privacy')}>Política de Privacidad</Link>.</>}
+              </p>
+            </details>
+          ))}
+        </div>
+      </div>
+    </section>
+  )
+}
+
 function FinalCta() {
   return (
     <section className="landing-final-cta">
       <div className="landing-shell">
-        <div>
-          <span><Icon name="spark" size={18} /> Tu próxima venta puede empezar hoy</span>
-          <h2>Haz que gestionar tu tienda se sienta fácil.</h2>
-          <p>Crea tu cuenta, publica tus productos y comienza a recibir pedidos.</p>
-          <div>
-            <Link className="landing-button landing-button--light" to="/register-business">
-              Crear mi tienda gratis <Icon name="arrow" size={18} />
-            </Link>
-            <Link className="landing-final-login" to="/login">Ya tengo una cuenta</Link>
+        <div className="landing-final-cta__card" data-reveal>
+          <img
+            className="landing-final-cta__bg"
+            src={earth1672}
+            srcSet={`${earth1024} 1024w, ${earth1672} 1672w`}
+            sizes="(max-width: 1340px) 100vw, 1340px"
+            alt=""
+            aria-hidden="true"
+            loading="lazy"
+            decoding="async"
+          />
+          <div className="landing-final-cta__content">
+            <span><Icon name="spark" size={18} /> Tu próxima venta puede empezar hoy</span>
+            <h2>Lleva tu negocio a todo el Perú.</h2>
+            <p>Crea tu tienda en minutos, compártela con un enlace y recibe pedidos desde cualquier lugar.</p>
+            <div>
+              <Link className="landing-button landing-button--light" to="/register-business">
+                Crear mi tienda gratis <Icon name="arrow" size={18} />
+              </Link>
+              <Link className="landing-final-login" to="/login">Ya tengo una cuenta</Link>
+            </div>
           </div>
-        </div>
-        <div className="landing-final-graphic" aria-hidden="true">
-          <span className="graphic-card graphic-card--one"><Icon name="orders" /> <i>12 pedidos nuevos</i></span>
-          <span className="graphic-card graphic-card--two"><b>+28%</b><i>ventas este mes</i></span>
-          <span className="graphic-card graphic-card--three"><Icon name="store" size={28} /></span>
         </div>
       </div>
     </section>
@@ -589,10 +752,12 @@ function Footer() {
             <p>La forma simple de crear, vender y gestionar tu tienda online.</p>
           </div>
           <div>
-            <strong>Producto</strong>
+            <strong>Fluxy</strong>
+            <a href="#about">Quiénes somos</a>
+            <a href="#uses">Para qué sirve</a>
             <a href="#features">Características</a>
             <a href="#pricing">Planes y precios</a>
-            <a href="#how">Cómo funciona</a>
+            <a href="#faq">Preguntas frecuentes</a>
           </div>
           <div>
             <strong>Cuenta</strong>
@@ -618,9 +783,69 @@ function Footer() {
   )
 }
 
-export default function LandingPage() {
+function Intro({ onDone }) {
+  const [leaving, setLeaving] = useState(false)
+  const onDoneRef = useRef(onDone)
+  useEffect(() => { onDoneRef.current = onDone })
+
+  useEffect(() => {
+    let finished = false
+    const timers = []
+    const finish = (delay) => {
+      if (finished) return
+      finished = true
+      setLeaving(true)
+      timers.push(setTimeout(() => onDoneRef.current(), delay))
+    }
+    timers.push(setTimeout(() => finish(800), 1900))
+    // Cualquier interacción la adelanta: nadie debería esperar para usar la página.
+    const skip = () => finish(450)
+    const events = ['pointerdown', 'keydown', 'wheel', 'touchstart']
+    events.forEach((name) => window.addEventListener(name, skip, { passive: true }))
+    const root = document.documentElement
+    const previous = root.style.overflow
+    root.style.overflow = 'hidden'
+    return () => {
+      timers.forEach(clearTimeout)
+      events.forEach((name) => window.removeEventListener(name, skip))
+      root.style.overflow = previous
+    }
+  }, [])
+
   return (
-    <div className="landing-page">
+    <div className={`landing-intro${leaving ? ' is-leaving' : ''}`} aria-hidden="true">
+      <div className="landing-intro__stage">
+        <span className="landing-intro__mark"><Icon name="bag" size={40} /></span>
+        <strong className="landing-intro__word">
+          {'Fluxy'.split('').map((letter, index) => <span key={index} style={{ '--i': index }}>{letter}</span>)}
+        </strong>
+        <span className="landing-intro__tag">Vende más. Fácil.</span>
+      </div>
+    </div>
+  )
+}
+
+export default function LandingPage() {
+  const rootRef = useRef(null)
+  const [phase, setPhase] = useState(initialPhase)
+  const [reveal] = useState(canReveal)
+
+  useEffect(() => {
+    if (phase !== 'enter') return undefined
+    const timer = setTimeout(() => setPhase('done'), 1800)
+    return () => clearTimeout(timer)
+  }, [phase])
+
+  useReveal(rootRef, reveal && phase !== 'intro')
+
+  const introDone = () => {
+    markIntroPlayed()
+    setPhase('enter')
+  }
+
+  return (
+    <div ref={rootRef} className={`landing-page is-${phase}${reveal ? ' can-reveal' : ''}`}>
+      {phase === 'intro' && <Intro onDone={introDone} />}
       <Navbar />
       <Hero />
       <Footer />
