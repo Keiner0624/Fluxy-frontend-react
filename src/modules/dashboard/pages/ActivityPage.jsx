@@ -27,6 +27,7 @@ const ACTIONS = {
   PASSWORD_RESET_COMPLETED: ['Restableció la contraseña', 'lock'],
   IDENTITY_LINKED: ['Vinculó una cuenta', 'globe'],
   IDENTITY_UNLINKED: ['Desvinculó una cuenta', 'globe'],
+  TERMS_ACCEPTED: ['Aceptó los términos vigentes', 'file'],
   TEAM_INVITED: ['Invitó a alguien al equipo', 'team'],
   TEAM_INVITE_REVOKED: ['Revocó una invitación', 'team'],
   TEAM_MEMBER_JOINED: ['Se sumó al equipo', 'team'],
@@ -51,7 +52,7 @@ const ACTIONS = {
   COUPON_DELETED: ['Eliminó un cupón', 'coupons'],
 }
 
-const DETAIL_LABELS = { method: 'Método', from: 'De', to: 'A', by: 'Origen', provider: 'Proveedor', revoked: 'Sesiones', sessionsRevoked: 'Sesiones cerradas', total: 'Total', months: 'Meses', flow: 'Flujo', updated: 'Actualizados', deleted: 'Eliminados', name: 'Nombre', device: 'Dispositivo' }
+const DETAIL_LABELS = { method: 'Método', from: 'De', to: 'A', by: 'Origen', provider: 'Proveedor', revoked: 'Sesiones', sessionsRevoked: 'Sesiones cerradas', total: 'Total', months: 'Meses', flow: 'Flujo', updated: 'Actualizados', deleted: 'Eliminados', name: 'Nombre', device: 'Dispositivo', version: 'Versión' }
 
 const DETAIL_VALUES = { AUTO_EMAIL: 'Acceso con el mismo correo', GOOGLE: 'Google', APPLE: 'Apple', PASSWORD: 'Contraseña' }
 

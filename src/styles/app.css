@@ -1508,3 +1508,32 @@ html[data-theme-anim='light']::view-transition-new(root) { z-index: 1; }
   .fx-table--stack .fx-cell--main .fx-row { min-width: 0; }
   .fx-show-sm { display: inline !important; }
 }
+
+/* ── Aviso de cookies ─────────────────────────────────────────────────────── */
+
+.fx.fx-cookies {
+  position: fixed;
+  min-height: 0;
+  z-index: 90;
+  right: 16px;
+  bottom: 16px;
+  display: flex;
+  max-width: 420px;
+  flex-direction: column;
+  gap: 12px;
+  padding: 16px 18px;
+  border: 1px solid var(--fx-line);
+  border-radius: var(--fx-r-lg);
+  background: var(--fx-surface);
+  box-shadow: var(--fx-shadow-lg);
+  color: var(--fx-copy);
+  font-size: 13.5px;
+  line-height: 1.55;
+}
+.fx-cookies a { color: var(--fx-brand); text-decoration: underline; }
+.fx-cookies__actions { display: flex; justify-content: flex-end; gap: 8px; }
+@media (max-width: 560px) {
+  .fx-cookies { right: 10px; bottom: 10px; left: 10px; max-width: none; padding-bottom: calc(16px + env(safe-area-inset-bottom)); }
+  .fx-cookies__actions > .fx-btn { flex: 1; justify-content: center; }
+}
+@media print { .fx-cookies { display: none; } }

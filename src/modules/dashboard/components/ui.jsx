@@ -9,7 +9,7 @@ import { isoDay, rangeFromPreset } from '@/app/format'
 // Con modales anidados (cancelar dentro del detalle), Escape cierra solo el de arriba.
 const openModals = []
 
-export function Modal({ title, subtitle, onClose, children, footer, width = 560, as: Tag = 'div', onSubmit }) {
+export function Modal({ title, subtitle, onClose, children, footer, width = 560, as: Tag = 'div', onSubmit, closable = true }) {
   // En un ref: onClose suele ser una función nueva en cada render y no debe
   // reordenar la pila de modales abiertos.
   const onCloseRef = useRef(onClose)
@@ -45,9 +45,11 @@ export function Modal({ title, subtitle, onClose, children, footer, width = 560,
             <h2 className="fx-h2 fx-truncate">{title}</h2>
             {subtitle && <p className="fx-hint" style={{ marginTop: 2 }}>{subtitle}</p>}
           </div>
-          <button type="button" className="fx-btn fx-btn--ghost fx-btn--icon" onClick={onClose} aria-label="Cerrar">
-            <Icon name="close" size={17} />
-          </button>
+          {closable && (
+            <button type="button" className="fx-btn fx-btn--ghost fx-btn--icon" onClick={onClose} aria-label="Cerrar">
+              <Icon name="close" size={17} />
+            </button>
+          )}
         </div>
         <div className="fx-modal__body">{children}</div>
         {footer && <div className="fx-modal__foot">{footer}</div>}

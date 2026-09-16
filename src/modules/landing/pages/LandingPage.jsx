@@ -1,5 +1,7 @@
 import { useEffect, useState } from 'react'
 import { Link } from 'react-router-dom'
+import { openCookiePreferences } from '@/app/consent'
+import { CURRENT_PROVIDER, legalUrl } from '../legal/documents'
 import './LandingPage.css'
 
 const features = [
@@ -94,6 +96,12 @@ function Icon({ name, size = 22 }) {
     arrow: <path d="M5 12h14m-5-5 5 5-5 5" />,
     menu: <path d="M4 7h16M4 12h16M4 17h16" />,
     close: <path d="m6 6 12 12M18 6 6 18" />,
+    book: (
+      <>
+        <path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20V3H6.5A2.5 2.5 0 0 0 4 5.5z" />
+        <path d="M4 19.5A2.5 2.5 0 0 0 6.5 22H20v-5M9 7h7M9 11h5" />
+      </>
+    ),
     spark: (
       <>
         <path d="m12 3 1.4 4.1L17.5 8.5l-4.1 1.4L12 14l-1.4-4.1-4.1-1.4 4.1-1.4L12 3Z" />
@@ -593,12 +601,16 @@ function Footer() {
           </div>
           <div>
             <strong>Legal</strong>
-            <Link to="/terms">Términos y condiciones</Link>
-            <Link to="/terms">Privacidad</Link>
+            <Link to={legalUrl('terms')}>Términos y condiciones</Link>
+            <Link to={legalUrl('privacy')}>Privacidad</Link>
+            <button type="button" className="landing-footer__link" onClick={openCookiePreferences}>Cookies</button>
+            <Link to={CURRENT_PROVIDER.complaintsPath} className="landing-footer__complaints">
+              <Icon name="book" size={16} /> Libro de Reclamaciones
+            </Link>
           </div>
         </div>
         <div className="landing-footer__bottom">
-          <span>© {new Date().getFullYear()} Fluxy. Todos los derechos reservados.</span>
+          <span>© {new Date().getFullYear()} Fluxy · {CURRENT_PROVIDER.name}. Todos los derechos reservados.</span>
           <span>Hecho para negocios que quieren crecer.</span>
         </div>
       </div>

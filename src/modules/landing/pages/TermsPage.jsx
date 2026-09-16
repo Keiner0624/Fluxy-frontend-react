@@ -4,7 +4,7 @@ import { Link, useSearchParams } from 'react-router-dom'
 import BrandLogo from '@/components/BrandLogo'
 import Icon from '@/components/Icon'
 
-import { CURRENT_LEGAL_VERSION, PUBLISHED_LEGAL_DOCUMENTS, getLegalDocument, legalUrl } from '../legal/documents'
+import { CURRENT_LEGAL_VERSION, CURRENT_PROVIDER, PUBLISHED_LEGAL_DOCUMENTS, getLegalDocument, legalUrl } from '../legal/documents'
 import '../legal/legal.css'
 
 const DOCS = [
@@ -17,22 +17,11 @@ export default function TermsPage() {
   const [searchParams, setSearchParams] = useSearchParams()
   const doc = searchParams.get('doc') === 'privacy' ? 'privacy' : 'terms'
   const [activeId, setActiveId] = useState(null)
-  const [draft, setDraft] = useState(null)
-  const [draftError, setDraftError] = useState(false)
   const version = searchParams.get('version') || CURRENT_LEGAL_VERSION
-  const isDraft = import.meta.env.DEV && version === '2026-09-13-draft'
-  const legalDocument = isDraft ? draft : getLegalDocument(version)
+  const legalDocument = getLegalDocument(version)
   const sections = legalDocument?.sections[doc] ?? EMPTY_SECTIONS
-
-  useEffect(() => {
-    let active = true
-    if (import.meta.env.DEV && isDraft) {
-      import('../../../../docs/legal/2026-09-13.draft.json')
-        .then(module => { if (active) setDraft(module.default) })
-        .catch(() => { if (active) setDraftError(true) })
-    }
-    return () => { active = false }
-  }, [isDraft])
+  const isCurrent = version === CURRENT_LEGAL_VERSION
+  const contactEmail = CURRENT_PROVIDER.supportEmail
 
   // Marca en el índice la sección visible al hacer scroll
   useEffect(() => {
@@ -63,8 +52,8 @@ export default function TermsPage() {
 
   if (!legalDocument) {
     return <div className="fx fx-legal"><main className="fx-legal__shell">
-      <h1>{isDraft && !draftError ? 'Cargando borrador…' : 'Versión no disponible'}</h1>
-      <p>{isDraft && !draftError ? 'Vista previa local; no es una versión publicada.' : 'Esta versión no está publicada. No se ha sustituido por otro documento.'}</p>
+      <h1>Versión no disponible</h1>
+      <p>Esta versión no está publicada. No se ha sustituido por otro documento.</p>
       <Link to={legalUrl(doc)} className="fx-btn fx-btn--primary">Ver documento vigente</Link>
     </main></div>
   }
@@ -88,15 +77,15 @@ export default function TermsPage() {
           <span className="fx-eyebrow">Documentos legales</span>
           <h1 className="fx-legal__title">{DOCS.find((d) => d.key === doc).label}</h1>
           <p className="fx-hint">Última actualización: {legalDocument.updatedAt} · Versión {legalDocument.version}</p>
-          {isDraft && <div className="fx-alert fx-alert--error fx-legal__draft" role="status">
-            Demostración con datos de prueba, solo visible en desarrollo. No es la versión vigente ni se solicita su aceptación.
-            Antes de publicarla deben confirmarse los datos legales reales y la revisión jurídica y operativa.
+          {!isCurrent && <div className="fx-alert fx-alert--warn fx-legal__draft" role="status">
+            <span>Estás viendo una versión anterior. <Link to={legalUrl(doc)} className="fx-auth__link">Ver la versión vigente</Link>.</span>
           </div>}
           <div className="fx-legal__tools">
             <label htmlFor="legal-version">Historial de versiones</label>
             <select id="legal-version" className="fx-input" value={version} onChange={event => { setSearchParams({ doc, version: event.target.value }); setActiveId(null) }}>
-              {Object.keys(PUBLISHED_LEGAL_DOCUMENTS).map(value => <option key={value} value={value}>{value} · publicada</option>)}
-              {import.meta.env.DEV && <option value="2026-09-13-draft">2026-09-13 · borrador local</option>}
+              {Object.values(PUBLISHED_LEGAL_DOCUMENTS).map(d => (
+                <option key={d.version} value={d.version}>{d.updatedAt}{d.version === CURRENT_LEGAL_VERSION ? ' · vigente' : ''}</option>
+              ))}
             </select>
             <button type="button" className="fx-btn fx-btn--secondary" onClick={() => window.print()}>Imprimir documento</button>
           </div>
@@ -158,9 +147,14 @@ export default function TermsPage() {
         <footer className="fx-legal__foot">
           <p className="fx-hint">
             ¿Dudas sobre estos documentos? Escribinos a{' '}
-            <a href={`mailto:${isDraft ? legalDocument.provider.contactEmail : 'soporte@fluxyweb.com'}`} className="fx-auth__link">{isDraft ? legalDocument.provider.contactEmail : 'soporte@fluxyweb.com'}</a>.
+            <a href={`mailto:${contactEmail}`} className="fx-auth__link">{contactEmail}</a>.
           </p>
-          <Link to="/" className="fx-btn fx-btn--secondary fx-btn--sm">Volver al inicio</Link>
+          <div className="fx-row" style={{ flexWrap: 'wrap', gap: 8 }}>
+            <Link to={CURRENT_PROVIDER.complaintsPath} className="fx-btn fx-btn--secondary fx-btn--sm">
+              <Icon name="book" size={15} /> Libro de Reclamaciones
+            </Link>
+            <Link to="/" className="fx-btn fx-btn--secondary fx-btn--sm">Volver al inicio</Link>
+          </div>
         </footer>
       </div>
     </div>

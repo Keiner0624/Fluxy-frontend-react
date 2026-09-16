@@ -1666,8 +1666,34 @@
   transition: color .2s ease;
 }
 
-.landing-footer__main a:hover {
+.landing-footer__main a:hover,
+.landing-footer__link:hover {
   color: var(--landing-blue);
+}
+
+.landing-footer__link {
+  padding: 0;
+  border: 0;
+  background: none;
+  color: #748091;
+  font: inherit;
+  font-size: 12px;
+  text-align: left;
+  cursor: pointer;
+  transition: color .2s ease;
+}
+
+.landing-footer__main a.landing-footer__complaints {
+  display: inline-flex;
+  width: fit-content;
+  align-items: center;
+  gap: 7px;
+  margin-top: 4px;
+  padding: 7px 10px;
+  border: 1px solid #dfe5ee;
+  border-radius: 8px;
+  color: #354257;
+  font-weight: 600;
 }
 
 .landing-footer__bottom {

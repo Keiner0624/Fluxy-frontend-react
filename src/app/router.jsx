@@ -28,6 +28,7 @@ const AcceptInvitePage = lazy(() => import('@/modules/auth/pages/AcceptInvitePag
 const PermissionRoute = lazy(() => import('@/modules/dashboard/components/PermissionRoute'))
 const ForgotPasswordPage = lazy(() => import('@/modules/auth/pages/ForgotPasswordPage'))
 const ResetPasswordPage = lazy(() => import('@/modules/auth/pages/ResetPasswordPage'))
+const ComplaintsPage = lazy(() => import('@/modules/landing/pages/ComplaintsPage'))
 const AdminPage = lazy(() => import('@/modules/admin/pages/AdminPage'))
 const AdminLoginPage = lazy(() => import('@/modules/admin/pages/AdminLoginPage'))
 const TermsPage = lazy(() => import('@/modules/landing/pages/TermsPage'))
@@ -121,5 +122,6 @@ export const router = createBrowserRouter([
   { path: '/admin', element: render(<AdminPage />) },
   { path: '/admin/login', element: render(<AdminLoginPage />) },
   { path: '/terms', element: render(<TermsPage />) },
+  { path: '/libro-de-reclamaciones', element: render(<ComplaintsPage />) },
   { path: '*', element: render(<NotFoundPage />) },
 ])

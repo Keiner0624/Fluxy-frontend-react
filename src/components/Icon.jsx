@@ -66,6 +66,7 @@ const PATHS = {
   truck:      <><path d="M14 17V5a1 1 0 0 0-1-1H2a1 1 0 0 0-1 1v11a1 1 0 0 0 1 1h1"/><path d="M14 8h4.6a1 1 0 0 1 .8.4L22 12v4a1 1 0 0 1-1 1h-1"/><circle cx="6" cy="17.5" r="2"/><circle cx="17" cy="17.5" r="2"/></>,
   shield:     <><path d="M12 2 4 6v6c0 5 3.4 8.9 8 10 4.6-1.1 8-5 8-10V6z"/></>,
   file:       <><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6"/></>,
+  book:       <><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20V3H6.5A2.5 2.5 0 0 0 4 5.5z"/><path d="M4 19.5A2.5 2.5 0 0 0 6.5 22H20v-5"/><path d="M9 7h7"/><path d="M9 11h5"/></>,
 
   // Módulos del panel 2.0
   customers:  <><circle cx="9" cy="8" r="3.5"/><path d="M2.5 20a6.5 6.5 0 0 1 13 0"/><path d="M16 4.3a3.5 3.5 0 0 1 0 7.4"/><path d="M18.5 14.4A6.5 6.5 0 0 1 21.5 20"/></>,

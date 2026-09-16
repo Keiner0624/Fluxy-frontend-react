@@ -10,8 +10,31 @@
   .fx-legal__tabs { display: flex; flex-wrap: wrap; }
   .fx-legal__tab { white-space: normal; min-height: 44px; }
 }
+/* Libro de Reclamaciones */
+.fx-complaints .fx-legal__title { display: flex; align-items: center; gap: 10px; }
+.fx-complaints .fx-legal__doc { max-width: 760px; }
+.fx-complaints .fx-legal__doc h2 { margin: 26px 0 14px; }
+.fx-complaints .fx-legal__doc h2:first-of-type { margin-top: 0; }
+.fx-complaints__provider { display: flex; flex-wrap: wrap; gap: 10px 28px; max-width: 760px; margin-bottom: 18px; padding: 14px 18px; border: 1px solid var(--fx-line); border-radius: var(--fx-r-lg); background: var(--fx-surface); }
+.fx-complaints__provider span { display: block; color: var(--fx-muted); font-size: 12px; }
+.fx-complaints__provider strong { color: var(--fx-ink); font-size: 14px; font-weight: 600; }
+.fx-complaints__two { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 0 14px; }
+.fx-complaints__types { display: grid; gap: 8px; margin: 0 0 16px; padding: 0; border: 0; }
+.fx-complaints__type { display: flex; align-items: flex-start; gap: 10px; padding: 12px 14px; border: 1px solid var(--fx-line-strong); border-radius: var(--fx-r); cursor: pointer; }
+.fx-complaints__type.is-on { border-color: var(--fx-brand); background: var(--fx-brand-soft); }
+.fx-complaints__type input { margin-top: 3px; accent-color: var(--fx-brand); }
+.fx-complaints__type strong { display: block; color: var(--fx-ink); font-size: 14px; }
+.fx-complaints__type small { color: var(--fx-copy); font-size: 13px; }
+.fx-complaints__consent { margin: 8px 0 14px; color: var(--fx-copy); }
+.fx-complaints__consent a, .fx-complaints .fx-legal__doc p a { color: var(--fx-brand); text-decoration: underline; }
+.fx-complaints__receipt h2 { margin-top: 14px !important; }
+.fx-complaints__code { font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size: 17px; color: var(--fx-ink); }
+@media (max-width: 560px) {
+  .fx-complaints__two { grid-template-columns: minmax(0, 1fr); }
+}
+
 @media print {
-  .fx-legal__nav, .fx-legal__tools, .fx-legal__tabs, .fx-legal__toc, .fx-legal__foot { display: none !important; }
+  .fx-legal__nav, .fx-legal__tools, .fx-legal__tabs, .fx-legal__toc, .fx-legal__foot, .fx-complaints__receipt .fx-row { display: none !important; }
   .fx-legal, .fx-legal__shell, .fx-legal__body { display: block !important; background: white !important; color: black !important; padding: 0 !important; max-width: none !important; }
   .fx-legal__section h2 { break-after: avoid; color: black !important; }
   .fx-legal__section p, .fx-legal__section li { color: black !important; orphans: 3; widows: 3; }

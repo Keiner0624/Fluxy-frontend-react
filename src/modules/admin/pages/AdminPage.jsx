@@ -2,6 +2,7 @@
 import { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { API_URL } from '@/app/config'
+import AdminComplaints from '../components/AdminComplaints'
 
 function getToken() { return localStorage.getItem('token') || '' }
 
@@ -301,6 +302,8 @@ export default function AdminPage() {
             </div>
           </div>
         )}
+
+        <AdminComplaints />
 
         {/* Tabla vendedores */}
         <div style={{ background:'rgba(13,13,26,0.95)', border:'1px solid rgba(255,255,255,0.06)', borderRadius:18, overflow:'hidden' }}>

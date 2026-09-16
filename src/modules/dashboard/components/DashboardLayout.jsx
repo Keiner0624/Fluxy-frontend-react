@@ -6,6 +6,7 @@ import { getCompanyStoreUrl } from '@/app/config'
 import { getMe } from '@/app/account'
 import { logout } from '@/app/session'
 import AccountBanners from './AccountBanners'
+import LegalUpdateModal from './LegalUpdateModal'
 import usePlan from '@/hooks/usePlan'
 import useAccess from '@/hooks/useAccess'
 import BrandLogo from '@/components/BrandLogo'
@@ -255,6 +256,8 @@ export default function DashboardLayout({ children }) {
           {children}
         </main>
       </div>
+
+      <LegalUpdateModal />
 
       <Toaster
         // En teléfono arriba: abajo tapaba los botones de las hojas y la barra del navegador.
