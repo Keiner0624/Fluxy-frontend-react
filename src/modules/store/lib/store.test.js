@@ -1,7 +1,9 @@
 import test from 'node:test'
 import assert from 'node:assert/strict'
 import { canUseWhatsapp, matchesSearch, money, productImages, sortProducts, whatsappNumber } from './storeFormat.js'
-import { storeBanner, storeThemeVars } from './storeTheme.js'
+import { contrast, storeBanner, storeMode, storeThemeVars } from './storeTheme.js'
+
+const rgb = (hex) => [1, 3, 5].map((i) => parseInt(hex.slice(i, i + 2), 16))
 
 test('un acento casi blanco se reemplaza por tinta legible', () => {
   const vars = storeThemeVars(JSON.stringify({ primary: '#ffffff' }))
@@ -14,6 +16,32 @@ test('un acento claro se oscurece para usarlo como texto sobre blanco', () => {
   assert.equal(vars['--sf-accent'], '#34d399')
   assert.notEqual(vars['--sf-accent-ink'], '#34d399')
   assert.equal(vars['--sf-on-accent'], '#111827')
+})
+
+test('la apariencia por defecto es clara y solo acepta valores conocidos', () => {
+  assert.equal(storeMode(undefined), 'light')
+  assert.equal(storeMode('{"mode":"dark"}'), 'dark')
+  assert.equal(storeMode('{"mode":"auto"}'), 'auto')
+  assert.equal(storeMode('{"mode":"neon"}'), 'light')
+})
+
+test('en la tienda oscura un acento casi negro se reemplaza por uno claro', () => {
+  const vars = storeThemeVars(JSON.stringify({ primary: '#111827' }), 'dark')
+  assert.equal(vars['--sf-accent'], '#f4f4f5')
+  assert.equal(vars['--sf-on-accent'], '#111827')
+  // En la tienda clara el mismo color se mantiene.
+  assert.equal(storeThemeVars(JSON.stringify({ primary: '#111827' }), 'light')['--sf-accent'], '#111827')
+})
+
+test('el texto de acento se lee en los dos fondos para toda la paleta de Estilo', () => {
+  const palette = ['#d92d20', '#ea580c', '#ca8a04', '#16a34a', '#0d9488', '#2563eb', '#7c3aed', '#db2777', '#111827', '#ffffff', '#34d399']
+  for (const primary of palette) {
+    for (const [scheme, surface] of [['light', [255, 255, 255]], ['dark', [28, 28, 33]]]) {
+      const vars = storeThemeVars(JSON.stringify({ primary }), scheme)
+      assert.ok(contrast(rgb(vars['--sf-accent-ink']), surface) >= 4.5, `${primary} en ${scheme}: texto de acento`)
+      assert.ok(contrast(rgb(vars['--sf-accent']), rgb(vars['--sf-on-accent'])) >= 3, `${primary} en ${scheme}: texto sobre el botón`)
+    }
+  }
 })
 
 test('un estilo inválido usa el acento por defecto', () => {

@@ -1537,3 +1537,39 @@ html[data-theme-anim='light']::view-transition-new(root) { z-index: 1; }
   .fx-cookies__actions > .fx-btn { flex: 1; justify-content: center; }
 }
 @media print { .fx-cookies { display: none; } }
+
+/* ── Estilo: apariencia de la tienda ─────────────────────────────────────── */
+
+.fx-modes { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 10px; }
+.fx-mode {
+  display: grid;
+  gap: 6px;
+  padding: 10px;
+  border: 1px solid var(--fx-line-strong);
+  border-radius: var(--fx-r);
+  background: var(--fx-surface);
+  color: var(--fx-ink);
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+  transition: border-color .15s, box-shadow .15s;
+}
+.fx-mode:hover { border-color: var(--fx-copy); }
+.fx-mode.is-on { border-color: var(--fx-brand); box-shadow: 0 0 0 3px color-mix(in srgb, var(--fx-brand) 18%, transparent); }
+.fx-mode strong { display: flex; align-items: center; gap: 6px; font-size: 13.5px; }
+.fx-mode small { color: var(--fx-muted); font-size: 12px; line-height: 1.4; }
+.fx-mode__sample { display: grid; height: 56px; padding: 8px; overflow: hidden; border-radius: 8px; grid-template-columns: 1fr 1fr; grid-template-rows: 10px 1fr; gap: 5px; }
+.fx-mode__sample i { border-radius: 4px; }
+.fx-mode__sample i:first-child { grid-column: 1 / -1; }
+.fx-mode__sample--light { background: #f7f5f2; }
+.fx-mode__sample--light i { background: #fff; box-shadow: 0 0 0 1px #ebe7e1; }
+.fx-mode__sample--dark { background: #101014; }
+.fx-mode__sample--dark i { background: #1c1c21; box-shadow: 0 0 0 1px #2c2c33; }
+.fx-mode__sample--auto { background: linear-gradient(115deg, #f7f5f2 50%, #101014 50%); }
+.fx-mode__sample--auto i { background: color-mix(in srgb, #fff 50%, #1c1c21); opacity: .85; }
+.fx-mode__sample i:first-child { background: color-mix(in srgb, var(--fx-brand) 70%, transparent); box-shadow: none; }
+@media (max-width: 560px) {
+  .fx-modes { grid-template-columns: minmax(0, 1fr); }
+  .fx-mode { grid-template-columns: 76px minmax(0, 1fr); column-gap: 12px; align-items: center; }
+  .fx-mode__sample { height: 48px; grid-row: span 2; }
+}

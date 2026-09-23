@@ -1,6 +1,6 @@
 // src/modules/dashboard/pages/StylePage.jsx
-// Estilo de la tienda: color de acento e imagen de portada, con vista previa
-// fiel a la tienda pública.
+// Estilo de la tienda: apariencia (clara, oscura o según el dispositivo), color de
+// acento e imagen de portada, con vista previa fiel a la tienda pública.
 import { useEffect, useRef, useState } from 'react'
 import toast from 'react-hot-toast'
 import DashboardLayout from '@/modules/dashboard/components/DashboardLayout'
@@ -11,7 +11,7 @@ import { api } from '@/app/api'
 import { getCompanyStoreUrl } from '@/app/config'
 import { getMyCompany, invalidateAccount } from '@/app/account'
 import { uploadImage } from '@/app/cloudinary'
-import { parseStoreStyle, storeThemeVars } from '@/modules/store/lib/storeTheme'
+import { parseStoreStyle, storeMode, storeThemeVars } from '@/modules/store/lib/storeTheme'
 
 const COLORS = [
   { color: '#d92d20', name: 'Rojo' },
@@ -27,24 +27,39 @@ const COLORS = [
 
 const DEFAULT_PRIMARY = '#d92d20'
 
-function StorePreview({ style, company, mobile }) {
-  const vars = storeThemeVars(JSON.stringify(style))
+const MODES = [
+  { value: 'light', label: 'Clara', icon: 'sun', text: 'Fondo claro y cálido.' },
+  { value: 'dark', label: 'Oscura', icon: 'moon', text: 'Fondo oscuro, ideal para fotos.' },
+  { value: 'auto', label: 'Automática', icon: 'sliders', text: 'Según el celular o la computadora de cada cliente.' },
+]
+
+// Mismos tonos que la tienda (StorePage.css) para que la vista previa sea fiel.
+const PALETTE = {
+  light: { bg: '#f7f5f2', surface: '#fff', subtle: '#f3efea', line: '#ebe7e1', ink: '#17171c', copy: '#4f5159', heroA: '#fff6ee' },
+  dark: { bg: '#101014', surface: '#1c1c21', subtle: '#26262d', line: '#2c2c33', ink: '#f4f4f5', copy: '#c3c4cc', heroA: '#1f1d22' },
+}
+
+const readStyle = (storeStyle) => ({ primary: DEFAULT_PRIMARY, bgImage: '', ...parseStoreStyle(storeStyle), mode: storeMode(storeStyle) })
+
+function StorePreview({ style, company, mobile, scheme }) {
+  const vars = storeThemeVars(JSON.stringify(style), scheme)
   const accent = vars['--sf-accent']
   const ink = vars['--sf-accent-ink']
   const onAccent = vars['--sf-on-accent']
-  const soft = `color-mix(in srgb, ${accent} 10%, #fff)`
+  const c = PALETTE[scheme]
+  const soft = `color-mix(in srgb, ${accent} 10%, ${c.surface})`
   const name = company?.name || 'Mi tienda'
   const cards = mobile ? 2 : 4
 
   return (
-    <div style={{ background: '#f7f5f2', fontFamily: "'Plus Jakarta Sans', 'DM Sans', system-ui, sans-serif", color: '#17171c' }}>
-      <div style={{ display: 'flex', alignItems: 'center', gap: 8, padding: '10px 14px', background: '#fff', borderBottom: '1px solid #ebe7e1' }}>
+    <div style={{ background: c.bg, fontFamily: "'Plus Jakarta Sans', 'DM Sans', system-ui, sans-serif", color: c.ink, transition: 'background .25s, color .25s' }}>
+      <div style={{ display: 'flex', alignItems: 'center', gap: 8, padding: '10px 14px', background: c.surface, borderBottom: `1px solid ${c.line}` }}>
         {company?.logoUrl
           ? <img src={company.logoUrl} alt="" style={{ width: 26, height: 26, borderRadius: 8, objectFit: 'cover' }} />
           : <span style={{ display: 'grid', placeItems: 'center', width: 26, height: 26, borderRadius: 8, background: accent, color: onAccent, fontSize: 12, fontWeight: 800 }}>{name[0]?.toUpperCase()}</span>}
         <strong style={{ color: ink, fontSize: 13, fontWeight: 800 }}>{name}</strong>
         {!mobile && (
-          <span style={{ display: 'flex', gap: 12, margin: '0 auto', fontSize: 10, color: '#4f5159', fontWeight: 600 }}>
+          <span style={{ display: 'flex', gap: 12, margin: '0 auto', fontSize: 10, color: c.copy, fontWeight: 600 }}>
             <span style={{ color: ink, borderBottom: `2px solid ${accent}` }}>Inicio</span><span>Productos</span><span>Nosotros</span>
           </span>
         )}
@@ -55,14 +70,14 @@ function StorePreview({ style, company, mobile }) {
       </div>
 
       <div style={{ padding: 12 }}>
-        <div style={{ display: 'grid', gridTemplateColumns: mobile ? '1fr' : '1.1fr .9fr', gap: 12, alignItems: 'center', padding: mobile ? 14 : 18, borderRadius: 16, background: `linear-gradient(118deg, color-mix(in srgb, ${accent} 9%, #fff6ee), #fff)` }}>
+        <div style={{ display: 'grid', gridTemplateColumns: mobile ? '1fr' : '1.1fr .9fr', gap: 12, alignItems: 'center', padding: mobile ? 14 : 18, borderRadius: 16, background: `linear-gradient(118deg, color-mix(in srgb, ${accent} 9%, ${c.heroA}), ${c.surface})` }}>
           <div>
             <span style={{ display: 'inline-block', padding: '3px 8px', borderRadius: 99, background: soft, color: ink, fontSize: 8, fontWeight: 700 }}>● Tienda oficial</span>
             <div style={{ margin: '6px 0 4px', color: ink, fontSize: mobile ? 18 : 22, fontWeight: 800, letterSpacing: '-.03em', lineHeight: 1.05 }}>{name}</div>
-            <div style={{ color: '#4f5159', fontSize: 9, lineHeight: 1.5 }}>{company?.description?.slice(0, 80) || 'Elegí tus productos y armá tu pedido en un minuto.'}</div>
+            <div style={{ color: c.copy, fontSize: 9, lineHeight: 1.5 }}>{company?.description?.slice(0, 80) || 'Elegí tus productos y armá tu pedido en un minuto.'}</div>
             <span style={{ display: 'inline-block', marginTop: 8, padding: '6px 10px', borderRadius: 8, background: accent, color: onAccent, fontSize: 9, fontWeight: 700 }}>Ver productos →</span>
           </div>
-          <div style={{ height: mobile ? 90 : 110, borderRadius: 12, background: style.bgImage ? `center/cover url(${style.bgImage})` : `radial-gradient(circle, ${soft}, #fff 70%)`, display: 'grid', placeItems: 'center', color: ink }}>
+          <div style={{ height: mobile ? 90 : 110, borderRadius: 12, background: style.bgImage ? `center/cover url(${style.bgImage})` : `radial-gradient(circle, ${soft}, ${c.surface} 70%)`, display: 'grid', placeItems: 'center', color: ink }}>
             {!style.bgImage && <Icon name="image" size={24} />}
           </div>
         </div>
@@ -70,8 +85,8 @@ function StorePreview({ style, company, mobile }) {
         <div style={{ margin: '12px 2px 8px', fontSize: 11, fontWeight: 800 }}>Productos destacados</div>
         <div style={{ display: 'grid', gridTemplateColumns: `repeat(${cards}, 1fr)`, gap: 8 }}>
           {Array.from({ length: cards }).map((_, i) => (
-            <div key={i} style={{ overflow: 'hidden', border: '1px solid #ebe7e1', borderRadius: 12, background: '#fff' }}>
-              <div style={{ height: 46, background: `linear-gradient(135deg, ${soft}, #f3efea)`, display: 'grid', placeItems: 'center', color: ink }}><Icon name="package" size={16} /></div>
+            <div key={i} style={{ overflow: 'hidden', border: `1px solid ${c.line}`, borderRadius: 12, background: c.surface }}>
+              <div style={{ height: 46, background: `linear-gradient(135deg, ${soft}, ${c.subtle})`, display: 'grid', placeItems: 'center', color: ink }}><Icon name="package" size={16} /></div>
               <div style={{ padding: 6 }}>
                 <div style={{ fontSize: 8.5, fontWeight: 700 }}>Producto {i + 1}</div>
                 <div style={{ margin: '2px 0 5px', color: ink, fontSize: 10, fontWeight: 800 }}>S/ {(12 + i * 9).toFixed(2)}</div>
@@ -88,18 +103,19 @@ function StorePreview({ style, company, mobile }) {
 function StyleContent() {
   const cached = JSON.parse(localStorage.getItem('company') || '{}') || {}
   const [company, setCompany] = useState(cached)
-  const [style, setStyle] = useState(() => ({ primary: DEFAULT_PRIMARY, bgImage: '', ...parseStoreStyle(cached.storeStyle) }))
+  const [style, setStyle] = useState(() => readStyle(cached.storeStyle))
   const [saved, setSaved] = useState(style)
   const [saving, setSaving] = useState(false)
   const [uploading, setUploading] = useState(false)
   const [previewMode, setPreviewMode] = useState('desktop')
+  const [autoPreview, setAutoPreview] = useState('light')
   const fileRef = useRef(null)
 
   useEffect(() => {
     let vigente = true
     getMyCompany({ force: true }).then((data) => {
       if (!vigente || !data) return
-      const current = { primary: DEFAULT_PRIMARY, bgImage: '', ...parseStoreStyle(data.storeStyle) }
+      const current = readStyle(data.storeStyle)
       setCompany(data)
       setStyle(current)
       setSaved(current)
@@ -107,9 +123,13 @@ function StyleContent() {
     return () => { vigente = false }
   }, [])
 
-  const effective = storeThemeVars(JSON.stringify(style))['--sf-accent']
-  const adjusted = effective.toLowerCase() !== String(style.primary).toLowerCase()
-  const dirty = style.primary !== saved.primary || (style.bgImage || '') !== (saved.bgImage || '')
+  const previewScheme = style.mode === 'auto' ? autoPreview : style.mode
+  // Aviso si el color se reemplaza en alguno de los fondos que verán los clientes.
+  const schemes = style.mode === 'auto' ? ['light', 'dark'] : [style.mode]
+  const adjustments = schemes
+    .map((scheme) => ({ scheme, color: storeThemeVars(JSON.stringify(style), scheme)['--sf-accent'] }))
+    .filter(({ color }) => color.toLowerCase() !== String(style.primary).toLowerCase())
+  const dirty = style.primary !== saved.primary || (style.bgImage || '') !== (saved.bgImage || '') || style.mode !== saved.mode
 
   const upload = async (event) => {
     const file = event.target.files?.[0]
@@ -132,7 +152,7 @@ function StyleContent() {
     setSaving(true)
     try {
       // Se conservan las claves que no edita esta pantalla (versiones anteriores del estilo).
-      const payload = JSON.stringify({ ...parseStoreStyle(company.storeStyle), primary: style.primary, bgImage: style.bgImage || '' })
+      const payload = JSON.stringify({ ...parseStoreStyle(company.storeStyle), primary: style.primary, bgImage: style.bgImage || '', mode: style.mode })
       const updated = await api.put('/companies/config', { storeStyle: payload })
       const next = { ...company, ...updated, storeStyle: payload }
       setCompany(next)
@@ -153,6 +173,26 @@ function StyleContent() {
     <div className="fx-style">
       <div className="fx-style__controls">
         <div className="fx-card">
+          <div className="fx-card__head"><h2 className="fx-h3">Apariencia</h2></div>
+          <div className="fx-card__body">
+            <p className="fx-hint" style={{ marginBottom: 12 }}>Cómo ven tu tienda los clientes. Los colores se ajustan solos al fondo.</p>
+            <div className="fx-modes" role="radiogroup" aria-label="Apariencia de la tienda">
+              {MODES.map((m) => (
+                <button key={m.value} type="button" role="radio" aria-checked={style.mode === m.value}
+                  className={`fx-mode${style.mode === m.value ? ' is-on' : ''}`}
+                  onClick={() => setStyle((s) => ({ ...s, mode: m.value }))}>
+                  <span className={`fx-mode__sample fx-mode__sample--${m.value}`} aria-hidden="true">
+                    <i /><i /><i />
+                  </span>
+                  <strong><Icon name={m.icon} size={15} /> {m.label}</strong>
+                  <small>{m.text}</small>
+                </button>
+              ))}
+            </div>
+          </div>
+        </div>
+
+        <div className="fx-card">
           <div className="fx-card__head"><h2 className="fx-h3">Color de la tienda</h2></div>
           <div className="fx-card__body">
             <p className="fx-hint" style={{ marginBottom: 12 }}>Se usa en botones, precios, el nombre de la tienda y los detalles.</p>
@@ -168,12 +208,16 @@ function StyleContent() {
                 onChange={(e) => setStyle((s) => ({ ...s, primary: e.target.value }))} aria-label="Color personalizado" />
               <span className="fx-hint">Color personalizado · {style.primary}</span>
             </div>
-            {adjusted && (
-              <div className="fx-alert fx-alert--warn" style={{ marginTop: 12 }}>
+            {adjustments.map(({ scheme, color }) => (
+              <div key={scheme} className="fx-alert fx-alert--warn" style={{ marginTop: 12 }}>
                 <Icon name="info" size={16} />
-                <span>Ese color es muy claro para leerse sobre fondo blanco. La tienda usará {effective}.</span>
+                <span>
+                  {scheme === 'dark'
+                    ? `Ese color es muy oscuro para distinguirse sobre el fondo oscuro. En la tienda oscura se usará ${color}.`
+                    : `Ese color es muy claro para leerse sobre el fondo claro. En la tienda clara se usará ${color}.`}
+                </span>
               </div>
-            )}
+            ))}
           </div>
         </div>
 
@@ -221,8 +265,18 @@ function StyleContent() {
 
       <div className="fx-style__preview">
         <div className="fx-card">
-          <div className="fx-card__head">
+          <div className="fx-card__head" style={{ flexWrap: 'wrap', gap: 8 }}>
             <h2 className="fx-h3">Vista previa</h2>
+            {style.mode === 'auto' && (
+              <div className="fx-tabs" style={{ padding: 3, marginLeft: 'auto' }} aria-label="Fondo de la vista previa">
+                <button type="button" className={`fx-tab${autoPreview === 'light' ? ' fx-tab--on' : ''}`} onClick={() => setAutoPreview('light')}>
+                  <Icon name="sun" size={14} /> Claro
+                </button>
+                <button type="button" className={`fx-tab${autoPreview === 'dark' ? ' fx-tab--on' : ''}`} onClick={() => setAutoPreview('dark')}>
+                  <Icon name="moon" size={14} /> Oscuro
+                </button>
+              </div>
+            )}
             <div className="fx-tabs" style={{ padding: 3 }}>
               <button type="button" className={`fx-tab${previewMode === 'desktop' ? ' fx-tab--on' : ''}`} onClick={() => setPreviewMode('desktop')}>Escritorio</button>
               <button type="button" className={`fx-tab${previewMode === 'mobile' ? ' fx-tab--on' : ''}`} onClick={() => setPreviewMode('mobile')}>Móvil</button>
@@ -230,7 +284,7 @@ function StyleContent() {
           </div>
           <div className="fx-card__body">
             <div className={previewMode === 'mobile' ? 'fx-preview-frame fx-preview-frame--mobile' : 'fx-preview-frame'}>
-              <StorePreview style={style} company={company} mobile={previewMode === 'mobile'} />
+              <StorePreview style={style} company={company} mobile={previewMode === 'mobile'} scheme={previewScheme} />
             </div>
           </div>
         </div>
@@ -247,7 +301,7 @@ export default function StylePage() {
       <div className="fx-page-head">
         <div>
           <h1>Estilo de la tienda</h1>
-          <p>Elegí el color y la portada de tu tienda. La vista previa se actualiza al instante.</p>
+          <p>Elegí la apariencia, el color y la portada de tu tienda. La vista previa se actualiza al instante.</p>
         </div>
       </div>
 

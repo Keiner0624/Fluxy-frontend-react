@@ -17,9 +17,10 @@ import { AboutSection, CategoryTiles, Hero, ProductSection, PromoBanner, TrustSt
 import { useCart } from '@/modules/store/hooks/useCart'
 import { useFavorites } from '@/modules/store/hooks/useFavorites'
 import { useStore } from '@/modules/store/hooks/useStore'
+import { useStoreScheme } from '@/modules/store/hooks/useStoreScheme'
 import { useStoreTracking } from '@/modules/store/hooks/useStoreTracking'
 import { canUseWhatsapp, money, productImages, sortProducts, stockOf, whatsappLink } from '@/modules/store/lib/storeFormat'
-import { storeBanner, storeThemeVars } from '@/modules/store/lib/storeTheme'
+import { storeBanner, storeMode, storeThemeVars } from '@/modules/store/lib/storeTheme'
 import './StorePage.css'
 
 const FONT_ID = 'sf-font'
@@ -83,7 +84,32 @@ export default function StorePage() {
   const ordersPaused = company?.acceptingOrders === false
   const whatsappAllowed = canUseWhatsapp(company)
   const contactLink = whatsappAllowed ? whatsappLink(company, `Hola ${company?.name}, vi su tienda y quiero hacer una consulta.`) : ''
-  const theme = useMemo(() => storeThemeVars(company?.storeStyle), [company?.storeStyle])
+  const scheme = useStoreScheme(storeMode(company?.storeStyle))
+  const theme = useMemo(() => storeThemeVars(company?.storeStyle, scheme), [company?.storeStyle, scheme])
+
+  // Fondo del documento y barra del navegador en el celular, del mismo tono que la tienda.
+  useEffect(() => {
+    const background = scheme === 'dark' ? '#101014' : '#f7f5f2'
+    const root = document.documentElement
+    const previous = { background: root.style.background, colorScheme: root.style.colorScheme }
+    root.style.background = background
+    root.style.colorScheme = scheme
+    let meta = document.querySelector('meta[name="theme-color"]')
+    const created = !meta
+    if (created) {
+      meta = document.createElement('meta')
+      meta.name = 'theme-color'
+      document.head.appendChild(meta)
+    }
+    const previousColor = meta.content
+    meta.content = background
+    return () => {
+      root.style.background = previous.background
+      root.style.colorScheme = previous.colorScheme
+      if (created) meta.remove()
+      else meta.content = previousColor
+    }
+  }, [scheme])
 
   useEffect(() => {
     if (!company?.name) return undefined
@@ -174,19 +200,19 @@ export default function StorePage() {
   }, [openProduct, products])
 
   if (!storeSlug) {
-    return <div className="sf-root" style={theme}><StoreProblem title="No se indicó una tienda" text="Abrí el enlace que te compartió el negocio." /></div>
+    return <div className="sf-root" data-scheme={scheme} style={theme}><StoreProblem title="No se indicó una tienda" text="Abrí el enlace que te compartió el negocio." /></div>
   }
 
   if (!loading && error) {
     return (
-      <div className="sf-root" style={theme}>
+      <div className="sf-root" data-scheme={scheme} style={theme}>
         <StoreProblem title="Esta tienda no está disponible" text={error.includes('conectar') ? error : 'Puede que el enlace esté mal escrito o que la tienda ya no esté en línea.'} />
       </div>
     )
   }
 
   return (
-    <div className="sf-root" style={theme}>
+    <div className="sf-root" data-scheme={scheme} style={theme}>
       <Toaster toastOptions={{ className: 'sf-toast-base' }} containerStyle={{ top: 70, bottom: 24 }} />
 
       {ordersPaused && (
