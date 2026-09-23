@@ -36,6 +36,8 @@ const ACTIONS = {
   OWNERSHIP_TRANSFER_CANCELLED: ['Canceló la transferencia', 'building'],
   OWNERSHIP_TRANSFERRED: ['Transfirió la propiedad', 'building'],
   PLAN_CHANGED: ['Cambió el plan', 'plans'],
+  SUBSCRIPTION_CANCEL_REQUESTED: ['Canceló la suscripción (sigue hasta fin del periodo)', 'plans'],
+  SUBSCRIPTION_REACTIVATED: ['Reactivó la suscripción', 'plans'],
   SETTINGS_UPDATED: ['Actualizó la configuración', 'settings'],
   INTEGRATION_UPDATED: ['Actualizó una integración', 'plug'],
   COMPANY_STATUS_CHANGED: ['Cambió el estado del negocio', 'info'],
@@ -52,15 +54,26 @@ const ACTIONS = {
   COUPON_DELETED: ['Eliminó un cupón', 'coupons'],
 }
 
-const DETAIL_LABELS = { method: 'Método', from: 'De', to: 'A', by: 'Origen', provider: 'Proveedor', revoked: 'Sesiones', sessionsRevoked: 'Sesiones cerradas', total: 'Total', months: 'Meses', flow: 'Flujo', updated: 'Actualizados', deleted: 'Eliminados', name: 'Nombre', device: 'Dispositivo', version: 'Versión' }
+const DETAIL_LABELS = { method: 'Método', from: 'De', to: 'A', by: 'Origen', provider: 'Proveedor', revoked: 'Sesiones', sessionsRevoked: 'Sesiones cerradas', total: 'Total', months: 'Meses', flow: 'Flujo', updated: 'Actualizados', deleted: 'Eliminados', name: 'Nombre', device: 'Dispositivo', version: 'Versión', plan: 'Plan', reason: 'Motivo', effectiveAt: 'Hasta' }
 
-const DETAIL_VALUES = { AUTO_EMAIL: 'Acceso con el mismo correo', GOOGLE: 'Google', APPLE: 'Apple', PASSWORD: 'Contraseña' }
+const DETAIL_VALUES = {
+  AUTO_EMAIL: 'Acceso con el mismo correo', GOOGLE: 'Google', APPLE: 'Apple', PASSWORD: 'Contraseña',
+  FREE: 'Free', PRO: 'Pro', BUSINESS: 'Business', TRIAL: 'Prueba gratuita', ADMIN: 'Fluxy', EXPIRATION: 'Vencimiento',
+  CANCELLATION: 'Cancelación', SCHEDULED_CHANGE: 'Cambio programado', NEW: 'Alta', RENEWAL: 'Renovación', UPGRADE: 'Subida de plan',
+  DOWNGRADE: 'Cambio programado', TOO_EXPENSIVE: 'Muy caro', NOT_USING: 'No lo usa', MISSING_FEATURES: 'Faltan funciones',
+  SWITCHING: 'Cambia de herramienta', TEMPORARY: 'Temporal', OTHER: 'Otro',
+}
+
+const ISO_DATE = /^\d{4}-\d{2}-\d{2}T/
+const detailValue = (value) => ISO_DATE.test(String(value))
+  ? new Date(value).toLocaleDateString('es-PE', { day: 'numeric', month: 'short', year: 'numeric' })
+  : DETAIL_VALUES[value] || value
 
 function details(metadata) {
   if (!metadata) return ''
   return Object.entries(metadata)
     .filter(([key]) => DETAIL_LABELS[key])
-    .map(([key, value]) => `${DETAIL_LABELS[key]}: ${DETAIL_VALUES[value] || value}`)
+    .map(([key, value]) => `${DETAIL_LABELS[key]}: ${detailValue(value)}`)
     .join(' · ')
 }
 

@@ -12,9 +12,25 @@ import useAccess from '@/hooks/useAccess'
 import BrandLogo from '@/components/BrandLogo'
 import Icon from '@/components/Icon'
 import { usePushNotifications } from '@/hooks/usePushNotifications'
+import useBadges from '@/hooks/useBadges'
 import { useTheme } from '@/hooks/useTheme'
 
 const PLAN_ORDER = { FREE: 0, PRO: 1, BUSINESS: 2 }
+
+// Qué contador lleva cada sección y cómo se ve. "dot" = aviso sin número.
+const BADGES = {
+  '/dashboard/orders':    { key: 'orders',    tone: 'brand',  label: (n) => `${n} ${n === 1 ? 'pedido' : 'pedidos'} por confirmar` },
+  '/dashboard/customers': { key: 'customers', tone: 'soft',   label: (n) => `${n} ${n === 1 ? 'cliente nuevo' : 'clientes nuevos'}` },
+  '/dashboard/payments':  { key: 'payments',  tone: 'brand',  label: (n) => `${n} ${n === 1 ? 'cobro' : 'cobros'} por verificar` },
+  '/dashboard/coupons':   { key: 'coupons',   tone: 'warn',   label: (n) => `${n} ${n === 1 ? 'cupón vence' : 'cupones vencen'} en 3 días` },
+  '/dashboard/inventory': { key: 'inventory', tone: 'warn',   label: (n) => `${n} ${n === 1 ? 'producto' : 'productos'} con stock bajo o agotados` },
+  '/dashboard/team':      { key: 'team',      tone: 'soft',   label: (n) => `${n} ${n === 1 ? 'invitación pendiente' : 'invitaciones pendientes'}` },
+  '/dashboard/activity':  { key: 'activity',  tone: 'danger', label: (n) => `${n} ${n === 1 ? 'alerta' : 'alertas'} de seguridad nuevas` },
+  '/dashboard/plans':     { key: 'billing',   tone: 'warn',   dot: true, label: () => 'Tu plan termina pronto' },
+  '/dashboard/security':  { key: 'security',  tone: 'warn',   dot: true, label: () => 'Verificá tu correo' },
+}
+// Lo que pide una acción: suma en el título de la pestaña y en el botón del menú del celular.
+const ACTIONABLE = ['orders', 'payments']
 const COLLAPSED_KEY = 'fluxy_sidebar_collapsed'
 
 // Agrupado por tarea del negocio. Cada opción se muestra solo a quien tiene
@@ -132,6 +148,29 @@ export default function DashboardLayout({ children }) {
     navigate('/login')
   }
 
+  const badges = useBadges({
+    scope: me ? `${me.companyId}_${me.email}` : null,
+    pathname: location.pathname,
+    enabled: Boolean(me),
+  })
+  const counts = { ...badges, security: me && me.emailVerified === false ? 1 : 0 }
+  const pending = ACTIONABLE.reduce((sum, key) => sum + (Number(counts[key]) || 0), 0)
+  const anyBadge = Object.values(BADGES).some((b) => Number(counts[b.key]) > 0)
+
+  // (3) Fluxy: los pedidos por confirmar se ven aunque la pestaña esté en segundo plano.
+  useEffect(() => {
+    const base = document.title.replace(/^\(\d+\+?\)\s*/, '')
+    document.title = pending > 0 ? `(${pending > 99 ? '99+' : pending}) ${base}` : base
+    return () => { document.title = document.title.replace(/^\(\d+\+?\)\s*/, '') }
+  }, [pending])
+
+  const badgeFor = (path) => {
+    const config = BADGES[path]
+    const value = config ? Number(counts[config.key]) || 0 : 0
+    if (!value) return null
+    return { ...config, value, text: config.label(value) }
+  }
+
   const isActive = (path) =>
     path === '/dashboard' ? location.pathname === path : location.pathname.startsWith(path)
 
@@ -165,17 +204,27 @@ export default function DashboardLayout({ children }) {
             <p className="fx-sidebar__group-label">{group.label}</p>
             {group.items.map((item) => {
               const locked = !planAllows(item.requiredPlan)
+              const badge = locked ? null : badgeFor(item.path)
               return (
                 <Link
                   key={item.path}
                   to={locked ? '/dashboard/plans' : item.path}
-                  title={collapsed ? item.label : undefined}
+                  title={collapsed ? (badge ? `${item.label} · ${badge.text}` : item.label) : badge?.text}
                   aria-current={isActive(item.path) ? 'page' : undefined}
                   className={`fx-sidebar__link${isActive(item.path) ? ' is-active' : ''}${locked ? ' is-locked' : ''}`}
                 >
-                  <Icon name={item.icon} size={17} />
+                  <span className="fx-sidebar__icon">
+                    <Icon name={item.icon} size={17} />
+                    {badge && <i className={`fx-sidebar__pip fx-sidebar__pip--${badge.tone}`} aria-hidden="true" />}
+                  </span>
                   <span className="fx-sidebar__label">{item.label}</span>
                   {locked && <Icon name="lock" size={13} className="fx-sidebar__lock" style={{ marginLeft: 'auto', opacity: .6 }} />}
+                  {badge && (
+                    <span className={`fx-sidebar__badge fx-sidebar__badge--${badge.tone}${badge.dot ? ' fx-sidebar__badge--dot' : ''}`}>
+                      {badge.dot ? '' : badge.value > 99 ? '99+' : badge.value}
+                      <span className="sr-only">{badge.text}</span>
+                    </span>
+                  )}
                 </Link>
               )
             })}
@@ -221,9 +270,10 @@ export default function DashboardLayout({ children }) {
             type="button"
             className="fx-btn fx-btn--ghost fx-btn--icon fx-topbar__menu"
             onClick={() => setSidebarOpen(true)}
-            aria-label="Abrir menú"
+            aria-label={anyBadge ? 'Abrir menú (hay avisos)' : 'Abrir menú'}
           >
             <Icon name="menu" size={19} />
+            {anyBadge && <i className="fx-topbar__menu-dot" aria-hidden="true" />}
           </button>
 
           <div className="fx-topbar__brand">

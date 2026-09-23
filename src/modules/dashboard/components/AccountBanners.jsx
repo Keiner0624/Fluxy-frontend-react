@@ -14,8 +14,27 @@ const LIFECYCLE = {
   ARCHIVED: { tone: 'error', icon: 'alert', text: 'Tu tienda está archivada y fuera de línea. Tus datos siguen guardados.' },
 }
 
+// Ocultar el aviso de correo dura 30 días en este dispositivo; Seguridad sigue marcándolo.
+const EMAIL_HIDE_DAYS = 30
+const emailHideKey = (email) => `fluxy_hide_email_notice_${email || 'me'}`
+
+function readEmailHidden(email) {
+  try {
+    const until = Number(localStorage.getItem(emailHideKey(email)))
+    return Number.isFinite(until) && until > Date.now()
+  } catch {
+    return false
+  }
+}
+
 export default function AccountBanners({ me, onChange }) {
   const [lifecycle, setLifecycle] = useState(null)
+  const [hiddenFor, setHiddenFor] = useState(null)
+  const emailHidden = hiddenFor === me?.email || readEmailHidden(me?.email)
+  const hideEmail = () => {
+    try { localStorage.setItem(emailHideKey(me?.email), String(Date.now() + EMAIL_HIDE_DAYS * 86_400_000)) } catch { /* sin almacenamiento */ }
+    setHiddenFor(me?.email)
+  }
   const [busy, setBusy] = useState(false)
   const status = lifecycle?.status || me?.companyStatus
 
@@ -70,12 +89,16 @@ export default function AccountBanners({ me, onChange }) {
     )
   }
 
-  if (me && me.emailVerified === false) {
+  if (me && me.emailVerified === false && !emailHidden) {
     banners.push(
       <div key="email" className="fx-alert fx-alert--warn" role="status" style={{ marginBottom: 14, alignItems: 'center' }}>
         <Icon name="mail" size={16} />
         <span style={{ flex: 1 }}>Verificá tu correo para poder recuperar tu cuenta si olvidás la contraseña.</span>
         <Link to="/dashboard/security#correo" className="fx-btn fx-btn--secondary fx-btn--sm">Verificar</Link>
+        <button type="button" className="fx-btn fx-btn--ghost fx-btn--icon fx-alert__close" onClick={hideEmail}
+          aria-label="Ocultar este aviso" title="Ocultar (sigue disponible en Seguridad)">
+          <Icon name="close" size={15} />
+        </button>
       </div>,
     )
   }

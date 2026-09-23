@@ -1,160 +1,500 @@
 // src/modules/dashboard/pages/PlansPage.jsx
-import { useState, useEffect } from 'react'
+// Plan y facturación: plan actual y hasta cuándo está pagado, cambiar de plan (con cotización
+// antes de pagar), cancelar al final del periodo, reactivar e historial. El backend decide todo;
+// esta pantalla solo lo muestra.
+import { useCallback, useEffect, useRef, useState } from 'react'
+import { useSearchParams } from 'react-router-dom'
+import toast from 'react-hot-toast'
 import DashboardLayout from '@/modules/dashboard/components/DashboardLayout'
-import { API_URL } from '@/app/config'
-import { useCurrency } from '@/hooks/useCurrency'
+import { EmptyState, ErrorState, Modal } from '@/modules/dashboard/components/ui'
 import Icon from '@/components/Icon'
-import { getMe, getMyCompany, invalidateAccount } from '@/app/account'
+import { api } from '@/app/api'
+import { invalidateAccount } from '@/app/account'
+import { newIdempotencyKey } from '@/app/session'
+import { legalUrl } from '@/modules/landing/legal/documents'
 
-function getToken() {
-  return localStorage.getItem('token') || ''
+const RANK = { FREE: 0, PRO: 1, BUSINESS: 2 }
+
+const BENEFITS = {
+  FREE: ['Hasta 10 productos', 'Tienda pública con enlace propio', 'Pedidos, clientes y cobros', 'Logo de tu negocio', 'Resumen de ventas'],
+  PRO: ['Hasta 100 productos', 'Pedidos por WhatsApp y aviso al cliente', 'Métricas y reportes exportables', 'Cupones de descuento',
+    'Estilo de la tienda: color, portada y modo oscuro', 'Equipo con roles y permisos'],
+  BUSINESS: ['Productos ilimitados', 'Todo lo de Pro', 'Dominio personalizado', 'Descripciones de productos con IA', 'Tienda sin la marca de Fluxy', 'Soporte prioritario'],
 }
 
-const PLANS = [
-  {
-    key: 'FREE',
-    name: 'Free',
-    tagline: 'Para empezar a vender hoy mismo.',
-    badge: null,
-    benefits: [
-      'Hasta 10 productos en tu tienda',
-      'Recepción de pedidos básica',
-      'Personalización de colores y logo',
-      'Tienda pública con enlace propio',
-      'Métricas básicas de ventas',
-    ],
-    excluded: [
-      'Mensaje automático por WhatsApp',
-      'Estados de pedidos avanzados',
-      'Dominio personalizado',
-      'Quitar la marca de Fluxy',
-      'Soporte prioritario',
-    ],
-  },
-  {
-    key: 'PRO',
-    name: 'Pro',
-    tagline: 'Para negocios que ya venden todos los días.',
-    badge: 'Más elegido',
-    benefits: [
-      'Hasta 100 productos en tu tienda',
-      'Mensaje automático de pedido por WhatsApp',
-      'Notificación al cliente con el resumen del pedido',
-      'Panel de pedidos con estados',
-      'Estadísticas completas y gráficos',
-      'Ranking de productos más vendidos',
-      'Personalización avanzada de la tienda',
-      'Logo propio en tu tienda',
-      'Múltiples métodos de pago visibles',
-      'Soporte por correo electrónico',
-    ],
-    excluded: [
-      'Dominio personalizado',
-      'Quitar la marca de Fluxy',
-      'Soporte prioritario 24/7',
-    ],
-  },
-  {
-    key: 'BUSINESS',
-    name: 'Business',
-    tagline: 'Todo incluido, sin límites.',
-    badge: 'Todo incluido',
-    benefits: [
-      'Productos ilimitados',
-      'Mensaje automático de pedido por WhatsApp',
-      'Notificación al cliente con el resumen del pedido',
-      'Panel de pedidos con estados avanzados',
-      'Estadísticas completas y gráficos',
-      'Ranking de productos más vendidos',
-      'Personalización avanzada de la tienda',
-      'Dominio personalizado',
-      'Tienda sin la marca de Fluxy',
-      'Soporte prioritario 24/7',
-    ],
-    excluded: [],
-  },
+const FEATURE_LABELS = {
+  METRICS: 'Métricas', REPORTS: 'Reportes', COUPONS: 'Cupones', CUSTOM_STYLE: 'Estilo de la tienda', WHATSAPP: 'Pedidos por WhatsApp',
+  CUSTOM_DOMAIN: 'Dominio personalizado', AI_DESCRIPTIONS: 'Descripciones con IA', NO_BRANDING: 'Tienda sin la marca de Fluxy',
+}
+
+const REASONS = [
+  ['TOO_EXPENSIVE', 'Es muy caro para mí'],
+  ['NOT_USING', 'No lo estoy usando'],
+  ['MISSING_FEATURES', 'Le faltan funciones que necesito'],
+  ['SWITCHING', 'Me cambio a otra herramienta'],
+  ['TEMPORARY', 'Es temporal, voy a volver'],
+  ['OTHER', 'Otro motivo'],
 ]
 
-const PLAN_ORDER = { FREE: 0, PRO: 1, BUSINESS: 2 }
+const EVENTS = {
+  TRIAL_STARTED: 'Empezó la prueba gratuita',
+  SUBSCRIPTION_STARTED: 'Empezó la suscripción',
+  RENEWED: 'Renovaste',
+  PLAN_UPGRADED: 'Subiste de plan',
+  DOWNGRADE_SCHEDULED: 'Programaste un cambio de plan',
+  DOWNGRADE_APPLIED: 'Empezó el plan programado',
+  CANCELLATION_REQUESTED: 'Pediste cancelar la suscripción',
+  CANCELLATION_REVOKED: 'Reactivaste la suscripción',
+  SUBSCRIPTION_CANCELED: 'Terminó la suscripción cancelada',
+  SUBSCRIPTION_EXPIRED: 'Venció el plan',
+  ADMIN_GRANTED: 'Cambio hecho por Fluxy',
+}
+
+const KINDS = { NEW: 'Alta', RENEWAL: 'Renovación', UPGRADE: 'Subida de plan', DOWNGRADE: 'Cambio programado' }
+const PLAN_NAMES = { FREE: 'Free', PRO: 'Pro', BUSINESS: 'Business' }
+
+const money = (value) => `S/ ${Number(value || 0).toFixed(Number(value) % 1 === 0 ? 0 : 2)}`
+const longDate = (value) => value ? new Date(value).toLocaleDateString('es-PE', { day: 'numeric', month: 'long', year: 'numeric' }) : '—'
+const shortDate = (value) => value ? new Date(value).toLocaleDateString('es-PE', { day: 'numeric', month: 'short', year: 'numeric' }) : '—'
+
+function statusBadge(sub) {
+  if (sub.status === 'FREE') return <span className="fx-badge">Gratis</span>
+  if (sub.cancelAtPeriodEnd) return <span className="fx-badge fx-badge--warn"><Icon name="clock" size={12} /> Se cancela el {shortDate(sub.paidUntil)}</span>
+  if (sub.trial) return <span className="fx-badge fx-badge--brand">Prueba gratuita</span>
+  return <span className="fx-badge fx-badge--ok"><span className="fx-dot" /> Activo</span>
+}
+
+function CurrentPlan({ sub, onRenew, onCancel, onReactivate, onTrial, busy }) {
+  const free = sub.status === 'FREE'
+  const limit = sub.usage?.productLimit
+  const used = sub.usage?.products ?? 0
+  const pct = limit > 0 ? Math.min(100, Math.round((used / limit) * 100)) : 0
+
+  return (
+    <section className="fx-card fx-billing-current" aria-label="Plan actual">
+      <div className="fx-card__body">
+        <div className="fx-billing-current__top">
+          <div>
+            <p className="fx-eyebrow">Plan actual</p>
+            <div className="fx-row" style={{ gap: 10, flexWrap: 'wrap', marginTop: 6 }}>
+              <h2 className="fx-billing-current__name">{sub.planName}</h2>
+              {statusBadge(sub)}
+            </div>
+          </div>
+          {!free && (
+            <p className="fx-billing-current__price">{money(sub.monthlyPrice)} <span>/ mes</span></p>
+          )}
+        </div>
+
+        {free ? (
+          <p className="fx-hint" style={{ marginTop: 10 }}>
+            {sub.last
+              ? `Tu plan ${sub.last.planName} ${sub.last.status === 'CANCELED' ? 'se canceló' : 'venció'} el ${longDate(sub.last.endedAt)}. Tus datos siguen guardados: elegí un plan para recuperar sus funciones.`
+              : 'Tu tienda funciona gratis con lo esencial. Cuando necesites más, elegí un plan: se activa apenas se confirma el pago.'}
+          </p>
+        ) : (
+          <dl className="fx-billing-current__facts">
+            <div>
+              <dt>{sub.cancelAtPeriodEnd ? 'Activo hasta' : sub.trial ? 'Prueba hasta' : 'Pagado hasta'}</dt>
+              <dd>{longDate(sub.paidUntil)} <small>{sub.daysLeft === 1 ? 'falta 1 día' : `faltan ${sub.daysLeft} días`}</small></dd>
+            </div>
+            <div>
+              <dt>Renovación</dt>
+              <dd>Manual <small>sin cobros automáticos</small></dd>
+            </div>
+            <div>
+              <dt>Después</dt>
+              <dd>{sub.pendingChange ? `Plan ${sub.pendingChange.planName}` : sub.cancelAtPeriodEnd ? 'Plan Free' : 'Plan Free si no renovás'}</dd>
+            </div>
+          </dl>
+        )}
+
+        {sub.pendingChange && (
+          <div className="fx-alert fx-alert--ok" style={{ marginTop: 14 }}>
+            <Icon name="clock" size={16} />
+            <span>El {longDate(sub.pendingChange.effectiveAt)} pasás a {sub.pendingChange.planName}, ya pagado hasta el {longDate(sub.pendingChange.paidUntil)}.</span>
+          </div>
+        )}
+        {sub.cancelAtPeriodEnd && (
+          <div className="fx-alert fx-alert--warn" style={{ marginTop: 14 }}>
+            <Icon name="info" size={16} />
+            <span>
+              Cancelaste la suscripción. Seguís con {sub.planName} hasta el {longDate(sub.paidUntil)}; después tu tienda pasa al plan Free.
+              No se borra nada. Podés reactivarla hasta esa fecha.
+            </span>
+          </div>
+        )}
+
+        {limit != null && (
+          <div className="fx-billing-usage">
+            <div className="fx-row fx-row--between" style={{ fontSize: 13 }}>
+              <span>Productos</span>
+              <span className="fx-num">{used}{limit > 0 ? ` de ${limit}` : ' · sin límite'}</span>
+            </div>
+            {limit > 0 && <div className="fx-progress" aria-hidden="true"><span style={{ width: `${pct}%` }} className={pct >= 90 ? 'is-high' : ''} /></div>}
+          </div>
+        )}
+
+        <div className="fx-row fx-billing-current__actions">
+          {free && sub.trialAvailable && (
+            <button type="button" className="fx-btn fx-btn--primary" onClick={onTrial} disabled={busy}>
+              <Icon name="sparkles" size={15} /> Probar Pro gratis 1 mes
+            </button>
+          )}
+          {!free && !sub.cancelAtPeriodEnd && (
+            <button type="button" className="fx-btn fx-btn--primary" onClick={onRenew} disabled={busy}>
+              <Icon name="refresh" size={15} /> Renovar
+            </button>
+          )}
+          <a href="#planes" className="fx-btn fx-btn--secondary">Cambiar plan</a>
+          {sub.canReactivate && (
+            <button type="button" className="fx-btn fx-btn--primary" onClick={onReactivate} disabled={busy}>
+              {busy ? <span className="fx-spinner" /> : <Icon name="undo" size={15} />} Reactivar suscripción
+            </button>
+          )}
+          {sub.canCancel && (
+            <button type="button" className="fx-btn fx-btn--ghost fx-billing-current__cancel" onClick={onCancel} disabled={busy}>
+              Cancelar suscripción
+            </button>
+          )}
+        </div>
+      </div>
+    </section>
+  )
+}
+
+function planAction(plan, sub) {
+  if (plan.code === 'FREE') {
+    return sub.status === 'FREE' ? { label: 'Plan actual', disabled: true } : { label: 'Plan gratuito', disabled: true }
+  }
+  if (sub.status === 'FREE') return { label: `Elegir ${plan.name}` }
+  if (sub.pendingChange?.plan === plan.code) return { label: 'Sumar meses' }
+  if (sub.plan === plan.code) return { label: sub.cancelAtPeriodEnd ? 'Renovar y seguir' : 'Renovar' }
+  if (RANK[plan.code] > RANK[sub.plan]) return { label: `Subir a ${plan.name}` }
+  return { label: `Cambiar a ${plan.name} al vencer` }
+}
+
+function PlanCards({ plans, sub, onPick }) {
+  return (
+    <div className="fx-plans" id="planes">
+      {plans.map((plan) => {
+        const current = sub.plan === plan.code
+        const action = planAction(plan, sub)
+        return (
+          <div key={plan.code} className={`fx-plan${current ? ' fx-plan--current' : ''}`}>
+            <div className="fx-plan__head">
+              <div className="fx-row fx-row--between">
+                <h2 className="fx-h2">{plan.name}</h2>
+                {current ? <span className="fx-badge fx-badge--brand">Tu plan</span>
+                  : sub.pendingChange?.plan === plan.code ? <span className="fx-badge">Programado</span>
+                    : plan.code === 'PRO' ? <span className="fx-badge">Más elegido</span> : null}
+              </div>
+              <p className="fx-plan__price">
+                {plan.code === 'FREE' ? 'Gratis' : money(plan.monthlyPrice)}
+                {plan.code !== 'FREE' && <span className="fx-plan__period"> / mes</span>}
+              </p>
+            </div>
+            <ul className="fx-plan__list">
+              {(BENEFITS[plan.code] || []).map((b) => (
+                <li key={b}><Icon name="check" size={15} style={{ color: 'var(--fx-ok)' }} /><span>{b}</span></li>
+              ))}
+            </ul>
+            <div className="fx-plan__foot">
+              <button type="button"
+                className={`fx-btn fx-btn--block ${action.disabled ? 'fx-btn--secondary' : RANK[plan.code] > RANK[sub.plan] || sub.status === 'FREE' ? 'fx-btn--primary' : 'fx-btn--secondary'}`}
+                disabled={action.disabled} onClick={() => onPick(plan)}>
+                {action.label}
+              </button>
+            </div>
+          </div>
+        )
+      })}
+    </div>
+  )
+}
+
+function CheckoutModal({ plan, onClose }) {
+  const [months, setMonths] = useState(1)
+  const [quote, setQuote] = useState(null)
+  const [error, setError] = useState('')
+  const [paying, setPaying] = useState(false)
+  const keyRef = useRef(newIdempotencyKey('checkout'))
+
+  useEffect(() => {
+    let vigente = true
+    setQuote(null)
+    setError('')
+    api.get('/billing/subscription/quote', { plan: plan.code, months })
+      .then((data) => { if (vigente) setQuote(data) })
+      .catch((err) => { if (vigente) setError(err.message) })
+    return () => { vigente = false }
+  }, [plan.code, months])
+
+  const pay = async () => {
+    setPaying(true)
+    setError('')
+    try {
+      const data = await api.post('/billing/subscription/checkout', { plan: plan.code, months }, { idempotencyKey: keyRef.current })
+      window.location.href = data.checkoutUrl
+    } catch (err) {
+      setError(err.message)
+      setPaying(false)
+      keyRef.current = newIdempotencyKey('checkout')
+    }
+  }
+
+  return (
+    <Modal
+      title={quote ? `${KINDS[quote.kind] || 'Pago'} · Plan ${plan.name}` : `Plan ${plan.name}`}
+      subtitle="Revisá qué pasa antes de pagar."
+      onClose={paying ? () => {} : onClose}
+      width={520}
+      footer={(
+        <>
+          <button type="button" className="fx-btn fx-btn--ghost" onClick={onClose} disabled={paying}>Volver</button>
+          <button type="button" className="fx-btn fx-btn--primary" onClick={pay} disabled={!quote || paying}>
+            {paying ? <><span className="fx-spinner" /> Redirigiendo…</> : <>Pagar {quote ? money(quote.amount) : ''} con Mercado Pago</>}
+          </button>
+        </>
+      )}
+    >
+      <div className="fx-field">
+        <span className="fx-label">Duración</span>
+        <div className="fx-tabs fx-billing-months" role="radiogroup" aria-label="Cantidad de meses">
+          {[1, 3, 6, 12].map((m) => (
+            <button key={m} type="button" role="radio" aria-checked={months === m}
+              className={`fx-tab${months === m ? ' fx-tab--on' : ''}`} onClick={() => setMonths(m)} disabled={paying}>
+              {m === 1 ? '1 mes' : `${m} meses`}
+            </button>
+          ))}
+        </div>
+      </div>
+
+      {error && <div className="fx-alert fx-alert--error" style={{ marginBottom: 12 }}><Icon name="alert" size={16} /><span>{error}</span></div>}
+      {!quote && !error && <div className="fx-skeleton" style={{ height: 120 }} />}
+      {quote && (
+        <>
+          <dl className="fx-kv fx-billing-quote">
+            <dt>Total</dt><dd><strong>{money(quote.amount)}</strong> <span className="fx-hint">({quote.months} × {money(plan.monthlyPrice)}, en soles)</span></dd>
+            <dt>Desde</dt><dd>{longDate(quote.periodStart)}</dd>
+            <dt>Hasta</dt><dd>{longDate(quote.periodEnd)}</dd>
+          </dl>
+          <ul className="fx-billing-notes">
+            {quote.notes.map((n) => <li key={n}><Icon name="info" size={14} /> {n}</li>)}
+          </ul>
+          {quote.warnings.length > 0 && (
+            <div className="fx-alert fx-alert--warn" style={{ marginTop: 12 }}>
+              <Icon name="alert" size={16} />
+              <div>{quote.warnings.map((w) => <p key={w} style={{ margin: 0 }}>{w}</p>)}</div>
+            </div>
+          )}
+          <p className="fx-hint" style={{ marginTop: 12 }}>
+            Pago único con Mercado Pago. No se guardan tarjetas ni se hacen cobros automáticos. <a href={legalUrl('terms')} target="_blank" rel="noreferrer" className="fx-link">Términos</a>
+          </p>
+        </>
+      )}
+    </Modal>
+  )
+}
+
+function CancelModal({ sub, plans, onClose, onDone }) {
+  const [reason, setReason] = useState('')
+  const [comment, setComment] = useState('')
+  const [busy, setBusy] = useState(false)
+  const keyRef = useRef(newIdempotencyKey('cancel'))
+  const current = plans.find((p) => p.code === sub.plan)
+  const lost = (current?.features || []).map((f) => FEATURE_LABELS[f]).filter(Boolean)
+
+  const confirm = async () => {
+    setBusy(true)
+    try {
+      const data = await api.post('/billing/subscription/cancel', { reason: reason || null, comment: comment || null }, { idempotencyKey: keyRef.current })
+      onDone(data)
+    } catch (err) {
+      toast.error(err.message)
+      setBusy(false)
+    }
+  }
+
+  return (
+    <Modal
+      title="Cancelar suscripción"
+      subtitle={`Plan ${sub.planName}`}
+      onClose={busy ? () => {} : onClose}
+      width={520}
+      footer={(
+        <>
+          <button type="button" className="fx-btn fx-btn--secondary" onClick={onClose} disabled={busy}>Mantener mi plan</button>
+          <button type="button" className="fx-btn fx-btn--danger" onClick={confirm} disabled={busy}>
+            {busy ? <span className="fx-spinner" /> : null} Cancelar suscripción
+          </button>
+        </>
+      )}
+    >
+      <div className="fx-billing-impact">
+        <div><Icon name="checkCircle" size={18} /><span><strong>Seguís con {sub.planName} hasta el {longDate(sub.paidUntil)}.</strong> Lo que pagaste se respeta completo.</span></div>
+        <div><Icon name="clock" size={18} /><span>Ese día tu tienda pasa al plan <strong>Free</strong>. No se hace ningún cobro.</span></div>
+        {lost.length > 0 && <div><Icon name="lock" size={18} /><span>Dejan de estar incluidos: {lost.join(', ')}. La configuración se guarda por si volvés.</span></div>}
+        <div><Icon name="shield" size={18} /><span>No se borra nada: productos, pedidos, clientes y cobros quedan guardados.</span></div>
+        <div><Icon name="undo" size={18} /><span>Podés reactivarla cuando quieras antes del {longDate(sub.paidUntil)}.</span></div>
+      </div>
+
+      <fieldset className="fx-billing-reasons">
+        <legend className="fx-label">¿Por qué cancelás? <span className="fx-hint">(opcional)</span></legend>
+        {REASONS.map(([value, label]) => (
+          <label key={value} className="fx-check">
+            <input type="radio" name="reason" value={value} checked={reason === value} onChange={() => setReason(value)} />
+            <span>{label}</span>
+          </label>
+        ))}
+      </fieldset>
+      <div className="fx-field" style={{ marginBottom: 0 }}>
+        <label className="fx-label" htmlFor="cancel-comment">Comentario <span className="fx-hint">(opcional)</span></label>
+        <textarea id="cancel-comment" className="fx-textarea" rows={3} maxLength={500} value={comment} onChange={(e) => setComment(e.target.value)}
+          placeholder="¿Qué te hubiera hecho quedarte?" />
+      </div>
+    </Modal>
+  )
+}
+
+function History({ history }) {
+  if (!history) return null
+  const payments = history.payments || []
+  const events = history.events || []
+  if (!payments.length && !events.length) {
+    return <EmptyState icon="receipt" title="Sin movimientos todavía" text="Acá vas a ver tus pagos de plan y cada cambio de la suscripción." />
+  }
+  return (
+    <div className="fx-split">
+      <div className="fx-card">
+        <div className="fx-card__head"><h2 className="fx-h3">Pagos</h2></div>
+        {payments.length === 0 ? <div className="fx-card__body fx-hint">Todavía no hay pagos de plan.</div> : (
+          <ul className="fx-list" style={{ padding: '4px 20px' }}>
+            {payments.map((p, i) => (
+              <li key={i} className="fx-list__row" style={{ gap: 12 }}>
+                <div style={{ flex: 1, minWidth: 0 }}>
+                  <div style={{ color: 'var(--fx-ink)', fontSize: 13.5 }}>{KINDS[p.kind]} · Plan {PLAN_NAMES[p.plan]} · {p.months === 1 ? '1 mes' : `${p.months} meses`}</div>
+                  <div className="fx-hint" style={{ fontSize: 12 }}>
+                    {shortDate(p.periodStart)} → {shortDate(p.periodEnd)}{p.creditDays ? ` · incluye ${p.creditDays} días convertidos` : ''}
+                  </div>
+                </div>
+                <div style={{ textAlign: 'right' }}>
+                  <div className="fx-num" style={{ color: 'var(--fx-ink)', fontWeight: 600 }}>{money(p.amount)}</div>
+                  <div className="fx-hint" style={{ fontSize: 12 }}>{shortDate(p.paidAt)}</div>
+                </div>
+              </li>
+            ))}
+          </ul>
+        )}
+      </div>
+      <div className="fx-card">
+        <div className="fx-card__head"><h2 className="fx-h3">Cambios</h2></div>
+        <ul className="fx-list" style={{ padding: '4px 20px' }}>
+          {events.slice(0, 20).map((e, i) => (
+            <li key={i} className="fx-list__row" style={{ alignItems: 'flex-start', gap: 10 }}>
+              <div style={{ flex: 1, minWidth: 0 }}>
+                <div style={{ color: 'var(--fx-ink)', fontSize: 13.5 }}>{EVENTS[e.type] || e.type}</div>
+                <div className="fx-hint" style={{ fontSize: 12 }}>
+                  {[e.fromPlan && e.toPlan && e.fromPlan !== e.toPlan ? `${PLAN_NAMES[e.fromPlan]} → ${PLAN_NAMES[e.toPlan]}` : null,
+                    e.actor].filter(Boolean).join(' · ')}
+                </div>
+              </div>
+              <span className="fx-hint" style={{ fontSize: 12, whiteSpace: 'nowrap' }}>{shortDate(e.createdAt)}</span>
+            </li>
+          ))}
+        </ul>
+      </div>
+    </div>
+  )
+}
 
 export default function PlansPage() {
-  const { currencyInfo, formatProPrice, formatBusinessPrice } = useCurrency()
-  const [currentPlan, setCurrentPlan]     = useState('FREE')
-  const [trialUsed, setTrialUsed]         = useState(false)
-  const [loadingPayment, setLoadingPayment] = useState(null)
-  const [loadingTrial, setLoadingTrial]   = useState(false)
-  const [trialSuccess, setTrialSuccess]   = useState(false)
-  const [paymentError, setPaymentError]   = useState('')
+  const [params, setParams] = useSearchParams()
+  const [sub, setSub] = useState(null)
+  const [plans, setPlans] = useState([])
+  const [history, setHistory] = useState(null)
+  const [error, setError] = useState(null)
+  const [picking, setPicking] = useState(null)
+  const [cancelling, setCancelling] = useState(false)
+  const [busy, setBusy] = useState(false)
+  const [returnState, setReturnState] = useState(null)
 
-  useEffect(() => { loadPlan() }, [])
+  const load = useCallback(async () => {
+    try {
+      const [s, p, h] = await Promise.all([api.get('/billing/subscription'), api.get('/billing/plans'), api.get('/billing/history')])
+      setSub(s)
+      setPlans(p)
+      setHistory(h)
+      setError(null)
+      return s
+    } catch (err) {
+      setError(err)
+      return null
+    }
+  }, [])
 
-  const loadPlan = async () => {
-    // En paralelo, y compartidas con el layout: antes iban una detrás de otra.
-    const [me, company] = await Promise.all([
-      getMe().catch(() => null),
-      getMyCompany().catch(() => null),
-    ])
-    if (me?.planName) setCurrentPlan(me.planName)
-    if (me?.trialUsed !== undefined) setTrialUsed(me.trialUsed)
-    // La empresa tiene la última palabra sobre trialUsed, como antes.
-    if (company?.trialUsed !== undefined) setTrialUsed(company.trialUsed)
+  useEffect(() => { load() }, [load])
+
+  // Vuelta de Mercado Pago: el plan cambia cuando llega el aviso del proveedor, no por esta URL.
+  // Se lee una sola vez al entrar; limpiar la URL no debe cortar la espera.
+  const [returned] = useState(() => params.get('payment'))
+  useEffect(() => {
+    if (!returned) return undefined
+    setParams({}, { replace: true })
+    if (returned !== 'approved') {
+      setReturnState(returned === 'rejected' ? 'rejected' : 'pending')
+      return undefined
+    }
+    setReturnState('confirming')
+    let vigente = true
+    let tries = 0
+    const startedAt = Date.now()
+    const tick = async () => {
+      const h = await api.get('/billing/history').catch(() => null)
+      if (!vigente) return
+      const last = h?.payments?.[0]?.paidAt
+      // Un pago registrado en los últimos minutos es el que acaba de hacer.
+      if (last && new Date(last).getTime() > startedAt - 10 * 60 * 1000) {
+        setReturnState('confirmed')
+        invalidateAccount()
+        load()
+        return
+      }
+      tries += 1
+      if (tries < 12) setTimeout(tick, 3000)
+      else setReturnState('pending')
+    }
+    tick()
+    return () => { vigente = false }
+    // Solo al entrar: returned no cambia.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [returned])
+
+  const reactivate = async () => {
+    setBusy(true)
+    try {
+      setSub(await api.post('/billing/subscription/reactivate', undefined, { idempotencyKey: newIdempotencyKey('reactivate') }))
+      toast.success('Listo: tu suscripción sigue activa.')
+      load()
+    } catch (err) {
+      toast.error(err.message)
+    } finally {
+      setBusy(false)
+    }
   }
 
-  const handleTrial = async () => {
-    setLoadingTrial(true)
-    setPaymentError('')
+  const startTrial = async () => {
+    setBusy(true)
     try {
-      const res = await fetch(`${API_URL}/companies/trial`, {
-        method: 'POST',
-        headers: { Authorization: `Bearer ${getToken()}` },
-      })
-      const data = await res.json()
-      if (!res.ok || !data.success) throw new Error(data.message || 'Error al activar prueba')
-      setTrialSuccess(true)
+      setSub(await api.post('/billing/subscription/trial', undefined, { idempotencyKey: newIdempotencyKey('trial') }))
       invalidateAccount()
-      setCurrentPlan('PRO')
-      setTrialUsed(true)
-      // Actualizar localStorage
-      const company = JSON.parse(localStorage.getItem('company') || '{}')
-      localStorage.setItem('company', JSON.stringify({ ...company, plan: 'PRO' }))
-      setTimeout(() => setTrialSuccess(false), 5000)
+      toast.success('Tu prueba de Pro está activa por 1 mes.')
+      load()
     } catch (err) {
-      setPaymentError(err.message)
+      toast.error(err.message)
     } finally {
-      setLoadingTrial(false)
+      setBusy(false)
     }
-  }
-
-  const handleUpgrade = async (plan) => {
-    setLoadingPayment(plan)
-    setPaymentError('')
-    try {
-      const res = await fetch(`${API_URL}/payments/create-preference`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          Authorization: `Bearer ${getToken()}`,
-        },
-        body: JSON.stringify({
-          plan,
-          months: '1',
-          currency: currencyInfo.currency,
-          price: plan === 'PRO' ? currencyInfo.proPrize : currencyInfo.businessPrice,
-        }),
-      })
-      const data = await res.json()
-      if (!res.ok) throw new Error(data.error || 'Error al crear preferencia')
-      if (data.initPoint) window.location.href = data.initPoint
-    } catch (err) {
-      setPaymentError(err.message || 'Error al iniciar el pago.')
-    } finally {
-      setLoadingPayment(null)
-    }
-  }
-
-  const priceLabel = (key) => {
-    if (key === 'FREE') return 'Gratis'
-    return key === 'PRO' ? formatProPrice() : formatBusinessPrice()
   }
 
   return (
@@ -162,96 +502,64 @@ export default function PlansPage() {
       <div className="fx-page-head">
         <div>
           <h1>Plan y facturación</h1>
-          <p>Estás en el plan <strong style={{ color: 'var(--fx-ink)' }}>{PLANS.find(p => p.key === currentPlan)?.name || currentPlan}</strong>.</p>
+          <p>Tu plan, hasta cuándo está pagado y todos tus cambios. Sin cobros automáticos.</p>
         </div>
       </div>
 
-      {trialSuccess && (
-        <div className="fx-alert fx-alert--ok" style={{ marginBottom: 16 }}>
-          <Icon name="checkCircle" size={16} />
-          <span>Prueba del plan Pro activada. Ya tenés acceso a todas sus funciones.</span>
+      {returnState === 'confirming' && (
+        <div className="fx-alert fx-alert--warn" role="status" style={{ marginBottom: 14 }}>
+          <span className="fx-spinner" /><span>Estamos confirmando tu pago con Mercado Pago. Tarda unos segundos.</span>
         </div>
       )}
-      {paymentError && (
-        <div className="fx-alert fx-alert--error" style={{ marginBottom: 16 }}>
-          <Icon name="alert" size={16} /><span>{paymentError}</span>
+      {returnState === 'confirmed' && (
+        <div className="fx-alert fx-alert--ok" role="status" style={{ marginBottom: 14 }}>
+          <Icon name="checkCircle" size={16} /><span>Pago confirmado. Tu plan ya está actualizado.</span>
         </div>
       )}
-
-      {currentPlan === 'FREE' && !trialUsed && (
-        <div className="fx-card" style={{ marginBottom: 20 }}>
-          <div className="fx-card__body fx-row fx-row--between" style={{ flexWrap: 'wrap', gap: 14 }}>
-            <div>
-              <h2 className="fx-h3" style={{ marginBottom: 4 }}>Probá el plan Pro gratis</h2>
-              <p className="fx-hint">7 días con todas las funciones. No se requiere tarjeta.</p>
-            </div>
-            <button className="fx-btn fx-btn--primary" onClick={handleTrial} disabled={loadingTrial}>
-              {loadingTrial ? <><span className="fx-spinner" /> Activando…</> : 'Activar prueba gratuita'}
-            </button>
-          </div>
+      {returnState === 'pending' && (
+        <div className="fx-alert fx-alert--warn" role="status" style={{ marginBottom: 14 }}>
+          <Icon name="clock" size={16} /><span>Tu pago todavía se está procesando. Cuando Mercado Pago lo confirme, tu plan se actualiza solo y te avisamos por correo.</span>
+        </div>
+      )}
+      {returnState === 'rejected' && (
+        <div className="fx-alert fx-alert--error" role="status" style={{ marginBottom: 14 }}>
+          <Icon name="alert" size={16} /><span>El pago no se completó. No se hizo ningún cambio en tu plan.</span>
         </div>
       )}
 
-      <div className="fx-plans">
-        {PLANS.map((plan) => {
-          const isCurrent = currentPlan === plan.key
-          const isLower   = PLAN_ORDER[plan.key] < PLAN_ORDER[currentPlan]
-          const isLoading = loadingPayment === plan.key
+      {error && <ErrorState error={error} onRetry={load} />}
+      {!sub && !error && <div className="fx-skeleton" style={{ height: 220, marginBottom: 20 }} />}
 
-          return (
-            <div key={plan.key} className={`fx-plan${isCurrent ? ' fx-plan--current' : ''}`}>
-              <div className="fx-plan__head">
-                <div className="fx-row fx-row--between">
-                  <h2 className="fx-h2">{plan.name}</h2>
-                  {isCurrent
-                    ? <span className="fx-badge fx-badge--brand">Tu plan</span>
-                    : plan.badge ? <span className="fx-badge">{plan.badge}</span> : null}
-                </div>
-                <p className="fx-plan__price">
-                  {priceLabel(plan.key)}
-                  {plan.key !== 'FREE' && <span className="fx-plan__period"> / mes</span>}
-                </p>
-                <p className="fx-hint">{plan.tagline}</p>
-              </div>
+      {sub && (
+        <>
+          <CurrentPlan sub={sub} busy={busy}
+            onRenew={() => setPicking(plans.find((p) => p.code === sub.plan))}
+            onCancel={() => setCancelling(true)}
+            onReactivate={reactivate}
+            onTrial={startTrial} />
 
-              <ul className="fx-plan__list">
-                {plan.benefits.map((b) => (
-                  <li key={b}>
-                    <Icon name="check" size={15} style={{ color: 'var(--fx-ok)' }} />
-                    <span>{b}</span>
-                  </li>
-                ))}
-                {plan.excluded.map((b) => (
-                  <li key={b} className="is-off">
-                    <Icon name="close" size={15} />
-                    <span>{b}</span>
-                  </li>
-                ))}
-              </ul>
+          <h2 className="fx-h3 fx-billing-title">Planes</h2>
+          <PlanCards plans={plans} sub={sub} onPick={setPicking} />
+          <p className="fx-hint" style={{ margin: '14px 0 28px', textAlign: 'center' }}>
+            Precios en soles. Renovar suma meses al final de lo que ya pagaste. Subir de plan es inmediato y convierte los días que te quedaban;
+            bajar de plan empieza cuando termina lo pagado.
+          </p>
 
-              <div className="fx-plan__foot">
-                {isCurrent ? (
-                  <button className="fx-btn fx-btn--secondary fx-btn--block" disabled>Plan actual</button>
-                ) : isLower ? (
-                  <button className="fx-btn fx-btn--ghost fx-btn--block" disabled>Incluido en tu plan</button>
-                ) : (
-                  <button
-                    className="fx-btn fx-btn--primary fx-btn--block"
-                    onClick={() => handleUpgrade(plan.key)}
-                    disabled={isLoading}
-                  >
-                    {isLoading ? <><span className="fx-spinner" /> Redirigiendo…</> : `Cambiar a ${plan.name}`}
-                  </button>
-                )}
-              </div>
-            </div>
-          )
-        })}
-      </div>
+          <h2 className="fx-h3 fx-billing-title">Historial</h2>
+          <History history={history} />
+        </>
+      )}
 
-      <p className="fx-hint" style={{ marginTop: 18, textAlign: 'center' }}>
-        Los pagos se procesan con Mercado Pago. La renovación es mensual y manual: si no renovás, tu cuenta vuelve al plan Free.
-      </p>
+      {picking && <CheckoutModal plan={picking} onClose={() => setPicking(null)} />}
+      {cancelling && sub && (
+        <CancelModal sub={sub} plans={plans} onClose={() => setCancelling(false)}
+          onDone={(data) => {
+            setSub(data)
+            setCancelling(false)
+            toast.success(`Listo. Tu plan sigue activo hasta el ${longDate(data.paidUntil)}.`)
+            load()
+          }} />
+      )}
     </DashboardLayout>
   )
 }
