@@ -255,7 +255,11 @@ export default function SettingsPage() {
         method: 'PUT', headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${getToken()}` },
         body: JSON.stringify({ name: form.name, description: form.description, phone: form.phone, address: form.address, email: form.email, logoUrl: form.logoUrl, paymentMethods: JSON.stringify(form.paymentMethods) }),
       })
-      if (!res.ok) throw new Error(`Error al guardar (${res.status})`)
+      if (!res.ok) {
+        const data = await res.json().catch(() => ({}))
+        const fields = data.errors ? Object.values(data.errors).join(' ') : ''
+        throw new Error(data.message && !fields ? data.message : fields || `No se pudo guardar (${res.status}).`)
+      }
       const updated = await res.json()
       const merged  = { ...company, name: updated.name, slug: updated.slug, logoUrl: updated.logoUrl }
       localStorage.setItem('company', JSON.stringify({ ...merged, storeUrl: getCompanyStoreUrl(merged) }))
@@ -324,28 +328,29 @@ export default function SettingsPage() {
 
             <div className="fx-field">
               <label className="fx-label" htmlFor="s-name">Nombre del negocio</label>
-              <input id="s-name" className="fx-input" value={form.name} onChange={(e) => setForm({ ...form, name: e.target.value })} />
+              <input id="s-name" className="fx-input" maxLength={120} value={form.name} onChange={(e) => setForm({ ...form, name: e.target.value })} />
             </div>
 
             <div className="fx-field">
               <label className="fx-label" htmlFor="s-desc">Descripción</label>
-              <textarea id="s-desc" className="fx-textarea" value={form.description} onChange={(e) => setForm({ ...form, description: e.target.value })} placeholder="Contá brevemente qué vendés" />
+              <textarea id="s-desc" className="fx-textarea" maxLength={2000} value={form.description} onChange={(e) => setForm({ ...form, description: e.target.value })} placeholder="Contá brevemente qué vendés" />
+              <p className="fx-hint" style={{ marginTop: 6, textAlign: 'right' }}>{(form.description || '').length} / 2000</p>
             </div>
 
             <div className="fx-grid" style={{ gridTemplateColumns: 'repeat(auto-fit, minmax(min(200px, 100%), 1fr))', gap: 12 }}>
               <div className="fx-field">
                 <label className="fx-label" htmlFor="s-phone">WhatsApp</label>
-                <input id="s-phone" className="fx-input" value={form.phone} onChange={(e) => setForm({ ...form, phone: e.target.value })} placeholder="999888777" />
+                <input id="s-phone" className="fx-input" maxLength={30} value={form.phone} onChange={(e) => setForm({ ...form, phone: e.target.value })} placeholder="999888777" />
               </div>
               <div className="fx-field">
                 <label className="fx-label" htmlFor="s-email">Correo de contacto</label>
-                <input id="s-email" className="fx-input" type="email" value={form.email} onChange={(e) => setForm({ ...form, email: e.target.value })} />
+                <input id="s-email" className="fx-input" type="email" maxLength={254} value={form.email} onChange={(e) => setForm({ ...form, email: e.target.value })} />
               </div>
             </div>
 
             <div className="fx-field" style={{ marginBottom: 0 }}>
               <label className="fx-label" htmlFor="s-addr">Dirección</label>
-              <input id="s-addr" className="fx-input" value={form.address} onChange={(e) => setForm({ ...form, address: e.target.value })} placeholder="Opcional" />
+              <input id="s-addr" className="fx-input" maxLength={300} value={form.address} onChange={(e) => setForm({ ...form, address: e.target.value })} placeholder="Opcional" />
             </div>
           </div>
         </div>
