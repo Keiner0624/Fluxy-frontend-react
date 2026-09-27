@@ -13,7 +13,10 @@ export const getAnalytics = (id, params) => api(`/marketing/campaigns/${id}/anal
 export const getLink = (id, channel) => api(`/marketing/campaigns/${id}/links`, { method: 'POST', body: { channel } })
 export const getOpportunities = () => api('/marketing/opportunities')
 export const getSegments = () => api('/marketing/segments')
-export const getSegmentCustomers = (key, categoryId) => api(`/marketing/segments/${key}/customers`, { params: { categoryId } })
+/** value: etiqueta (TAG), origen (SOURCE) o id de producto (PRODUCT_BUYERS). */
+export const getSegmentCustomers = (key, categoryId, value) =>
+  api(`/marketing/segments/${key}/customers`, { params: { categoryId, value } })
+export const listCustomerTags = () => api('/customers/tags')
 
 /** Empresa de la sesión guardada al entrar (nombre, slug, logo, color). */
 export function readStoredCompany() {

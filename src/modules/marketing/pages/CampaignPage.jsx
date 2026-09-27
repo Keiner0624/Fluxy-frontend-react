@@ -338,7 +338,8 @@ function Results({ campaign }) {
 }
 
 function Audience({ campaign }) {
-  const customers = useApi(() => getSegmentCustomers(campaign.segment, campaign.segmentCategoryId), [campaign.segment, campaign.segmentCategoryId])
+  const customers = useApi(() => getSegmentCustomers(campaign.segment, campaign.segmentCategoryId, campaign.segmentValue),
+    [campaign.segment, campaign.segmentCategoryId, campaign.segmentValue])
   const link = useApi(() => getLink(campaign.id, 'WHATSAPP'), [campaign.id])
   const [shown, setShown] = useState(20)
   const [sent, setSent] = useState(() => new Set())

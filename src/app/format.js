@@ -129,6 +129,43 @@ export function paymentMethodLabel(key) {
   return PAYMENT_METHODS[key] || key
 }
 
+// ─── Clientes (CRM) ──────────────────────────────────────────────────────────
+
+/** Segmentos automáticos: los calcula el servidor, no se editan a mano. */
+export const CUSTOMER_SEGMENTS = {
+  NEW:        { label: 'Nuevo',       badge: 'fx-badge--brand',  icon: 'sparkles' },
+  RECURRING:  { label: 'Recurrente',  badge: 'fx-badge--ok',     icon: 'refresh' },
+  FREQUENT:   { label: 'Frecuente',   badge: 'fx-badge--ok',     icon: 'heart' },
+  HIGH_VALUE: { label: 'Alto valor',  badge: 'fx-badge--brand',  icon: 'star' },
+  INACTIVE:   { label: 'Inactivo',    badge: 'fx-badge--warn',   icon: 'clock' },
+}
+
+export const CUSTOMER_SOURCES = {
+  ONLINE_STORE: 'Tienda online',
+  POS:          'Punto de venta',
+  MANUAL:       'Registro manual',
+  IMPORT:       'Importación',
+  WHATSAPP:     'WhatsApp',
+  INSTAGRAM:    'Instagram',
+  FACEBOOK:     'Facebook',
+  CAMPAIGN:     'Campaña',
+}
+
+export const CUSTOMER_ACTIVITY = {
+  CUSTOMER_CREATED:     { label: 'Cliente registrado',   icon: 'user' },
+  CUSTOMER_UPDATED:     { label: 'Datos actualizados',   icon: 'edit' },
+  ORDER_CREATED:        { label: 'Pedido',               icon: 'cart' },
+  ORDER_PAID:           { label: 'Pago',                 icon: 'money' },
+  ORDER_DELIVERED:      { label: 'Entrega',              icon: 'truck' },
+  ORDER_CANCELLED:      { label: 'Cancelación',          icon: 'close' },
+  TAG_ADDED:            { label: 'Etiqueta',             icon: 'tag' },
+  TAG_REMOVED:          { label: 'Etiqueta',             icon: 'tag' },
+  NOTE_CREATED:         { label: 'Nota interna',         icon: 'file' },
+  COUPON_USED:          { label: 'Cupón',                icon: 'coupons' },
+  CAMPAIGN_INTERACTION: { label: 'Campaña',              icon: 'megaphone' },
+  REFUND_CREATED:       { label: 'Reembolso',            icon: 'undo' },
+}
+
 // ─── Equipo ──────────────────────────────────────────────────────────────────
 
 export const ROLES = {
@@ -143,7 +180,7 @@ export const ROLES = {
 export const PERMISSION_GROUPS = [
   { module: 'Productos',     items: [['PRODUCT_VIEW', 'Ver'], ['PRODUCT_CREATE', 'Crear'], ['PRODUCT_UPDATE', 'Editar'], ['PRODUCT_DELETE', 'Eliminar']] },
   { module: 'Pedidos',       items: [['ORDER_VIEW', 'Ver'], ['ORDER_UPDATE', 'Cambiar estado'], ['ORDER_CANCEL', 'Cancelar']] },
-  { module: 'Clientes',      items: [['CUSTOMER_VIEW', 'Ver'], ['CUSTOMER_UPDATE', 'Editar']] },
+  { module: 'Clientes',      items: [['CUSTOMER_VIEW', 'Ver'], ['CUSTOMER_CREATE', 'Crear'], ['CUSTOMER_UPDATE', 'Editar datos'], ['CUSTOMER_NOTES', 'Notas internas'], ['CUSTOMER_TAGS', 'Etiquetas']] },
   { module: 'Pagos',         items: [['PAYMENT_VIEW', 'Ver'], ['PAYMENT_UPDATE', 'Registrar y aprobar'], ['PAYMENT_REFUND', 'Reembolsar']] },
   { module: 'Inventario',    items: [['INVENTORY_VIEW', 'Ver'], ['INVENTORY_ADJUST', 'Ajustar stock']] },
   { module: 'Cupones',       items: [['COUPON_VIEW', 'Ver'], ['COUPON_MANAGE', 'Gestionar']] },

@@ -4,16 +4,25 @@
 import { useEffect, useState } from 'react'
 import Icon from '@/components/Icon'
 import { Modal } from '@/modules/dashboard/components/ui'
+import { CUSTOMER_SOURCES } from '@/app/format'
 import { uploadImage, validateImage } from '@/app/cloudinary'
 import { generateCampaignCopy } from '@/app/ai'
 import {
   CHANNELS, OBJECTIVES, TYPES, defaultObjective, discountLabel, formatMoney, suggestContent,
 } from '../lib/marketingFormat'
 import {
-  campaignAction, createCampaign, getSegments, listCategories, listCoupons, listProducts, readStoredCompany, updateCampaign,
+  campaignAction, createCampaign, getSegmentCustomers, getSegments, listCategories, listCoupons, listCustomerTags, listProducts,
+  readStoredCompany, updateCampaign,
 } from '../api/marketingApi'
 
 const STEPS = ['Qué', 'Objetivo', 'Canal', 'Contenido', 'Audiencia', 'Revisar']
+
+/** Audiencias que piden un dato y el aviso si falta. */
+const VALUE_PARAMS = {
+  TAG: 'Elegí la etiqueta del segmento.',
+  SOURCE: 'Elegí el origen del segmento.',
+  PRODUCT: 'Elegí el producto del segmento.',
+}
 
 function toLocalInput(iso) {
   if (!iso) return ''
@@ -35,7 +44,7 @@ function initialForm(campaign, preset) {
       type: campaign.type, objective: campaign.objective, targetId: campaign.type === 'COUPON' ? null : campaign.targetId,
       couponId: campaign.couponId, channel: campaign.channel, name: campaign.name || '', title: campaign.title || '',
       message: campaign.message || '', callToAction: campaign.callToAction || '', imageUrl: campaign.imageUrl || '',
-      segment: campaign.segment || '', segmentCategoryId: campaign.segmentCategoryId || '',
+      segment: campaign.segment || '', segmentCategoryId: campaign.segmentCategoryId || '', segmentValue: campaign.segmentValue || '',
       startsAt: toLocalInput(campaign.startsAt), endsAt: toLocalInput(campaign.endsAt),
     }
   }
@@ -43,7 +52,7 @@ function initialForm(campaign, preset) {
   return {
     type, objective: preset?.objective || (type ? defaultObjective(type) : ''), targetId: preset?.targetId || null,
     couponId: null, channel: preset?.channel || '', name: preset?.name || '', title: '', message: '', callToAction: '',
-    imageUrl: '', segment: preset?.segment || '', segmentCategoryId: '', startsAt: '', endsAt: '',
+    imageUrl: '', segment: preset?.segment || '', segmentCategoryId: '', segmentValue: '', startsAt: '', endsAt: '',
   }
 }
 
@@ -77,7 +86,8 @@ export default function CampaignWizard({ campaign, preset, capabilities, canPubl
   const published = editing && campaign.status !== 'DRAFT'
   const [step, setStep] = useState(() => (editing ? 3 : preset?.type ? (preset.type === 'STORE' || preset.targetId ? 1 : 0) : 0))
   const [form, setForm] = useState(() => initialForm(campaign, preset))
-  const [catalog, setCatalog] = useState({ products: [], categories: [], coupons: [], segments: [], loaded: false })
+  const [catalog, setCatalog] = useState({ products: [], categories: [], coupons: [], segments: [], tags: [], loaded: false })
+  const [audienceSize, setAudienceSize] = useState(null)
   const [error, setError] = useState('')
   const [saving, setSaving] = useState(false)
   const [uploading, setUploading] = useState(false)
@@ -87,8 +97,9 @@ export default function CampaignWizard({ campaign, preset, capabilities, canPubl
   useEffect(() => {
     let alive = true
     // Cada lista puede fallar por permisos (p. ej. sin acceso a Cupones): se sigue con lo que haya.
-    Promise.allSettled([listProducts(), listCategories(), capabilities?.coupons ? listCoupons() : Promise.resolve([]), getSegments()])
-      .then(([products, categories, coupons, segments]) => {
+    Promise.allSettled([listProducts(), listCategories(), capabilities?.coupons ? listCoupons() : Promise.resolve([]), getSegments(),
+      listCustomerTags()])
+      .then(([products, categories, coupons, segments, tags]) => {
         if (!alive) return
         const value = (r) => (r.status === 'fulfilled' && Array.isArray(r.value) ? r.value : [])
         setCatalog({
@@ -96,6 +107,7 @@ export default function CampaignWizard({ campaign, preset, capabilities, canPubl
           categories: value(categories),
           coupons: value(coupons),
           segments: value(segments),
+          tags: value(tags),
           loaded: true,
         })
       })
@@ -103,6 +115,25 @@ export default function CampaignWizard({ campaign, preset, capabilities, canPubl
   }, [capabilities?.coupons])
 
   const set = (patch) => { setForm((f) => ({ ...f, ...patch })); setError('') }
+  const segmentOptions = catalog.segments
+  const selectedSegment = segmentOptions.find((s) => s.key === form.segment)
+  const segmentParam = selectedSegment?.param || null
+
+  // Audiencias que dependen de un dato elegido: se cuentan cuando el dato está completo.
+  const audienceKey = segmentParam === 'CATEGORY'
+    ? (form.segmentCategoryId ? `${form.segment}|${form.segmentCategoryId}` : '')
+    : (VALUE_PARAMS[segmentParam] && String(form.segmentValue).trim() ? `${form.segment}|${form.segmentValue}` : '')
+  useEffect(() => {
+    if (!audienceKey) { setAudienceSize(null); return undefined }
+    let alive = true
+    getSegmentCustomers(form.segment, segmentParam === 'CATEGORY' ? form.segmentCategoryId : undefined,
+      segmentParam === 'CATEGORY' ? undefined : String(form.segmentValue).trim())
+      .then((list) => { if (alive) setAudienceSize({ customers: list.length, reachable: list.filter((c) => c.phone).length }) })
+      .catch(() => { if (alive) setAudienceSize(null) })
+    return () => { alive = false }
+    // audienceKey resume segmento, categoría y valor.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [audienceKey])
   const product = catalog.products.find((p) => p.id === Number(form.targetId))
   const category = catalog.categories.find((c) => c.id === Number(form.targetId))
   const coupon = catalog.coupons.find((c) => c.id === Number(form.couponId))
@@ -169,6 +200,7 @@ export default function CampaignWizard({ campaign, preset, capabilities, canPubl
       if (form.startsAt && form.endsAt && new Date(form.endsAt) <= new Date(form.startsAt)) return 'La fecha de fin tiene que ser posterior al inicio.'
     }
     if (index === 4 && form.segment === 'CATEGORY_BUYERS' && !form.segmentCategoryId) return 'Elegí la categoría del segmento.'
+    if (index === 4 && VALUE_PARAMS[segmentParam] && !String(form.segmentValue).trim()) return VALUE_PARAMS[segmentParam]
     return ''
   }
 
@@ -192,6 +224,7 @@ export default function CampaignWizard({ campaign, preset, capabilities, canPubl
     imageUrl: form.imageUrl,
     segment: form.segment || null,
     segmentCategoryId: form.segment === 'CATEGORY_BUYERS' ? Number(form.segmentCategoryId) || null : null,
+    segmentValue: VALUE_PARAMS[segmentParam] ? String(form.segmentValue).trim() : null,
     startsAt: toIso(form.startsAt),
     endsAt: toIso(form.endsAt),
   })
@@ -235,8 +268,6 @@ export default function CampaignWizard({ campaign, preset, capabilities, canPubl
     }
   }
 
-  const segmentOptions = catalog.segments
-  const selectedSegment = segmentOptions.find((s) => s.key === form.segment)
 
   const footer = (
     <>
@@ -442,7 +473,7 @@ export default function CampaignWizard({ campaign, preset, capabilities, canPubl
             Con un segmento, en la campaña vas a tener la lista de esos clientes para escribirles uno a uno por WhatsApp. Quienes pidieron no recibir promociones no aparecen.
           </p>
           <div className="fx-roles">
-            <button type="button" className={`fx-role${!form.segment ? ' is-on' : ''}`} onClick={() => set({ segment: '', segmentCategoryId: '' })}>
+            <button type="button" className={`fx-role${!form.segment ? ' is-on' : ''}`} onClick={() => set({ segment: '', segmentCategoryId: '', segmentValue: '' })}>
               <strong>Sin segmento</strong><span>Compartís el enlace en tus canales.</span>
             </button>
             {segmentOptions.map((s) => (
@@ -452,7 +483,7 @@ export default function CampaignWizard({ campaign, preset, capabilities, canPubl
                 className={`fx-role${form.segment === s.key ? ' is-on' : ''}`}
                 disabled={!s.available}
                 style={!s.available ? { opacity: .55, cursor: 'not-allowed' } : undefined}
-                onClick={() => s.available && set({ segment: s.key })}
+                onClick={() => s.available && form.segment !== s.key && set({ segment: s.key, segmentValue: '' })}
               >
                 <strong style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
                   {s.label}
@@ -471,9 +502,45 @@ export default function CampaignWizard({ campaign, preset, capabilities, canPubl
               </select>
             </div>
           )}
-          {selectedSegment?.reachable != null && (
+          {segmentParam === 'TAG' && (
+            <div className="fx-field" style={{ marginTop: 14 }}>
+              <label className="fx-label" htmlFor="w-segtag">Etiqueta</label>
+              {catalog.tags.length > 0 ? (
+                <select id="w-segtag" className="fx-select" value={form.segmentValue} onChange={(e) => set({ segmentValue: e.target.value })}>
+                  <option value="">Elegí una etiqueta</option>
+                  {catalog.tags.map((t) => <option key={t} value={t}>{t}</option>)}
+                </select>
+              ) : (
+                <input id="w-segtag" className="fx-input" value={form.segmentValue} maxLength={30} placeholder="vip"
+                  onChange={(e) => set({ segmentValue: e.target.value })} />
+              )}
+            </div>
+          )}
+          {segmentParam === 'SOURCE' && (
+            <div className="fx-field" style={{ marginTop: 14 }}>
+              <label className="fx-label" htmlFor="w-segsrc">Origen</label>
+              <select id="w-segsrc" className="fx-select" value={form.segmentValue} onChange={(e) => set({ segmentValue: e.target.value })}>
+                <option value="">Elegí un origen</option>
+                {Object.entries(CUSTOMER_SOURCES).map(([key, label]) => <option key={key} value={key}>{label}</option>)}
+              </select>
+            </div>
+          )}
+          {segmentParam === 'PRODUCT' && (
+            <div className="fx-field" style={{ marginTop: 14 }}>
+              <label className="fx-label" htmlFor="w-segprod">Producto</label>
+              <select id="w-segprod" className="fx-select" value={form.segmentValue} onChange={(e) => set({ segmentValue: e.target.value })}>
+                <option value="">Elegí un producto</option>
+                {catalog.products.map((p) => <option key={p.id} value={p.id}>{p.name}</option>)}
+              </select>
+            </div>
+          )}
+          {selectedSegment?.reachable != null ? (
             <p className="fx-hint" style={{ marginTop: 12 }}>
               {selectedSegment.reachable} de {selectedSegment.customers} tienen teléfono para escribirles.
+            </p>
+          ) : audienceSize && (
+            <p className="fx-hint" style={{ marginTop: 12 }}>
+              {audienceSize.customers} {audienceSize.customers === 1 ? 'cliente' : 'clientes'} en esta audiencia; {audienceSize.reachable} con teléfono.
             </p>
           )}
         </>
@@ -489,7 +556,7 @@ export default function CampaignWizard({ campaign, preset, capabilities, canPubl
           {coupon && form.type !== 'COUPON' && <><dt>Cupón</dt><dd>{coupon.code} · {discountLabel(coupon)}</dd></>}
           <dt>Vigencia</dt>
           <dd>{form.startsAt ? new Date(form.startsAt).toLocaleString('es-PE', { dateStyle: 'medium', timeStyle: 'short' }) : 'Al activarla'} → {form.endsAt ? new Date(form.endsAt).toLocaleString('es-PE', { dateStyle: 'medium', timeStyle: 'short' }) : 'Hasta finalizarla'}</dd>
-          {selectedSegment && <><dt>Audiencia</dt><dd>{selectedSegment.label}</dd></>}
+          {selectedSegment && <><dt>Audiencia</dt><dd>{selectedSegment.label}{segmentParam === 'TAG' && form.segmentValue ? `: ${form.segmentValue}` : ''}{segmentParam === 'SOURCE' && form.segmentValue ? `: ${CUSTOMER_SOURCES[form.segmentValue] || form.segmentValue}` : ''}{segmentParam === 'PRODUCT' && form.segmentValue ? `: ${catalog.products.find((p) => String(p.id) === String(form.segmentValue))?.name || ''}` : ''}</dd></>}
           <dt>Mensaje</dt>
           <dd style={{ whiteSpace: 'pre-line' }}>{[form.title, form.message, form.callToAction && `${form.callToAction}: (enlace de la campaña)`].filter(Boolean).join('\n')}</dd>
         </dl>
