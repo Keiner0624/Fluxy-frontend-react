@@ -14,7 +14,7 @@ export function StoreFooter({ company, whatsapp, onNavigate }) {
             <BrandMark company={company} size={44} />
             <span className="sf-brand__copy"><strong>{company?.name}</strong></span>
           </div>
-          <p>{company?.description || 'Pedí online y coordiná la entrega directamente con el negocio.'}</p>
+          <p>Pedí online y coordiná la entrega directamente con el negocio.</p>
           {whatsapp && (
             <a className="sf-btn sf-btn--whatsapp" href={whatsapp} target="_blank" rel="noreferrer">
               <Icon name="whatsapp" size={17} /> Escribinos por WhatsApp

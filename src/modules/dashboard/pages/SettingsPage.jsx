@@ -210,7 +210,7 @@ export default function SettingsPage() {
   const { plan } = usePlan()
   const { currencyInfo } = useCurrency()
   const PAYMENT_METHODS = getPaymentMethods(currencyInfo?.countryCode || 'PE')
-  const [form, setForm] = useState({ name: '', description: '', phone: '', address: '', email: '', logoUrl: '', paymentMethods: [] })
+  const [form, setForm] = useState({ name: '', description: '', aboutText: '', phone: '', address: '', email: '', logoUrl: '', paymentMethods: [] })
   const [loading, setLoading]             = useState(true)
   const [saving, setSaving]               = useState(false)
   const [uploadingLogo, setUploadingLogo] = useState(false)
@@ -228,7 +228,7 @@ export default function SettingsPage() {
     setLoading(true)
     try {
       const data = await getMyCompany()
-      setForm({ name: data.name || '', description: data.description || '', phone: data.phone || '', address: data.address || '', email: data.email || '', logoUrl: data.logoUrl || '', paymentMethods: data.paymentMethods ? JSON.parse(data.paymentMethods) : [] })
+      setForm({ name: data.name || '', description: data.description || '', aboutText: data.aboutText || '', phone: data.phone || '', address: data.address || '', email: data.email || '', logoUrl: data.logoUrl || '', paymentMethods: data.paymentMethods ? JSON.parse(data.paymentMethods) : [] })
       setLogoPreview(data.logoUrl || null)
     } catch { setError('Error al cargar la configuración') }
     finally { setLoading(false) }
@@ -253,7 +253,7 @@ export default function SettingsPage() {
     try {
       const res = await fetch(`${API_URL}/companies/config`, {
         method: 'PUT', headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${getToken()}` },
-        body: JSON.stringify({ name: form.name, description: form.description, phone: form.phone, address: form.address, email: form.email, logoUrl: form.logoUrl, paymentMethods: JSON.stringify(form.paymentMethods) }),
+        body: JSON.stringify({ name: form.name, description: form.description, aboutText: form.aboutText, phone: form.phone, address: form.address, email: form.email, logoUrl: form.logoUrl, paymentMethods: JSON.stringify(form.paymentMethods) }),
       })
       if (!res.ok) {
         const data = await res.json().catch(() => ({}))
@@ -332,9 +332,19 @@ export default function SettingsPage() {
             </div>
 
             <div className="fx-field">
-              <label className="fx-label" htmlFor="s-desc">Descripción</label>
+              <label className="fx-label" htmlFor="s-desc">Descripción de la portada</label>
               <textarea id="s-desc" className="fx-textarea" maxLength={2000} value={form.description} onChange={(e) => setForm({ ...form, description: e.target.value })} placeholder="Contá brevemente qué vendés" />
-              <p className="fx-hint" style={{ marginTop: 6, textAlign: 'right' }}>{(form.description || '').length} / 2000</p>
+              <p className="fx-hint" style={{ marginTop: 6, textAlign: 'right' }}>{(form.description || '').length} / 2000 · Se muestra en la portada de tu tienda.</p>
+            </div>
+
+            <div className="fx-field">
+              <label className="fx-label" htmlFor="s-about">Sobre nosotros</label>
+              <textarea id="s-about" className="fx-textarea" rows={5} maxLength={2000} value={form.aboutText}
+                onChange={(e) => setForm({ ...form, aboutText: e.target.value })}
+                placeholder="Tu historia: desde cuándo atendés, qué te diferencia, cómo trabajás con tus clientes…" />
+              <p className="fx-hint" style={{ marginTop: 6, textAlign: 'right' }}>
+                {(form.aboutText || '').length} / 2000 · Se muestra en la sección Nosotros. Si lo dejás vacío, usamos un texto breve.
+              </p>
             </div>
 
             <div className="fx-grid" style={{ gridTemplateColumns: 'repeat(auto-fit, minmax(min(200px, 100%), 1fr))', gap: 12 }}>

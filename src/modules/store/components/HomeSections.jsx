@@ -167,7 +167,8 @@ export function AboutSection({ company, whatsapp }) {
       <div className="sf-about__intro">
         <span className="sf-eyebrow">Nosotros</span>
         <h2 id="sf-about-title">¿Por qué elegir {company?.name}?</h2>
-        <p>{company?.description || 'Somos un negocio local que atiende cada pedido de forma personal. Elegí tus productos y nosotros nos encargamos del resto.'}</p>
+        {/* Texto propio de Nosotros (Configuración); la descripción es de la portada. */}
+        <p className="sf-about__text">{company?.aboutText || 'Somos un negocio local que atiende cada pedido de forma personal. Elegí tus productos y nosotros nos encargamos del resto.'}</p>
       </div>
       <div className="sf-about__grid">
         {reasons.map((reason) => (
