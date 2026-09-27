@@ -441,13 +441,16 @@ export default function PlansPage() {
 
   useEffect(() => { load() }, [load])
 
-  // Vuelta de Mercado Pago: el plan cambia cuando llega el aviso del proveedor, no por esta URL.
-  // Se lee una sola vez al entrar; limpiar la URL no debe cortar la espera.
+  // Vuelta de Mercado Pago. Mercado Pago agrega payment_id a la URL: el backend consulta ese pago
+  // en Mercado Pago (no confía en la URL) y lo aplica si está aprobado. Si no se puede, se espera
+  // el aviso (webhook) del proveedor. Se lee una sola vez al entrar; limpiar la URL no corta la espera.
   const [returned] = useState(() => params.get('payment'))
+  const [returnedPaymentId] = useState(() => [params.get('payment_id'), params.get('collection_id')]
+    .find((id) => /^\d+$/.test(id || '')) || null)
   useEffect(() => {
     if (!returned) return undefined
     setParams({}, { replace: true })
-    if (returned !== 'approved') {
+    if (returned !== 'approved' && !returnedPaymentId) {
       setReturnState(returned === 'rejected' ? 'rejected' : 'pending')
       return undefined
     }
@@ -455,22 +458,38 @@ export default function PlansPage() {
     let vigente = true
     let tries = 0
     const startedAt = Date.now()
+    const confirmed = () => {
+      setReturnState('confirmed')
+      invalidateAccount()
+      load()
+    }
+    const confirmReturn = async () => {
+      try {
+        const result = await api.post('/billing/subscription/confirm', { paymentId: returnedPaymentId })
+        if (!vigente) return
+        if (result.status === 'APPLIED' || result.status === 'ALREADY_APPLIED') confirmed()
+        else if (result.status === 'REJECTED') setReturnState('rejected')
+        else setReturnState('pending')
+      } catch {
+        // Mercado Pago no respondió: queda el aviso del proveedor.
+        if (vigente) tick()
+      }
+    }
     const tick = async () => {
       const h = await api.get('/billing/history').catch(() => null)
       if (!vigente) return
       const last = h?.payments?.[0]?.paidAt
       // Un pago registrado en los últimos minutos es el que acaba de hacer.
       if (last && new Date(last).getTime() > startedAt - 10 * 60 * 1000) {
-        setReturnState('confirmed')
-        invalidateAccount()
-        load()
+        confirmed()
         return
       }
       tries += 1
       if (tries < 12) setTimeout(tick, 3000)
       else setReturnState('pending')
     }
-    tick()
+    if (returnedPaymentId) confirmReturn()
+    else tick()
     return () => { vigente = false }
     // Solo al entrar: returned no cambia.
     // eslint-disable-next-line react-hooks/exhaustive-deps
