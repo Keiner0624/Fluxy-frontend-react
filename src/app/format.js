@@ -134,7 +134,7 @@ export function paymentMethodLabel(key) {
 export const ROLES = {
   OWNER:  { label: 'Dueño',          text: 'Acceso total, incluida la facturación.' },
   ADMIN:     { label: 'Administrador', text: 'Todo el negocio salvo el plan y la facturación.' },
-  MANAGER:   { label: 'Encargado',     text: 'La operación diaria: catálogo, pedidos, cobros, stock y reportes. Sin equipo ni configuración.' },
+  MANAGER:   { label: 'Encargado',     text: 'La operación diaria: catálogo, pedidos, cobros, stock, reportes y campañas. Sin equipo ni configuración.' },
   SELLER:    { label: 'Vendedor',      text: 'Pedidos, clientes y cobros. Ve el catálogo y el stock.' },
   WAREHOUSE: { label: 'Almacén',       text: 'Stock y preparación de pedidos.' },
   VIEWER:    { label: 'Solo lectura',  text: 'Consulta la información sin modificar nada.' },
@@ -147,6 +147,7 @@ export const PERMISSION_GROUPS = [
   { module: 'Pagos',         items: [['PAYMENT_VIEW', 'Ver'], ['PAYMENT_UPDATE', 'Registrar y aprobar'], ['PAYMENT_REFUND', 'Reembolsar']] },
   { module: 'Inventario',    items: [['INVENTORY_VIEW', 'Ver'], ['INVENTORY_ADJUST', 'Ajustar stock']] },
   { module: 'Cupones',       items: [['COUPON_VIEW', 'Ver'], ['COUPON_MANAGE', 'Gestionar']] },
+  { module: 'Marketing',     items: [['MARKETING_VIEW', 'Ver'], ['MARKETING_CREATE', 'Crear'], ['MARKETING_EDIT', 'Editar'], ['MARKETING_PUBLISH', 'Publicar'], ['MARKETING_ANALYTICS', 'Ver resultados']] },
   { module: 'Reportes',      items: [['REPORT_VIEW', 'Ver'], ['REPORT_EXPORT', 'Exportar']] },
   { module: 'Equipo',        items: [['TEAM_VIEW', 'Ver'], ['TEAM_INVITE', 'Invitar'], ['TEAM_MANAGE', 'Gestionar']] },
   { module: 'Integraciones', items: [['INTEGRATION_VIEW', 'Ver'], ['INTEGRATION_MANAGE', 'Configurar']] },

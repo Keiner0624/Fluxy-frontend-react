@@ -151,6 +151,13 @@ function CustomerDetail({ customerId, onClose, onChanged }) {
                   <div><dt>Correo</dt><dd>{c.email || '—'}</dd></div>
                   <div><dt>Dirección</dt><dd>{c.address || '—'}</dd></div>
                 </dl>
+                {/* Baja de promociones: queda fuera de los segmentos de Marketing. */}
+                <label className="fx-check" style={{ marginTop: 10 }}>
+                  <input type="checkbox" checked={Boolean(c.marketingOptOut)} disabled={!canEdit || saving}
+                    onChange={(e) => save({ marketingOptOut: e.target.checked },
+                      e.target.checked ? 'No va a aparecer en las campañas.' : 'Vuelve a aparecer en las campañas.')} />
+                  No quiere recibir promociones
+                </label>
               </section>
 
               <section>

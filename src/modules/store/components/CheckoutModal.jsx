@@ -18,7 +18,7 @@ function readBuyer() {
   }
 }
 
-export default function CheckoutModal({ open, cart, total, count, company, onClose, onSuccess }) {
+export default function CheckoutModal({ open, cart, total, count, company, marketingSessionId, suggestedCoupon, onClose, onSuccess }) {
   const methods = paymentMethods(company)
   const orderKey = useRef(newIdempotencyKey('pedido'))
   const [form, setForm] = useState(() => {
@@ -58,6 +58,17 @@ export default function CheckoutModal({ open, cart, total, count, company, onClo
 
   // El cupón se validó contra otro total: se vuelve a aplicar.
   useEffect(() => { setCouponData(null) }, [total])
+
+  // Llegó por una campaña con cupón: se completa y se aplica solo (si no escribió otro).
+  const autoCoupon = useRef(false)
+  useEffect(() => {
+    if (!open || !suggestedCoupon || autoCoupon.current || !company?.id) return
+    autoCoupon.current = true
+    setCoupon((current) => current || suggestedCoupon)
+    validateCoupon(company.id, suggestedCoupon, total)
+      .then((data) => { if (data?.valid) setCouponData((current) => current || data) })
+      .catch(() => { /* queda escrito para aplicarlo a mano */ })
+  }, [open, suggestedCoupon, company?.id, total])
 
   if (!open) return null
 
@@ -104,6 +115,7 @@ export default function CheckoutModal({ open, cart, total, count, company, onClo
         items: cart.map((item) => ({ productId: item.product.id, quantity: item.quantity })),
         couponCode: couponData?.code || null,
         paymentMethod: payment || null,
+        ...(marketingSessionId ? { marketingSessionId } : {}),
       }, orderKey.current)
       orderKey.current = newIdempotencyKey('pedido')
       try {

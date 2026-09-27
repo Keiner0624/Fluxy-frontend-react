@@ -24,6 +24,8 @@ const TeamPage = lazy(() => import('@/modules/dashboard/pages/TeamPage'))
 const IntegrationsPage = lazy(() => import('@/modules/dashboard/pages/IntegrationsPage'))
 const SecurityPage = lazy(() => import('@/modules/dashboard/pages/SecurityPage'))
 const ActivityPage = lazy(() => import('@/modules/dashboard/pages/ActivityPage'))
+const MarketingPage = lazy(() => import('@/modules/marketing/pages/MarketingPage'))
+const CampaignPage = lazy(() => import('@/modules/marketing/pages/CampaignPage'))
 const AcceptInvitePage = lazy(() => import('@/modules/auth/pages/AcceptInvitePage'))
 const PermissionRoute = lazy(() => import('@/modules/dashboard/components/PermissionRoute'))
 const ForgotPasswordPage = lazy(() => import('@/modules/auth/pages/ForgotPasswordPage'))
@@ -114,6 +116,8 @@ export const router = createBrowserRouter([
   { path: '/dashboard/integrations', element: protect(<IntegrationsPage />) },
   { path: '/dashboard/security', element: protect(<SecurityPage />) },
   { path: '/dashboard/activity', element: protect(<ActivityPage />) },
+  { path: '/dashboard/marketing', element: protect(<MarketingPage />) },
+  { path: '/dashboard/marketing/:id', element: protect(<CampaignPage />) },
   { path: '/invite/:token', element: render(<AcceptInvitePage />) },
   { path: '/payment/:status', element: protect(<PaymentReturnPage />) },
   { path: '/payments/:status', element: protect(<PaymentReturnPage />) },

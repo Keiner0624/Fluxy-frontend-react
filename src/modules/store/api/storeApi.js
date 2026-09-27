@@ -39,6 +39,24 @@ export function getProducts(slug) {
 }
 
 /**
+ * Paso del embudo de una campaña. Nunca falla ni demora la tienda: keepalive deja que el
+ * aviso salga aunque el comprador cambie de página. Devuelve null si no se pudo.
+ */
+export async function trackCampaignEvent(companyId, event) {
+  try {
+    const response = await fetch(`${API_URL}/store/${encodeURIComponent(companyId)}/events`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(event),
+      keepalive: true,
+    })
+    return response.ok ? await response.json() : null
+  } catch {
+    return null
+  }
+}
+
+/**
  * idempotencyKey: si la conexión se corta y el comprador vuelve a confirmar,
  * el backend devuelve el mismo pedido en lugar de crear otro.
  */

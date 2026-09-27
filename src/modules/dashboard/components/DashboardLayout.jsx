@@ -53,6 +53,12 @@ const NAV_GROUPS = [
     ],
   },
   {
+    label: 'Crecimiento',
+    items: [
+      { path: '/dashboard/marketing',  icon: 'megaphone',  label: 'Marketing',          permission: 'MARKETING_VIEW' },
+    ],
+  },
+  {
     label: 'Catálogo',
     items: [
       { path: '/dashboard/products',   icon: 'products',   label: 'Productos',          permission: 'PRODUCT_VIEW' },

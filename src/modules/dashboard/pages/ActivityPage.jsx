@@ -52,9 +52,16 @@ const ACTIONS = {
   PRODUCTS_BULK_CHANGED: ['Cambió productos en lote', 'products'],
   CATEGORY_DELETED: ['Eliminó una categoría', 'categories'],
   COUPON_DELETED: ['Eliminó un cupón', 'coupons'],
+  CAMPAIGN_CREATED: ['Creó una campaña', 'megaphone'],
+  CAMPAIGN_UPDATED: ['Editó una campaña', 'megaphone'],
+  CAMPAIGN_ACTIVATED: ['Activó una campaña', 'megaphone'],
+  CAMPAIGN_PAUSED: ['Pausó una campaña', 'megaphone'],
+  CAMPAIGN_FINISHED: ['Finalizó una campaña', 'megaphone'],
+  CAMPAIGN_ARCHIVED: ['Archivó una campaña', 'megaphone'],
+  CAMPAIGN_DELETED: ['Eliminó un borrador de campaña', 'megaphone'],
 }
 
-const DETAIL_LABELS = { method: 'Método', from: 'De', to: 'A', by: 'Origen', provider: 'Proveedor', revoked: 'Sesiones', sessionsRevoked: 'Sesiones cerradas', total: 'Total', months: 'Meses', flow: 'Flujo', updated: 'Actualizados', deleted: 'Eliminados', name: 'Nombre', device: 'Dispositivo', version: 'Versión', plan: 'Plan', reason: 'Motivo', effectiveAt: 'Hasta' }
+const DETAIL_LABELS = { method: 'Método', from: 'De', to: 'A', by: 'Origen', provider: 'Proveedor', revoked: 'Sesiones', sessionsRevoked: 'Sesiones cerradas', total: 'Total', months: 'Meses', flow: 'Flujo', updated: 'Actualizados', deleted: 'Eliminados', name: 'Nombre', device: 'Dispositivo', version: 'Versión', plan: 'Plan', reason: 'Motivo', effectiveAt: 'Hasta', type: 'Tipo', channel: 'Canal', status: 'Estado' }
 
 const DETAIL_VALUES = {
   AUTO_EMAIL: 'Acceso con el mismo correo', GOOGLE: 'Google', APPLE: 'Apple', PASSWORD: 'Contraseña',
@@ -62,6 +69,8 @@ const DETAIL_VALUES = {
   CANCELLATION: 'Cancelación', SCHEDULED_CHANGE: 'Cambio programado', NEW: 'Alta', RENEWAL: 'Renovación', UPGRADE: 'Subida de plan',
   DOWNGRADE: 'Cambio programado', TOO_EXPENSIVE: 'Muy caro', NOT_USING: 'No lo usa', MISSING_FEATURES: 'Faltan funciones',
   SWITCHING: 'Cambia de herramienta', TEMPORARY: 'Temporal', OTHER: 'Otro',
+  STORE: 'Tienda', PRODUCT: 'Producto', CATEGORY: 'Categoría', COUPON: 'Cupón', WHATSAPP: 'WhatsApp', INSTAGRAM: 'Instagram',
+  FACEBOOK: 'Facebook', TIKTOK: 'TikTok', DIRECT: 'Enlace directo', QR: 'Código QR', ACTIVE: 'Activa', SCHEDULED: 'Programada',
 }
 
 const ISO_DATE = /^\d{4}-\d{2}-\d{2}T/

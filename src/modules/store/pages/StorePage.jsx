@@ -19,6 +19,7 @@ import { useFavorites } from '@/modules/store/hooks/useFavorites'
 import { useStore } from '@/modules/store/hooks/useStore'
 import { useStoreScheme } from '@/modules/store/hooks/useStoreScheme'
 import { useStoreTracking } from '@/modules/store/hooks/useStoreTracking'
+import { useCampaignTracking } from '@/modules/store/hooks/useCampaignTracking'
 import { canUseWhatsapp, money, productImages, sortProducts, stockOf, whatsappLink } from '@/modules/store/lib/storeFormat'
 import { storeBanner, storeMode, storeThemeVars } from '@/modules/store/lib/storeTheme'
 import './StorePage.css'
@@ -76,6 +77,7 @@ export default function StorePage() {
   const [cartOpen, setCartOpen] = useState(false)
   const [checkoutOpen, setCheckoutOpen] = useState(false)
   useStoreTracking(company)
+  const campaign = useCampaignTracking(company, storeSlug, params)
   useStoreFont()
 
   const view = params.get(PARAMS.view) === 'productos' ? 'catalog' : 'home'
@@ -88,6 +90,12 @@ export default function StorePage() {
   }
   const openProductId = Number(params.get(PARAMS.product)) || null
   const openProduct = products.find((p) => p.id === openProductId) || null
+  const { track } = campaign
+
+  // Embudo de la campaña por la que llegó el comprador (si llegó por una).
+  useEffect(() => {
+    if (openProduct?.id) track('PRODUCT_VIEW', openProduct.id)
+  }, [openProduct?.id, track])
 
   const ordersPaused = company?.acceptingOrders === false
   const whatsappAllowed = canUseWhatsapp(company)
@@ -188,6 +196,7 @@ export default function StorePage() {
       return
     }
     add(product, amount)
+    track('ADD_TO_CART', product.id)
     if (silent) return
     const image = productImages(product)[0]
     toast.custom((t) => (
@@ -202,7 +211,7 @@ export default function StorePage() {
       // En el celular abajo están la barra del pedido y la navegación.
       position: window.matchMedia('(max-width: 720px)').matches ? 'top-center' : 'bottom-center',
     })
-  }, [add, ordersPaused, quantityOf])
+  }, [add, ordersPaused, quantityOf, track])
 
   const cardProps = useCallback((product) => ({
     quantity: quantityOf(product.id),
@@ -328,6 +337,7 @@ export default function StorePage() {
           if (ordersPaused) return
           setCartOpen(false)
           setCheckoutOpen(true)
+          track('CHECKOUT_STARTED')
         }}
       />
 
@@ -337,6 +347,8 @@ export default function StorePage() {
         total={total}
         count={count}
         company={company}
+        marketingSessionId={campaign.orderSessionId}
+        suggestedCoupon={campaign.coupon}
         onClose={() => setCheckoutOpen(false)}
         onSuccess={() => { clear(); refresh() }}
       />

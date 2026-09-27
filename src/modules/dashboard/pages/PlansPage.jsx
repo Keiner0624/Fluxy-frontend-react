@@ -16,15 +16,20 @@ import { legalUrl } from '@/modules/landing/legal/documents'
 const RANK = { FREE: 0, PRO: 1, BUSINESS: 2 }
 
 const BENEFITS = {
-  FREE: ['Hasta 10 productos', 'Tienda pública con enlace propio', 'Pedidos, clientes y cobros', 'Logo de tu negocio', 'Resumen de ventas'],
+  FREE: ['Hasta 10 productos', 'Tienda pública con enlace propio', 'Pedidos, clientes y cobros', 'Logo de tu negocio', 'Resumen de ventas',
+    'Marketing: 2 campañas activas con enlace y QR'],
   PRO: ['Hasta 100 productos', 'Pedidos por WhatsApp y aviso al cliente', 'Métricas y reportes exportables', 'Cupones de descuento',
-    'Estilo de la tienda: color, portada y modo oscuro', 'Equipo con roles y permisos'],
-  BUSINESS: ['Productos ilimitados', 'Todo lo de Pro', 'Dominio personalizado', 'Descripciones de productos con IA', 'Tienda sin la marca de Fluxy', 'Soporte prioritario'],
+    'Estilo de la tienda: color, portada y modo oscuro', 'Equipo con roles y permisos',
+    'Marketing: 20 campañas, embudo, segmentos y QR con tu marca'],
+  BUSINESS: ['Productos ilimitados', 'Todo lo de Pro', 'Dominio personalizado', 'Descripciones de productos con IA', 'Tienda sin la marca de Fluxy',
+    'Campañas ilimitadas y exportación de resultados', 'Soporte prioritario'],
 }
 
 const FEATURE_LABELS = {
   METRICS: 'Métricas', REPORTS: 'Reportes', COUPONS: 'Cupones', CUSTOM_STYLE: 'Estilo de la tienda', WHATSAPP: 'Pedidos por WhatsApp',
   CUSTOM_DOMAIN: 'Dominio personalizado', AI_DESCRIPTIONS: 'Descripciones con IA', NO_BRANDING: 'Tienda sin la marca de Fluxy',
+  MARKETING_FULL_ANALYTICS: 'Analítica completa de campañas', MARKETING_ADVANCED_SEGMENTS: 'Segmentos avanzados de clientes',
+  MARKETING_CUSTOM_QR: 'QR de campaña personalizado', MARKETING_EXPORT: 'Exportación de resultados de campañas',
 }
 
 const REASONS = [
