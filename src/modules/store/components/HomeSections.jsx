@@ -4,7 +4,8 @@ import ProductCard, { ProductPlaceholder } from './ProductCard'
 import { BrandMark } from './StoreHeader'
 import { PAYMENT_LABELS, money, paymentMethods, productImages, stockOf } from '../lib/storeFormat'
 
-export function Hero({ company, banner, heroProduct, productCount, categoryCount, whatsapp, onShop, onOpenProduct, onAdd, ordersPaused }) {
+// La portada es una foto limpia: sin tarjetas encima.
+export function Hero({ company, banner, heroProduct, productCount, categoryCount, whatsapp, onShop }) {
   const heroImage = banner || productImages(heroProduct)[0]
   return (
     <section className="sf-hero" aria-labelledby="sf-hero-title">
@@ -36,19 +37,6 @@ export function Hero({ company, banner, heroProduct, productCount, categoryCount
           <img className="sf-hero__image" src={heroImage} alt="" />
         ) : (
           <div className="sf-hero__identity"><BrandMark company={company} size={120} /></div>
-        )}
-        {heroProduct && (
-          <div className="sf-hero__tag">
-            <button type="button" className="sf-hero__tag-info" onClick={() => onOpenProduct(heroProduct)}>
-              <small>Destacado</small>
-              <strong>{heroProduct.name}</strong>
-              <span>{money(heroProduct.price)}</span>
-            </button>
-            <button type="button" className="sf-btn sf-btn--primary sf-btn--icon" onClick={() => onAdd(heroProduct)}
-              disabled={ordersPaused || stockOf(heroProduct) <= 0} aria-label={`Agregar ${heroProduct.name} al carrito`}>
-              <Icon name="plus" size={18} />
-            </button>
-          </div>
         )}
       </div>
     </section>

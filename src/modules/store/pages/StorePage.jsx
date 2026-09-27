@@ -279,10 +279,7 @@ export default function StorePage() {
             productCount={products.length}
             categoryCount={categories.length}
             whatsapp={contactLink}
-            ordersPaused={ordersPaused}
             onShop={() => navigate('catalog')}
-            onOpenProduct={openDetail}
-            onAdd={addToCart}
           />
           <TrustStrip company={company} whatsapp={contactLink} />
           <CategoryTiles categories={categories} products={products} onPick={(id) => navigate('catalog', null, { category: id })} />
