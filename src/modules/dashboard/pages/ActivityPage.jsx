@@ -59,9 +59,26 @@ const ACTIONS = {
   CAMPAIGN_FINISHED: ['Finalizó una campaña', 'megaphone'],
   CAMPAIGN_ARCHIVED: ['Archivó una campaña', 'megaphone'],
   CAMPAIGN_DELETED: ['Eliminó un borrador de campaña', 'megaphone'],
+  INVOICING_SETTINGS_UPDATED: ['Cambió la configuración de facturación', 'receipt'],
+  INVOICING_PROVIDER_CHANGED: ['Cambió el proveedor o las credenciales de facturación', 'receipt'],
+  INVOICING_CONNECTION_TESTED: ['Probó la conexión de facturación', 'receipt'],
+  INVOICING_ACTIVATION_CHANGED: ['Activó o pausó la facturación', 'receipt'],
+  TAX_PROFILE_VERIFICATION_STARTED: ['Pidió verificar el RUC', 'shield'],
+  TAX_PROFILE_VERIFIED: ['RUC verificado', 'shield'],
+  TAX_PROFILE_REJECTED: ['El RUC no se pudo verificar', 'shield'],
+  TAX_PROFILE_SUSPENDED: ['Facturación suspendida por el RUC', 'shield'],
+  INVOICE_SERIES_CHANGED: ['Cambió una serie de comprobantes', 'receipt'],
+  INVOICE_CREATED: ['Emitió un comprobante', 'receipt'],
+  INVOICE_ACCEPTED: ['Comprobante aceptado', 'receipt'],
+  INVOICE_REJECTED: ['Comprobante rechazado', 'receipt'],
+  INVOICE_FAILED: ['Comprobante no emitido', 'receipt'],
+  INVOICE_RETRIED: ['Reintentó un comprobante', 'receipt'],
+  INVOICE_EMAIL_RESENT: ['Reenvió un comprobante por correo', 'receipt'],
+  INVOICE_PUBLIC_LINK_REVOKED: ['Renovó el enlace público de un comprobante', 'receipt'],
+  CREDIT_NOTE_CREATED: ['Emitió una nota de crédito', 'receipt'],
 }
 
-const DETAIL_LABELS = { method: 'Método', from: 'De', to: 'A', by: 'Origen', provider: 'Proveedor', revoked: 'Sesiones', sessionsRevoked: 'Sesiones cerradas', total: 'Total', months: 'Meses', flow: 'Flujo', updated: 'Actualizados', deleted: 'Eliminados', name: 'Nombre', device: 'Dispositivo', version: 'Versión', plan: 'Plan', reason: 'Motivo', effectiveAt: 'Hasta', type: 'Tipo', channel: 'Canal', status: 'Estado' }
+const DETAIL_LABELS = { method: 'Método', from: 'De', to: 'A', by: 'Origen', provider: 'Proveedor', revoked: 'Sesiones', sessionsRevoked: 'Sesiones cerradas', total: 'Total', months: 'Meses', flow: 'Flujo', updated: 'Actualizados', deleted: 'Eliminados', name: 'Nombre', device: 'Dispositivo', version: 'Versión', plan: 'Plan', reason: 'Motivo', effectiveAt: 'Hasta', type: 'Tipo', channel: 'Canal', status: 'Estado', number: 'Comprobante', related: 'Modifica', ruc: 'RUC', source: 'Fuente', tokenHint: 'Token', credentialsChanged: 'Credenciales nuevas', ok: 'Conexión' }
 
 const DETAIL_VALUES = {
   AUTO_EMAIL: 'Acceso con el mismo correo', GOOGLE: 'Google', APPLE: 'Apple', PASSWORD: 'Contraseña',
@@ -71,6 +88,9 @@ const DETAIL_VALUES = {
   SWITCHING: 'Cambia de herramienta', TEMPORARY: 'Temporal', OTHER: 'Otro',
   STORE: 'Tienda', PRODUCT: 'Producto', CATEGORY: 'Categoría', COUPON: 'Cupón', WHATSAPP: 'WhatsApp', INSTAGRAM: 'Instagram',
   FACEBOOK: 'Facebook', TIKTOK: 'TikTok', DIRECT: 'Enlace directo', QR: 'Código QR', ACTIVE: 'Activa', SCHEDULED: 'Programada',
+  SANDBOX: 'Modo de prueba', NUBEFACT: 'Nubefact', RUC_API: 'Padrón SUNAT', VERIFIED: 'Verificado', REQUIRES_ACTION: 'Requiere acción',
+  BOLETA: 'Boleta', FACTURA: 'Factura', ANULACION: 'Anulación', DEVOLUCION_TOTAL: 'Devolución total', AUTOMATIC: 'Automática',
+  PAUSED: 'Pausada', true: 'Sí', false: 'No',
 }
 
 const ISO_DATE = /^\d{4}-\d{2}-\d{2}T/

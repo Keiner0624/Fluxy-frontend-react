@@ -11,6 +11,7 @@ import {
 } from '@/app/format'
 import { Modal, Badge, ErrorState } from '@/modules/dashboard/components/ui'
 import PaymentForm from '@/modules/dashboard/components/PaymentForm'
+import OrderInvoiceSection from '@/modules/invoicing/components/OrderInvoiceSection'
 
 const CANCEL_REASONS = [
   'El cliente canceló',
@@ -226,6 +227,8 @@ export default function OrderDetailModal({ orderId, onClose, onChanged }) {
                 )}
               </>
             )}
+
+            <OrderInvoiceSection order={order} />
 
             <p className="fx-eyebrow" style={{ margin: '22px 0 10px' }}>Historial</p>
             <ol className="fx-timeline">

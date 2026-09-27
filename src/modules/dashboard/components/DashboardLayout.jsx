@@ -23,6 +23,7 @@ const BADGES = {
   '/dashboard/customers': { key: 'customers', tone: 'soft',   label: (n) => `${n} ${n === 1 ? 'cliente nuevo' : 'clientes nuevos'}` },
   '/dashboard/payments':  { key: 'payments',  tone: 'brand',  label: (n) => `${n} ${n === 1 ? 'cobro' : 'cobros'} por verificar` },
   '/dashboard/coupons':   { key: 'coupons',   tone: 'warn',   label: (n) => `${n} ${n === 1 ? 'cupón vence' : 'cupones vencen'} en 3 días` },
+  '/dashboard/invoices':  { key: 'invoices',  tone: 'danger', label: (n) => `${n} ${n === 1 ? 'comprobante con error o rechazado' : 'comprobantes con error o rechazados'}` },
   '/dashboard/inventory': { key: 'inventory', tone: 'warn',   label: (n) => `${n} ${n === 1 ? 'producto' : 'productos'} con stock bajo o agotados` },
   '/dashboard/team':      { key: 'team',      tone: 'soft',   label: (n) => `${n} ${n === 1 ? 'invitación pendiente' : 'invitaciones pendientes'}` },
   '/dashboard/activity':  { key: 'activity',  tone: 'danger', label: (n) => `${n} ${n === 1 ? 'alerta' : 'alertas'} de seguridad nuevas` },
@@ -50,6 +51,7 @@ const NAV_GROUPS = [
       { path: '/dashboard/customers',  icon: 'customers',  label: 'Clientes',           permission: 'CUSTOMER_VIEW' },
       { path: '/dashboard/payments',   icon: 'payments',   label: 'Pagos',              permission: 'PAYMENT_VIEW' },
       { path: '/dashboard/coupons',    icon: 'coupons',    label: 'Cupones',            permission: 'COUPON_VIEW', requiredPlan: 'PRO' },
+      { path: '/dashboard/invoices',   icon: 'receipt',    label: 'Comprobantes',       permission: 'INVOICE_VIEW', requiredPlan: 'PRO' },
     ],
   },
   {

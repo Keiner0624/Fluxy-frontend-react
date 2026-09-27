@@ -6,6 +6,7 @@ import { trackPurchase } from '@/modules/store/hooks/useStoreTracking'
 import { newIdempotencyKey } from '@/app/session'
 import { ProductPlaceholder } from './ProductCard'
 import { PAYMENT_LABELS, money, paymentMethods, productImages } from '../lib/storeFormat'
+import { BOLETA_ID_THRESHOLD, receiverErrors } from '@/modules/invoicing/lib/invoicingFormat'
 
 const BUYER_KEY = 'fluxy_buyer'
 
@@ -34,6 +35,13 @@ export default function CheckoutModal({ open, cart, total, count, company, marke
   const [submitting, setSubmitting] = useState(false)
   const [failure, setFailure] = useState('')
   const [order, setOrder] = useState(null)
+  // Comprobante electrónico: solo si la tienda emite (company.invoicing).
+  const invoicing = company?.invoicing || null
+  const [invoice, setInvoice] = useState({ type: 'BOLETA', documentType: 'DNI', documentNumber: '', legalName: '', fiscalAddress: '', email: '' })
+  const setInvoiceField = (field) => (event) => {
+    setInvoice((v) => ({ ...v, [field]: event.target.value }))
+    setErrors((e) => ({ ...e, [`invoice_${field}`]: undefined }))
+  }
 
   useEffect(() => {
     if (!open) return undefined
@@ -98,6 +106,14 @@ export default function CheckoutModal({ open, cart, total, count, company, marke
     if (form.name.trim().length < 2) found.name = 'Ingresá tu nombre.'
     if (form.phone.replace(/\D/g, '').length < 7) found.phone = 'Ingresá un número para coordinar la entrega.'
     if (methods.length > 0 && !payment) found.payment = 'Elegí cómo vas a pagar.'
+    if (invoicing) {
+      const receiver = { documentType: invoice.type === 'FACTURA' ? 'RUC' : invoice.documentType, documentNumber: invoice.documentNumber,
+        name: invoice.legalName, email: invoice.email }
+      const invoiceErrors = receiverErrors(invoice.type, receiver, Number(couponData?.finalTotal ?? total))
+      if (invoiceErrors.documentNumber) found.invoice_documentNumber = invoiceErrors.documentNumber
+      if (invoiceErrors.name) found.invoice_legalName = invoiceErrors.name
+      if (invoiceErrors.email) found.invoice_email = invoiceErrors.email
+    }
     setErrors(found)
     if (Object.keys(found).length) {
       document.getElementById(`sf-checkout-${Object.keys(found)[0]}`)?.focus()
@@ -116,6 +132,14 @@ export default function CheckoutModal({ open, cart, total, count, company, marke
         couponCode: couponData?.code || null,
         paymentMethod: payment || null,
         ...(marketingSessionId ? { marketingSessionId } : {}),
+        ...(invoicing ? {
+          invoiceType: invoice.type,
+          buyerDocumentType: invoice.type === 'FACTURA' ? 'RUC' : (invoice.documentNumber.trim() ? invoice.documentType : 'NINGUNO'),
+          buyerDocumentNumber: invoice.documentNumber.trim() || null,
+          buyerLegalName: invoice.type === 'FACTURA' ? invoice.legalName.trim() : null,
+          buyerFiscalAddress: invoice.type === 'FACTURA' ? invoice.fiscalAddress.trim() || null : null,
+          buyerEmail: invoice.email.trim() || null,
+        } : {}),
       }, orderKey.current)
       orderKey.current = newIdempotencyKey('pedido')
       try {
@@ -205,6 +229,54 @@ export default function CheckoutModal({ open, cart, total, count, company, marke
                       ))}
                     </div>
                     {errors.payment && <em className="sf-field-error">{errors.payment}</em>}
+                  </fieldset>
+                )}
+
+                {invoicing && (invoicing.receipt || invoicing.invoice) && (
+                  <fieldset className="sf-fieldset">
+                    <legend><span>{methods.length > 0 ? 3 : 2}</span> Comprobante</legend>
+                    <div className="sf-pay">
+                      {[['BOLETA', 'Boleta', invoicing.receipt], ['FACTURA', 'Factura', invoicing.invoice]].filter(([, , ok]) => ok).map(([key, label]) => (
+                        <label key={key} className={`sf-pay__option${invoice.type === key ? ' is-on' : ''}`}>
+                          <input type="radio" name="sf-invoice" value={key} checked={invoice.type === key}
+                            onChange={() => { setInvoice((v) => ({ ...v, type: key })); setErrors((e) => ({ ...e, invoice_documentNumber: undefined, invoice_legalName: undefined })) }} />
+                          <Icon name="receipt" size={16} /> {label}
+                        </label>
+                      ))}
+                    </div>
+                    {invoice.type === 'FACTURA' ? (
+                      <>
+                        <label className="sf-field">
+                          <span>RUC</span>
+                          <input value={invoice.documentNumber} onChange={setInvoiceField('documentNumber')} inputMode="numeric" maxLength={11}
+                            placeholder="20XXXXXXXXX" aria-invalid={Boolean(errors.invoice_documentNumber)} />
+                          {errors.invoice_documentNumber && <em>{errors.invoice_documentNumber}</em>}
+                        </label>
+                        <label className="sf-field">
+                          <span>Razón social</span>
+                          <input value={invoice.legalName} onChange={setInvoiceField('legalName')} maxLength={200} aria-invalid={Boolean(errors.invoice_legalName)} />
+                          {errors.invoice_legalName && <em>{errors.invoice_legalName}</em>}
+                        </label>
+                        <label className="sf-field sf-field--full">
+                          <span>Dirección fiscal <small>(opcional)</small></span>
+                          <input value={invoice.fiscalAddress} onChange={setInvoiceField('fiscalAddress')} maxLength={300} />
+                        </label>
+                      </>
+                    ) : (
+                      <label className="sf-field">
+                        <span>DNI {Number(couponData?.finalTotal ?? total) >= BOLETA_ID_THRESHOLD ? '' : <small>(opcional)</small>}</span>
+                        <input value={invoice.documentNumber} onChange={setInvoiceField('documentNumber')} inputMode="numeric" maxLength={8}
+                          aria-invalid={Boolean(errors.invoice_documentNumber)} />
+                        {errors.invoice_documentNumber && <em>{errors.invoice_documentNumber}</em>}
+                      </label>
+                    )}
+                    <label className={`sf-field${invoice.type === 'FACTURA' ? ' sf-field--full' : ''}`}>
+                      <span>Correo para recibirlo <small>(opcional)</small></span>
+                      <input type="email" value={invoice.email} onChange={setInvoiceField('email')} autoComplete="email" maxLength={150}
+                        aria-invalid={Boolean(errors.invoice_email)} />
+                      {errors.invoice_email && <em>{errors.invoice_email}</em>}
+                    </label>
+                    {invoicing.test && <em className="sf-field-error" style={{ color: 'var(--sf-muted)' }}>Esta tienda está probando la facturación: el comprobante no tiene valor tributario.</em>}
                   </fieldset>
                 )}
               </div>

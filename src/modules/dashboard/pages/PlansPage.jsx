@@ -20,7 +20,7 @@ const BENEFITS = {
     'Marketing: 2 campañas activas con enlace y QR'],
   PRO: ['Hasta 100 productos', 'Pedidos por WhatsApp y aviso al cliente', 'Métricas y reportes exportables', 'Cupones de descuento',
     'Estilo de la tienda: color, portada y modo oscuro', 'Equipo con roles y permisos',
-    'Marketing: 20 campañas, embudo, segmentos y QR con tu marca'],
+    'Marketing: 20 campañas, embudo, segmentos y QR con tu marca', 'Boletas y facturas electrónicas'],
   BUSINESS: ['Productos ilimitados', 'Todo lo de Pro', 'Dominio personalizado', 'Descripciones de productos con IA', 'Tienda sin la marca de Fluxy',
     'Campañas ilimitadas y exportación de resultados', 'Soporte prioritario'],
 }
@@ -30,6 +30,7 @@ const FEATURE_LABELS = {
   CUSTOM_DOMAIN: 'Dominio personalizado', AI_DESCRIPTIONS: 'Descripciones con IA', NO_BRANDING: 'Tienda sin la marca de Fluxy',
   MARKETING_FULL_ANALYTICS: 'Analítica completa de campañas', MARKETING_ADVANCED_SEGMENTS: 'Segmentos avanzados de clientes',
   MARKETING_CUSTOM_QR: 'QR de campaña personalizado', MARKETING_EXPORT: 'Exportación de resultados de campañas',
+  ELECTRONIC_INVOICING: 'Facturación electrónica',
 }
 
 const REASONS = [
