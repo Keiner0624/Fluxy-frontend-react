@@ -5,6 +5,7 @@ import { useEffect, useState } from 'react'
 import Icon from '@/components/Icon'
 import { Modal } from '@/modules/dashboard/components/ui'
 import { uploadImage, validateImage } from '@/app/cloudinary'
+import { generateCampaignCopy } from '@/app/ai'
 import {
   CHANNELS, OBJECTIVES, TYPES, defaultObjective, discountLabel, formatMoney, suggestContent,
 } from '../lib/marketingFormat'
@@ -80,6 +81,7 @@ export default function CampaignWizard({ campaign, preset, capabilities, canPubl
   const [error, setError] = useState('')
   const [saving, setSaving] = useState(false)
   const [uploading, setUploading] = useState(false)
+  const [writing, setWriting] = useState(false)
   const [company] = useState(readStoredCompany)
 
   useEffect(() => {
@@ -110,6 +112,24 @@ export default function CampaignWizard({ campaign, preset, capabilities, canPubl
     type: form.type, objective: form.objective, target: target && { name: target.name, price: target.price },
     coupon, storeName: company.name,
   })
+
+  // Texto propuesto por la IA (plan Business): queda en los campos para revisarlo y editarlo.
+  const writeWithAi = async () => {
+    setWriting(true)
+    setError('')
+    try {
+      const copy = await generateCampaignCopy({
+        type: form.type, objective: form.objective, channel: form.channel,
+        target: target?.name || null, price: target?.price != null ? String(target.price) : null,
+        couponCode: coupon?.code || null, discount: coupon ? discountLabel(coupon) : null, storeName: company.name || null,
+      })
+      set({ title: copy.title, message: copy.message, callToAction: copy.callToAction })
+    } catch (e) {
+      setError(e.message)
+    } finally {
+      setWriting(false)
+    }
+  }
 
   const applySuggestion = () => {
     const s = suggestion()
@@ -352,9 +372,16 @@ export default function CampaignWizard({ campaign, preset, capabilities, canPubl
           </div>
           <div className="fx-row fx-row--between" style={{ marginBottom: 8 }}>
             <span className="fx-label" style={{ margin: 0 }}>Contenido</span>
-            <button type="button" className="fx-btn fx-btn--ghost fx-btn--sm" onClick={applySuggestion}>
-              <Icon name="sparkles" size={14} /> Usar texto sugerido
-            </button>
+            <div className="fx-row" style={{ gap: 4 }}>
+              <button type="button" className="fx-btn fx-btn--ghost fx-btn--sm" onClick={applySuggestion} disabled={writing}>
+                <Icon name="refresh" size={14} /> Texto sugerido
+              </button>
+              {capabilities?.ai && (
+                <button type="button" className="fx-btn fx-btn--secondary fx-btn--sm" onClick={writeWithAi} disabled={writing}>
+                  {writing ? <><span className="fx-spinner" /> Escribiendo…</> : <><Icon name="sparkles" size={14} /> Escribir con IA</>}
+                </button>
+              )}
+            </div>
           </div>
           <div className="fx-field">
             <label className="fx-label" htmlFor="w-title">Título</label>

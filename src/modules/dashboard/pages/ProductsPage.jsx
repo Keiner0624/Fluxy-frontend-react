@@ -9,6 +9,8 @@ import { api } from '@/app/api'
 import { uploadImage, validateImage } from '@/app/cloudinary'
 import useApi, { useDebounced } from '@/hooks/useApi'
 import useAccess from '@/hooks/useAccess'
+import usePlan from '@/hooks/usePlan'
+import { generateProductDescription } from '@/app/ai'
 import { money, integer, count } from '@/app/format'
 import {
   ConfirmDialog, EmptyState, ErrorState, Modal, NoAccess, Pagination, StatCard,
@@ -84,6 +86,29 @@ function ProductForm({ product, categories, onClose, onSaved }) {
   const [error, setError] = useState('')
   const fileRef = useRef(null)
   const set = (key) => (e) => setForm((f) => ({ ...f, [key]: e.target.value }))
+  const { isBusiness, loading: planLoading } = usePlan()
+  const [generating, setGenerating] = useState(false)
+  const [previousDescription, setPreviousDescription] = useState(null)
+
+  // Propuesta de la IA: reemplaza el texto, se puede deshacer y hay que guardar para que quede.
+  const generateDescription = async () => {
+    if (!form.name.trim()) { setError('Escribí el nombre del producto para generar la descripción.'); return }
+    setGenerating(true)
+    setError('')
+    try {
+      const category = categories.find((c) => String(c.id) === String(form.categoryId))?.name
+      const { description } = await generateProductDescription({
+        name: form.name.trim(), price: form.price || null, category: category || null, notes: form.description.trim() || null,
+      })
+      setPreviousDescription(form.description)
+      setForm((f) => ({ ...f, description }))
+      toast.success('Descripción generada. Revisala antes de guardar.')
+    } catch (err) {
+      setError(err.message)
+    } finally {
+      setGenerating(false)
+    }
+  }
 
   const onImage = (e) => {
     const file = e.target.files[0]
@@ -195,8 +220,28 @@ function ProductForm({ product, categories, onClose, onSaved }) {
       </div>
 
       <div className="fx-field">
-        <label className="fx-label" htmlFor="p-desc">Descripción</label>
-        <textarea id="p-desc" className="fx-textarea" value={form.description} onChange={set('description')} placeholder="Detalles del producto (opcional)" />
+        <div className="fx-row fx-row--between" style={{ marginBottom: 6, gap: 8, flexWrap: 'wrap' }}>
+          <label className="fx-label" htmlFor="p-desc" style={{ margin: 0 }}>Descripción</label>
+          <div className="fx-row" style={{ gap: 4 }}>
+            {previousDescription !== null && !generating && (
+              <button type="button" className="fx-btn fx-btn--ghost fx-btn--sm"
+                onClick={() => { setForm((f) => ({ ...f, description: previousDescription })); setPreviousDescription(null) }}>
+                <Icon name="undo" size={13} /> Deshacer
+              </button>
+            )}
+            {!planLoading && (isBusiness ? (
+              <button type="button" className="fx-btn fx-btn--secondary fx-btn--sm" onClick={generateDescription} disabled={generating || saving}>
+                {generating ? <><span className="fx-spinner" /> Generando…</> : <><Icon name="sparkles" size={14} /> {form.description.trim() ? 'Mejorar con IA' : 'Generar con IA'}</>}
+              </button>
+            ) : (
+              <Link to="/dashboard/plans" className="fx-btn fx-btn--ghost fx-btn--sm" title="Descripciones con IA en el plan Business">
+                <Icon name="sparkles" size={14} /> Generar con IA <span className="fx-plan-tag fx-plan-tag--business">Business</span>
+              </Link>
+            ))}
+          </div>
+        </div>
+        <textarea id="p-desc" className="fx-textarea" value={form.description} onChange={(e) => { set('description')(e); setPreviousDescription(null) }}
+          placeholder="Detalles del producto (opcional)" disabled={generating} />
       </div>
 
       <div className="fx-field" style={{ marginBottom: 0 }}>
