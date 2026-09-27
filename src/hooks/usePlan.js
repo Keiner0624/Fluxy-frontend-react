@@ -14,6 +14,8 @@ export const FEATURE_PLAN = {
   whatsapp:    'PRO',
   orderStatus: 'PRO',
   style:       'PRO',
+  coupons:     'PRO',
+  team:        'PRO',
   domain:      'BUSINESS',
   noBranding:  'BUSINESS',
 }

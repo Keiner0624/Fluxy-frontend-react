@@ -1,12 +1,24 @@
 // src/modules/dashboard/pages/CouponsPage.jsx
 import { useState, useEffect } from 'react'
+import { Link } from 'react-router-dom'
 import DashboardLayout from '@/modules/dashboard/components/DashboardLayout'
 import { API_URL } from '@/app/config'
 import Icon from '@/components/Icon'
 import useAccess from '@/hooks/useAccess'
+import usePlan from '@/hooks/usePlan'
 import { NoAccess } from '@/modules/dashboard/components/ui'
 
 function getToken() { return localStorage.getItem('token') || '' }
+
+function PlanNotice({ children }) {
+  return (
+    <div className="fx-alert fx-alert--warn" role="status" style={{ marginBottom: 16, alignItems: 'center', flexWrap: 'wrap' }}>
+      <Icon name="lock" size={16} />
+      <span style={{ flex: 1, minWidth: 220 }}>{children}</span>
+      <Link to="/dashboard/plans" className="fx-btn fx-btn--secondary fx-btn--sm">Ver planes</Link>
+    </div>
+  )
+}
 
 function formatDate(value) {
   if (!value) return 'Sin vencimiento'
@@ -31,6 +43,11 @@ export default function CouponsPage() {
 }
 
 function CouponsContent({ canManage }) {
+  // Crear y activar cupones es del plan Pro (lo valida el servidor). Sin el plan se pueden ver,
+  // desactivar y borrar los que quedaron de antes.
+  const { isPro, loading: planLoading } = usePlan()
+  const locked = !planLoading && !isPro
+  const canCreate = canManage && !locked
   const [coupons, setCoupons]   = useState([])
   const [loading, setLoading]   = useState(true)
   const [showForm, setShowForm] = useState(false)
@@ -85,7 +102,12 @@ function CouponsContent({ canManage }) {
 
   const handleToggle = async (id) => {
     try {
-      await fetch(`${API_URL}/coupons/${id}/toggle`, { method: 'PUT', headers: { Authorization: `Bearer ${getToken()}` } })
+      const res = await fetch(`${API_URL}/coupons/${id}/toggle`, { method: 'PUT', headers: { Authorization: `Bearer ${getToken()}` } })
+      if (!res.ok) {
+        const body = await res.json().catch(() => ({}))
+        setError(body.message || 'Error al cambiar estado')
+        return
+      }
       loadCoupons()
     } catch { setError('Error al cambiar estado') }
   }
@@ -108,7 +130,7 @@ function CouponsContent({ canManage }) {
           <h1>Cupones</h1>
           <p>{loading ? 'Cargando…' : `${coupons.length} ${coupons.length === 1 ? 'cupón creado' : 'cupones creados'}`}</p>
         </div>
-        {canManage && (
+        {canCreate && (
           <div className="fx-page-head__actions">
             <button className="fx-btn fx-btn--primary" onClick={() => { setShowForm(true); setError('') }}>
               <Icon name="plus" size={16} />
@@ -117,6 +139,13 @@ function CouponsContent({ canManage }) {
           </div>
         )}
       </div>
+
+      {locked && (
+        <PlanNotice>
+          Los cupones de descuento están disponibles desde el plan Pro. Sin el plan no se aplican en tu tienda;
+          podés desactivar o eliminar los que ya tenías.
+        </PlanNotice>
+      )}
 
       {success && (
         <div className="fx-alert fx-alert--ok" style={{ marginBottom: 16 }}>
@@ -143,7 +172,7 @@ function CouponsContent({ canManage }) {
             <p className="fx-empty__text">
               Los cupones te permiten ofrecer descuentos por código en el checkout de tu tienda.
             </p>
-            {canManage && (
+            {canCreate && (
               <button className="fx-btn fx-btn--primary" style={{ marginTop: 18 }} onClick={() => setShowForm(true)}>
                 <Icon name="plus" size={16} />
                 Crear cupón
@@ -192,12 +221,14 @@ function CouponsContent({ canManage }) {
                     </td>
                     <td>
                       {canManage && <div className="fx-row" style={{ gap: 2, justifyContent: 'flex-end' }}>
-                        <button
-                          className="fx-btn fx-btn--ghost fx-btn--sm"
-                          onClick={() => handleToggle(c.id)}
-                        >
-                          {c.active ? 'Desactivar' : 'Activar'}
-                        </button>
+                        {(c.active || !locked) && (
+                          <button
+                            className="fx-btn fx-btn--ghost fx-btn--sm"
+                            onClick={() => handleToggle(c.id)}
+                          >
+                            {c.active ? 'Desactivar' : 'Activar'}
+                          </button>
+                        )}
                         <button
                           className="fx-btn fx-btn--ghost fx-btn--icon"
                           style={{ color: 'var(--fx-danger)' }}

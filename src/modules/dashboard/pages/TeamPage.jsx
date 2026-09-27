@@ -1,12 +1,14 @@
 // src/modules/dashboard/pages/TeamPage.jsx
 // Personas del negocio, su rol y lo que puede hacer cada una.
 import { useState } from 'react'
+import { Link } from 'react-router-dom'
 import toast from 'react-hot-toast'
 import DashboardLayout from '@/modules/dashboard/components/DashboardLayout'
 import Icon from '@/components/Icon'
 import { api } from '@/app/api'
 import useApi from '@/hooks/useApi'
 import useAccess from '@/hooks/useAccess'
+import usePlan from '@/hooks/usePlan'
 import { date, ROLES, PERMISSION_GROUPS } from '@/app/format'
 import { ConfirmDialog, EmptyState, ErrorState, Modal, NoAccess } from '@/modules/dashboard/components/ui'
 import useReauth from '@/hooks/useReauth'
@@ -214,6 +216,7 @@ function EditMemberModal({ member, team, onClose, onSaved }) {
 export default function TeamPage() {
   const access = useAccess()
   const canView = access.can('TEAM_VIEW')
+  const { isPro, loading: planLoading } = usePlan()
   const { data: team, loading, error, reload } = useApi(() => api.get('/team'), [], { enabled: canView })
   const [inviting, setInviting] = useState(false)
   const [editing, setEditing] = useState(null)
@@ -310,6 +313,9 @@ export default function TeamPage() {
 
   if (access.ready && !canView) return <DashboardLayout><NoAccess module="Equipo" /></DashboardLayout>
 
+  // Invitar es del plan Pro (lo valida el servidor). Sin el plan se sigue gestionando a quien ya está.
+  const inviteLocked = !planLoading && !isPro
+
   const members = team?.members || []
   const invitations = team?.invitations || []
 
@@ -320,7 +326,7 @@ export default function TeamPage() {
           <h1>Equipo</h1>
           <p>{team ? `${members.length} ${members.length === 1 ? 'persona' : 'personas'} con acceso al panel` : 'Quién trabaja en tu negocio y qué puede hacer'}</p>
         </div>
-        {access.can('TEAM_INVITE') && (
+        {access.can('TEAM_INVITE') && !inviteLocked && (
           <div className="fx-page-head__actions">
             <button className="fx-btn fx-btn--primary" onClick={() => setInviting(true)} disabled={!team}>
               <Icon name="plus" size={16} /> Invitar persona
@@ -328,6 +334,17 @@ export default function TeamPage() {
           </div>
         )}
       </div>
+
+      {inviteLocked && access.can('TEAM_INVITE') && (
+        <div className="fx-alert fx-alert--warn" role="status" style={{ marginBottom: 14, alignItems: 'center', flexWrap: 'wrap' }}>
+          <Icon name="lock" size={16} />
+          <span style={{ flex: 1, minWidth: 220 }}>
+            Sumar personas a tu equipo con roles y permisos está disponible desde el plan Pro.
+            {members.length > 1 ? ' Quienes ya tienen acceso lo conservan y podés editarlos o quitarlos.' : ''}
+          </span>
+          <Link to="/dashboard/plans" className="fx-btn fx-btn--secondary fx-btn--sm">Ver planes</Link>
+        </div>
+      )}
 
       {error && <div style={{ marginBottom: 14 }}><ErrorState error={error} onRetry={reload} /></div>}
 
