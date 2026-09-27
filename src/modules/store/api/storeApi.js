@@ -16,9 +16,16 @@ async function requestJson(path, options, fallbackMessage) {
   }
 
   if (!response.ok) {
-    throw new Error(data?.message || data?.error || fallbackMessage)
+    const error = new Error(data?.message || data?.error || fallbackMessage)
+    error.status = response.status
+    throw error
   }
   return data
+}
+
+/** Tienda del dominio propio donde se abrió la app. active=false: hay que ir a storeUrl. */
+export function resolveStoreDomain(host) {
+  return requestJson(`/store/domain?${new URLSearchParams({ host })}`, undefined, 'Tienda no encontrada')
 }
 
 export function getCompanyInfo(slug) {

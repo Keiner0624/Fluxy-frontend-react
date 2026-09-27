@@ -7,6 +7,7 @@ import { useCallback, useEffect, useMemo, useState } from 'react'
 import { useParams, useSearchParams } from 'react-router-dom'
 import toast, { Toaster } from 'react-hot-toast'
 import Icon from '@/components/Icon'
+import { PLATFORM_URL } from '@/app/config'
 import Cart from '@/modules/store/components/Cart'
 import CatalogView from '@/modules/store/components/CatalogView'
 import CheckoutModal from '@/modules/store/components/CheckoutModal'
@@ -62,15 +63,16 @@ function StoreProblem({ title, text }) {
       <span className="sf-empty__icon"><Icon name="store" size={30} /></span>
       <h1>{title}</h1>
       <p>{text}</p>
-      <a className="sf-btn sf-btn--ghost" href="/">Ir a Fluxy</a>
+      <a className="sf-btn sf-btn--ghost" href={PLATFORM_URL}>Ir a Fluxy</a>
     </main>
   )
 }
 
-export default function StorePage() {
+/** slug: lo pasa DomainStorePage cuando la tienda se abre en su dominio propio. */
+export default function StorePage({ slug: domainSlug } = {}) {
   const { slug } = useParams()
   const [params, setParams] = useSearchParams()
-  const storeSlug = slug || params.get('store')
+  const storeSlug = domainSlug || slug || params.get('store')
   const { company, products, categories, loading, error, refresh } = useStore(storeSlug)
   const { cart, add, setQuantity, quantityOf, remove, clear, total, count } = useCart(storeSlug, products)
   const { favorites, isFavorite, toggle: toggleFavorite } = useFavorites(storeSlug)

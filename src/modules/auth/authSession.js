@@ -25,7 +25,8 @@ export async function startSession(auth) {
       plan: company.plan || 'FREE',
       logoUrl: company.logoUrl || '',
       storeStyle: company.storeStyle || '',
-      storeUrl: buildStoreUrl(company.slug),
+      storeDomain: company.storeDomain || '',
+      storeUrl: company.storeDomain ? `https://${company.storeDomain}` : buildStoreUrl(company.slug),
     }))
   }
   return { me, company }

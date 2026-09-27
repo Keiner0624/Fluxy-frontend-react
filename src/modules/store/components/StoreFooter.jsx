@@ -1,5 +1,6 @@
 // Pie de la tienda, barra inferior en móvil y accesos flotantes.
 import Icon from '@/components/Icon'
+import { PLATFORM_URL } from '@/app/config'
 import { BrandMark } from './StoreHeader'
 import { PAYMENT_LABELS, mapsLink, money, paymentMethods } from '../lib/storeFormat'
 
@@ -57,7 +58,7 @@ export function StoreFooter({ company, whatsapp, onNavigate }) {
 
       <div className="sf-container sf-footer__bottom">
         <span>© {new Date().getFullYear()} {company?.name}. Todos los derechos reservados.</span>
-        {showBranding && <a href="/" target="_blank" rel="noreferrer">Tienda creada con <strong>Fluxy</strong></a>}
+        {showBranding && <a href={PLATFORM_URL} target="_blank" rel="noreferrer">Tienda creada con <strong>Fluxy</strong></a>}
       </div>
     </footer>
   )

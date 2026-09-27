@@ -6,6 +6,8 @@ const RUNTIME_ORIGIN = typeof window !== 'undefined'
 export const API_URL = (import.meta.env.VITE_API_URL || 'http://localhost:8080').replace(/\/$/, '')
 export const APP_URL = (import.meta.env.VITE_STORE_APP_URL || RUNTIME_ORIGIN).replace(/\/$/, '')
 export const SELLER_APP_URL = (import.meta.env.VITE_SELLER_APP_URL || RUNTIME_ORIGIN).replace(/\/$/, '')
+/** Dirección de Fluxy aunque la app esté abierta en el dominio propio de una tienda. */
+export const PLATFORM_URL = (import.meta.env.VITE_SELLER_APP_URL || DEFAULT_SELLER_APP_URL).replace(/\/$/, '')
 
 export function buildStoreUrl(slug) {
   if (!slug) return APP_URL
@@ -24,6 +26,9 @@ export function buildSellerPaymentReturnUrl(payment, plan) {
 
 export function getCompanyStoreUrl(company) {
   if (!company) return ''
+
+  // Dominio propio activo (lo decide el backend según el plan y los DNS).
+  if (company.storeDomain) return `https://${company.storeDomain}`
 
   if (company.slug) {
     return buildStoreUrl(company.slug)

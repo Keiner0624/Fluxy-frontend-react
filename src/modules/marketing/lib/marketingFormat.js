@@ -141,7 +141,9 @@ export function composeMessage(campaign, url) {
 export function rebaseLink(link, storeUrl) {
   if (!link) return ''
   if (!storeUrl || !link.query) return link.url
-  return `${storeUrl.replace(/[?#].*$/, '').replace(/\/$/, '')}${link.query}`
+  // Con dominio propio la tienda está en la raíz: https://mitienda.com/?cmp=…
+  const base = storeUrl.replace(/[?#].*$/, '').replace(/\/$/, '')
+  return `${/^https?:\/\/[^/]+$/.test(base) ? `${base}/` : base}${link.query}`
 }
 
 /** Número para wa.me: solo dígitos; un celular peruano de 9 dígitos lleva el 51. */

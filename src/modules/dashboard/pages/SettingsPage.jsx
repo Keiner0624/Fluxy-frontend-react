@@ -8,6 +8,9 @@ import { useCurrency } from '@/hooks/useCurrency'
 import Icon from '@/components/Icon'
 import { getMyCompany, invalidateAccount } from '@/app/account'
 import { uploadImage } from '@/app/cloudinary'
+import { api } from '@/app/api'
+import { dateTime } from '@/app/format'
+import { ConfirmDialog } from '@/modules/dashboard/components/ui'
 
 
 function getToken() { return localStorage.getItem('token') || '' }
@@ -70,58 +73,71 @@ function getPaymentMethods(countryCode) {
 
 
 // ─── Dominio personalizado ───────────────────────────────────────────────────
+const DOMAIN_STATUS = {
+  ACTIVE:                { badge: 'fx-badge--ok',     icon: 'checkCircle' },
+  PENDING_DNS:           { badge: 'fx-badge--warn',   icon: 'clock' },
+  VERIFICATION_REQUIRED: { badge: 'fx-badge--warn',   icon: 'shield' },
+  ERROR:                 { badge: 'fx-badge--danger', icon: 'alert' },
+}
+
+function CopyValue({ value }) {
+  const [copied, setCopied] = useState(false)
+  return (
+    <button type="button" className="fx-btn fx-btn--ghost fx-btn--sm" aria-label={`Copiar ${value}`}
+      onClick={() => { navigator.clipboard?.writeText(value); setCopied(true); setTimeout(() => setCopied(false), 1500) }}>
+      <Icon name={copied ? 'check' : 'copy'} size={14} />
+    </button>
+  )
+}
+
+/** Guarda el dominio activo en la empresa del navegador: los enlaces para compartir lo usan. */
+function rememberStoreDomain(domain) {
+  try {
+    const cached = JSON.parse(localStorage.getItem('company') || '{}') || {}
+    const next = { ...cached, storeDomain: domain || '' }
+    localStorage.setItem('company', JSON.stringify({ ...next, storeUrl: getCompanyStoreUrl(next) }))
+  } catch { /* sin almacenamiento: se actualiza al volver a entrar */ }
+  invalidateAccount()
+}
+
 function CustomDomainSection({ plan }) {
   const navigate = useNavigate()
-  const [domain, setDomain]               = useState('')
-  const [currentDomain, setCurrentDomain] = useState('')
-  const [domainStatus, setDomainStatus]   = useState('none')
-  const [saving, setSaving]               = useState(false)
-  const [removing, setRemoving]           = useState(false)
-  const [message, setMessage]             = useState(null)
-  const [instructions, setInstructions]   = useState(null)
+  const [view, setView]         = useState(null)
+  const [input, setInput]       = useState('')
+  const [busy, setBusy]         = useState('')
+  const [error, setError]       = useState('')
+  const [confirming, setConfirming] = useState(false)
   const isBusiness = plan === 'BUSINESS'
 
-  useEffect(() => { if (isBusiness) loadDomainStatus() }, [isBusiness])
-
-  const loadDomainStatus = async () => {
-    try {
-      const res  = await fetch(`${API_URL}/domains/status`, { headers: { Authorization: `Bearer ${getToken()}` } })
-      const data = await res.json()
-      setCurrentDomain(data.domain || '')
-      setDomainStatus(data.status || 'none')
-    } catch { /* silencioso */ }
+  const apply = (next) => {
+    setView(next)
+    rememberStoreDomain(next?.status === 'ACTIVE' && next.planIncludes ? next.domain : '')
   }
 
-  const handleAddDomain = async () => {
-    if (!domain.trim()) return
-    setSaving(true); setMessage(null)
-    try {
-      const res  = await fetch(`${API_URL}/domains/add`, { method: 'POST', headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${getToken()}` }, body: JSON.stringify({ domain: domain.trim() }) })
-      const data = await res.json()
-      if (!res.ok) throw new Error(data.message || 'Error al agregar dominio')
-      setCurrentDomain(data.domain); setDomainStatus('pending'); setInstructions(data.instructions)
-      setMessage({ type: 'ok', text: data.message }); setDomain('')
-    } catch (err) { setMessage({ type: 'error', text: err.message }) }
-    finally { setSaving(false) }
+  const run = async (kind, action) => {
+    setBusy(kind); setError('')
+    try { await action() } catch (err) { setError(err.message) } finally { setBusy('') }
   }
 
-  const handleRemoveDomain = async () => {
-    setRemoving(true); setMessage(null)
-    try {
-      const res  = await fetch(`${API_URL}/domains/remove`, { method: 'DELETE', headers: { Authorization: `Bearer ${getToken()}` } })
-      const data = await res.json()
-      if (!res.ok) throw new Error(data.message)
-      setCurrentDomain(''); setDomainStatus('none'); setInstructions(null)
-      setMessage({ type: 'ok', text: 'Dominio eliminado.' })
-    } catch (err) { setMessage({ type: 'error', text: err.message }) }
-    finally { setRemoving(false) }
-  }
+  useEffect(() => {
+    let alive = true
+    api.get('/domains').then((next) => { if (alive) apply(next) }).catch(() => { if (alive) setView({ status: 'NONE' }) })
+    return () => { alive = false }
+  }, [])
 
-  const STATUS = {
-    verified: { label: 'Verificado', badge: 'fx-badge--ok',     icon: 'checkCircle' },
-    pending:  { label: 'Pendiente',  badge: 'fx-badge--warn',   icon: 'clock' },
-    error:    { label: 'Con error',  badge: 'fx-badge--danger', icon: 'alert' },
-  }
+  const connect = () => run('connect', async () => {
+    apply(await api.post('/domains', { domain: input.trim() }))
+    setInput('')
+  })
+  const verify = () => run('verify', async () => apply(await api.post('/domains/verify')))
+  const remove = () => run('remove', async () => {
+    await api.del('/domains')
+    setConfirming(false)
+    apply({ status: 'NONE', planIncludes: isBusiness, available: view?.available })
+  })
+
+  const hasDomain = view && view.status !== 'NONE' && view.domain
+  const status = hasDomain ? DOMAIN_STATUS[view.status] || DOMAIN_STATUS.PENDING_DNS : null
 
   return (
     <div className="fx-card">
@@ -131,76 +147,119 @@ function CustomDomainSection({ plan }) {
       </div>
 
       <div className="fx-card__body">
-        {!isBusiness ? (
+        {error && (
+          <div className="fx-alert fx-alert--error" style={{ marginBottom: 16 }}>
+            <Icon name="alert" size={16} /><span>{error}</span>
+          </div>
+        )}
+
+        {!view ? (
+          <div className="fx-skeleton" style={{ height: 44 }} />
+        ) : hasDomain ? (
+          <>
+            <div className="fx-row fx-row--between" style={{ flexWrap: 'wrap', gap: 12 }}>
+              <div>
+                <p style={{ fontSize: 15, fontWeight: 600 }}>{view.domain}</p>
+                <span className={`fx-badge ${status.badge}`} style={{ marginTop: 6 }}>
+                  <Icon name={status.icon} size={12} /> {view.statusLabel}
+                </span>
+              </div>
+              <div className="fx-row" style={{ gap: 8, flexWrap: 'wrap' }}>
+                {view.status === 'ACTIVE' && view.planIncludes && (
+                  <a href={view.url} target="_blank" rel="noreferrer" className="fx-btn fx-btn--secondary fx-btn--sm">
+                    <Icon name="external" size={15} /> Abrir
+                  </a>
+                )}
+                {view.status !== 'ACTIVE' && (
+                  <button type="button" className="fx-btn fx-btn--secondary fx-btn--sm" onClick={verify} disabled={Boolean(busy)}>
+                    {busy === 'verify' ? <span className="fx-spinner" /> : <Icon name="refresh" size={15} />} Verificar ahora
+                  </button>
+                )}
+                <button type="button" className="fx-btn fx-btn--danger fx-btn--sm" onClick={() => setConfirming(true)} disabled={Boolean(busy)}>
+                  <Icon name="trash" size={15} /> Quitar
+                </button>
+              </div>
+            </div>
+
+            {view.message && (
+              <div className={`fx-alert ${view.status === 'ACTIVE' && view.planIncludes ? 'fx-alert--ok' : view.planIncludes ? '' : 'fx-alert--warn'}`}
+                style={{ marginTop: 16 }}>
+                <Icon name={view.status === 'ACTIVE' && view.planIncludes ? 'checkCircle' : 'info'} size={16} />
+                <span>{view.message}</span>
+              </div>
+            )}
+
+            {view.records?.length > 0 && (
+              <div style={{ marginTop: 16 }}>
+                <p className="fx-eyebrow" style={{ marginBottom: 8 }}>Registros DNS</p>
+                <div className="fx-table-wrap" style={{ border: '1px solid var(--fx-line)', borderRadius: 'var(--fx-r)' }}>
+                  <table className="fx-table">
+                    <thead>
+                      <tr><th>Tipo</th><th>Nombre</th><th>Valor</th><th className="fx-hide-sm">Para qué</th></tr>
+                    </thead>
+                    <tbody>
+                      {view.records.map((r) => (
+                        <tr key={`${r.type}-${r.name}-${r.value}`}>
+                          <td className="fx-table__strong">{r.type}</td>
+                          <td><code>{r.name}</code><CopyValue value={r.name} /></td>
+                          <td style={{ wordBreak: 'break-all' }}><code>{r.value}</code><CopyValue value={r.value} /></td>
+                          <td className="fx-hide-sm fx-hint" style={{ fontSize: 12.5 }}>{r.purpose}</td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+                <ol className="fx-hint" style={{ margin: '12px 0 0', paddingLeft: 18, fontSize: 13, display: 'grid', gap: 4 }}>
+                  <li>Entrá a la empresa donde compraste el dominio (Punto.pe, GoDaddy, Namecheap, Cloudflare…) y buscá “DNS” o “Zona DNS”.</li>
+                  <li>Agregá cada registro. Si ya hay un registro A para “@” o un CNAME para “www”, reemplazalo. Si no acepta “@”, dejá el nombre vacío.</li>
+                  <li>Si usás Cloudflare, dejá la nube en gris (“Solo DNS”).</li>
+                  <li>Volvé acá y tocá “Verificar ahora”. También lo revisamos solos cada 10 minutos.</li>
+                </ol>
+              </div>
+            )}
+
+            {view.checkedAt && (
+              <p className="fx-hint" style={{ marginTop: 12, fontSize: 12 }}>Última revisión: {dateTime(view.checkedAt)}</p>
+            )}
+          </>
+        ) : !isBusiness ? (
           <>
             <p className="fx-hint" style={{ marginBottom: 16 }}>
               Conectá tu propio dominio (por ejemplo <strong style={{ color: 'var(--fx-ink)' }}>mitienda.com</strong>) y
               mostrá tu tienda sin la marca de Fluxy.
             </p>
-            <button className="fx-btn fx-btn--primary" onClick={() => navigate('/dashboard/plans')}>
+            <button type="button" className="fx-btn fx-btn--primary" onClick={() => navigate('/dashboard/plans')}>
               Ver plan Business
               <Icon name="arrowRight" size={15} />
             </button>
           </>
         ) : (
           <>
-            {message && (
-              <div className={`fx-alert fx-alert--${message.type === 'ok' ? 'ok' : 'error'}`} style={{ marginBottom: 16 }}>
-                <Icon name={message.type === 'ok' ? 'checkCircle' : 'alert'} size={16} />
-                <span>{message.text}</span>
+            <p className="fx-hint" style={{ marginBottom: 12 }}>
+              Usá un dominio que ya compraste. Si escribís <strong style={{ color: 'var(--fx-ink)' }}>mitienda.com</strong>, también
+              conectamos <strong style={{ color: 'var(--fx-ink)' }}>www.mitienda.com</strong>. Tu tienda sigue disponible en su dirección de Fluxy.
+            </p>
+            {view.available === false && (
+              <div className="fx-alert fx-alert--warn" style={{ marginBottom: 12 }}>
+                <Icon name="info" size={16} /><span>Conectar dominios no está disponible en este momento. Probá más tarde.</span>
               </div>
             )}
-
-            {currentDomain ? (
-              <>
-                <div className="fx-row fx-row--between" style={{ flexWrap: 'wrap', gap: 12 }}>
-                  <div>
-                    <p style={{ fontSize: 15, fontWeight: 600 }}>{currentDomain}</p>
-                    <span className={`fx-badge ${STATUS[domainStatus]?.badge || ''}`} style={{ marginTop: 6 }}>
-                      <Icon name={STATUS[domainStatus]?.icon || 'info'} size={12} />
-                      {STATUS[domainStatus]?.label || domainStatus}
-                    </span>
-                  </div>
-                  <div className="fx-row" style={{ gap: 8 }}>
-                    <button className="fx-btn fx-btn--secondary fx-btn--sm" onClick={loadDomainStatus}>
-                      <Icon name="refresh" size={15} />
-                      Verificar
-                    </button>
-                    <button className="fx-btn fx-btn--danger fx-btn--sm" onClick={handleRemoveDomain} disabled={removing}>
-                      {removing ? <span className="fx-spinner" /> : <Icon name="trash" size={15} />}
-                      Quitar
-                    </button>
-                  </div>
-                </div>
-
-                {(instructions || domainStatus === 'pending') && (
-                  <div className="fx-alert" style={{ marginTop: 16, display: 'block' }}>
-                    <p style={{ marginBottom: 8, fontWeight: 500 }}>Configurá estos registros en tu proveedor de DNS:</p>
-                    {instructions ? (
-                      <pre className="fx-pre">{typeof instructions === 'string' ? instructions : JSON.stringify(instructions, null, 2)}</pre>
-                    ) : (
-                      <p>Los cambios de DNS pueden tardar hasta 48 horas en propagarse.</p>
-                    )}
-                  </div>
-                )}
-              </>
-            ) : (
-              <div className="fx-row" style={{ gap: 8 }}>
-                <input
-                  className="fx-input"
-                  placeholder="mitienda.com"
-                  value={domain}
-                  onChange={(e) => setDomain(e.target.value)}
-                  onKeyDown={(e) => { if (e.key === 'Enter') handleAddDomain() }}
-                />
-                <button className="fx-btn fx-btn--primary" onClick={handleAddDomain} disabled={saving || !domain.trim()}>
-                  {saving ? <><span className="fx-spinner" /> Conectando…</> : 'Conectar'}
-                </button>
-              </div>
-            )}
+            <form className="fx-row" style={{ gap: 8 }} onSubmit={(e) => { e.preventDefault(); if (input.trim()) connect() }}>
+              <input className="fx-input" placeholder="mitienda.com" value={input} aria-label="Dominio"
+                onChange={(e) => setInput(e.target.value)} disabled={view.available === false} />
+              <button type="submit" className="fx-btn fx-btn--primary" disabled={Boolean(busy) || !input.trim() || view.available === false}>
+                {busy === 'connect' ? <><span className="fx-spinner" /> Conectando…</> : 'Conectar'}
+              </button>
+            </form>
           </>
         )}
       </div>
+
+      {confirming && (
+        <ConfirmDialog title="Quitar el dominio" danger confirmLabel="Quitar dominio" busy={busy === 'remove'}
+          text={`${view?.domain} deja de mostrar tu tienda. Tu tienda sigue disponible en su dirección de Fluxy y podés volver a conectarlo cuando quieras.`}
+          onConfirm={remove} onClose={() => setConfirming(false)} />
+      )}
     </div>
   )
 }

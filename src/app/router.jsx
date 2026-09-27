@@ -1,12 +1,15 @@
-import { lazy, Suspense } from 'react'
+import { lazy, Suspense, useEffect } from 'react'
 import { Navigate, createBrowserRouter, useParams, useSearchParams } from 'react-router-dom'
 import ProtectedRoute from './ProtectedRoute'
+import { customStoreHost } from './storeHost'
+import { PLATFORM_URL } from './config'
 
 const LandingPage = lazy(() => import('@/modules/landing/pages/LandingPage'))
 const LoginPage = lazy(() => import('@/modules/auth/pages/LoginPage'))
 const RegisterBusinessPage = lazy(() => import('@/modules/auth/pages/RegisterBusinessPage'))
 const BusinessOnboardingPage = lazy(() => import('@/modules/auth/pages/BusinessOnboardingPage'))
 const StorePage = lazy(() => import('@/modules/store/pages/StorePage'))
+const DomainStorePage = lazy(() => import('@/modules/store/pages/DomainStorePage'))
 const DashboardPage = lazy(() => import('@/modules/dashboard/pages/DashboardPage'))
 const ProductsPage = lazy(() => import('@/modules/dashboard/pages/ProductsPage'))
 const OrdersPage = lazy(() => import('@/modules/dashboard/pages/OrdersPage'))
@@ -96,7 +99,7 @@ function PaymentReturnPage() {
   return <Navigate to={`/dashboard?${params.toString()}`} replace />
 }
 
-export const router = createBrowserRouter([
+const platformRoutes = [
   { path: '/', element: <RootPage /> },
   { path: '/login', element: render(<LoginPage />) },
   { path: '/register-business', element: render(<RegisterBusinessPage />) },
@@ -134,4 +137,32 @@ export const router = createBrowserRouter([
   { path: '/terms', element: render(<TermsPage />) },
   { path: '/libro-de-reclamaciones', element: render(<ComplaintsPage />) },
   { path: '*', element: render(<NotFoundPage />) },
-])
+]
+
+/** En el dominio de una tienda, /store/slug (enlaces viejos) muestra la misma tienda en la raíz. */
+function DomainStoreRedirect() {
+  const [searchParams] = useSearchParams()
+  const search = searchParams.toString()
+  return <Navigate to={search ? `/?${search}` : '/'} replace />
+}
+
+/** El panel, el login y lo demás están en la dirección de Fluxy. */
+function ToPlatform() {
+  useEffect(() => {
+    const { pathname, search } = window.location
+    window.location.replace(`${PLATFORM_URL}${pathname}${search}`)
+  }, [])
+  return null
+}
+
+function domainRoutes(host) {
+  return [
+    { path: '/', element: renderStore(<DomainStorePage host={host} />) },
+    { path: '/comprobante/:token', element: renderStore(<PublicDocumentPage />) },
+    { path: '/store/:slug', element: <DomainStoreRedirect /> },
+    { path: '*', element: <ToPlatform /> },
+  ]
+}
+
+const storeHost = customStoreHost()
+export const router = createBrowserRouter(storeHost ? domainRoutes(storeHost) : platformRoutes)
