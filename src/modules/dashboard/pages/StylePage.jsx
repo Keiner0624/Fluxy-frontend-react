@@ -72,7 +72,9 @@ function StorePreview({ style, company, mobile, scheme }) {
       <div style={{ padding: 12 }}>
         <div style={{ display: 'grid', gridTemplateColumns: mobile ? '1fr' : '1.1fr .9fr', gap: 12, alignItems: 'center', padding: mobile ? 14 : 18, borderRadius: 16, background: `linear-gradient(118deg, color-mix(in srgb, ${accent} 9%, ${c.heroA}), ${c.surface})` }}>
           <div>
-            <span style={{ display: 'inline-block', padding: '3px 8px', borderRadius: 99, background: soft, color: ink, fontSize: 8, fontWeight: 700 }}>● Tienda oficial</span>
+            {company?.address && (
+              <span style={{ display: 'inline-block', padding: '3px 8px', borderRadius: 99, background: soft, color: ink, fontSize: 8, fontWeight: 700 }}>{company.address.split(',').slice(-1)[0].trim()}</span>
+            )}
             <div style={{ margin: '6px 0 4px', color: ink, fontSize: mobile ? 18 : 22, fontWeight: 800, letterSpacing: '-.03em', lineHeight: 1.05 }}>{name}</div>
             <div style={{ color: c.copy, fontSize: 9, lineHeight: 1.5 }}>{company?.description?.slice(0, 80) || 'Elegí tus productos y armá tu pedido en un minuto.'}</div>
             <span style={{ display: 'inline-block', marginTop: 8, padding: '6px 10px', borderRadius: 8, background: accent, color: onAccent, fontSize: 9, fontWeight: 700 }}>Ver productos →</span>

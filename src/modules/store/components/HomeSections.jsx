@@ -9,7 +9,9 @@ export function Hero({ company, banner, heroProduct, productCount, categoryCount
   return (
     <section className="sf-hero" aria-labelledby="sf-hero-title">
       <div className="sf-hero__copy">
-        <span className="sf-chip"><span className="sf-chip__dot" /> Tienda oficial{company?.address ? ` · ${company.address.split(',').slice(-1)[0].trim()}` : ''}</span>
+        {company?.address && (
+          <span className="sf-chip"><Icon name="mapPin" size={13} /> {company.address.split(',').slice(-1)[0].trim()}</span>
+        )}
         <h1 id="sf-hero-title">{company?.name}</h1>
         <p>{company?.description || 'Elegí tus productos, armá tu pedido en un minuto y coordiná la entrega directamente con nosotros.'}</p>
         <div className="sf-hero__actions">

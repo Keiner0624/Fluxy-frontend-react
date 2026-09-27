@@ -10,10 +10,10 @@ export function BrandMark({ company, size = 44 }) {
     : <span className="sf-brand__mark" style={{ width: size, height: size }} aria-hidden="true">{initial}</span>
 }
 
+/** Descripción corta bajo el nombre; si no hay una que entre, solo se muestra el nombre. */
 function tagline(company) {
   const description = company?.description?.trim()
-  if (description && description.length <= 38) return description
-  return 'Tienda oficial'
+  return description && description.length <= 38 ? description : ''
 }
 
 function SearchBox({ products, onOpenProduct, onSearch, autoFocus, onDone }) {
@@ -132,7 +132,7 @@ export default function StoreHeader({ company, view, products, cartCount, onNavi
           <BrandMark company={company} />
           <span className="sf-brand__copy">
             <strong>{company?.name || 'Tienda'}</strong>
-            <small>{tagline(company)}</small>
+            {tagline(company) && <small>{tagline(company)}</small>}
           </span>
         </button>
 

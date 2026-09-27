@@ -24,6 +24,14 @@ import { storeBanner, storeMode, storeThemeVars } from '@/modules/store/lib/stor
 import './StorePage.css'
 
 const FONT_ID = 'sf-font'
+
+/** Logo cuadrado y liviano para la pestaña: Cloudinary lo recorta y lo achica al vuelo. */
+function storeFavicon(logoUrl) {
+  if (typeof logoUrl !== 'string' || !/^https:\/\//.test(logoUrl)) return ''
+  return logoUrl.includes('res.cloudinary.com') && logoUrl.includes('/upload/')
+    ? logoUrl.replace('/upload/', '/upload/c_fill,w_128,h_128,f_png/')
+    : logoUrl
+}
 const PARAMS = { view: 'vista', category: 'categoria', q: 'q', sort: 'orden', available: 'stock', onlyFavorites: 'favoritos', product: 'producto' }
 
 function useStoreFont() {
@@ -110,6 +118,22 @@ export default function StorePage() {
       else meta.content = previousColor
     }
   }, [scheme])
+
+  // El logo del negocio como ícono de la pestaña (y del acceso directo en el celular).
+  useEffect(() => {
+    const icon = storeFavicon(company?.logoUrl)
+    if (!icon) return undefined
+    const links = [...document.querySelectorAll('link[rel="icon"], link[rel="apple-touch-icon"]')]
+    const previous = links.map((link) => [link, link.href, link.type])
+    links.forEach((link) => {
+      link.href = icon
+      link.removeAttribute('type')
+    })
+    return () => previous.forEach(([link, href, type]) => {
+      link.href = href
+      if (type) link.type = type
+    })
+  }, [company?.logoUrl])
 
   useEffect(() => {
     if (!company?.name) return undefined

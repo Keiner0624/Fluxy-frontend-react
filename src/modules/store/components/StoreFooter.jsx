@@ -12,7 +12,7 @@ export function StoreFooter({ company, whatsapp, onNavigate }) {
         <div className="sf-footer__brand">
           <div className="sf-brand sf-brand--static">
             <BrandMark company={company} size={44} />
-            <span className="sf-brand__copy"><strong>{company?.name}</strong><small>Tienda oficial</small></span>
+            <span className="sf-brand__copy"><strong>{company?.name}</strong></span>
           </div>
           <p>{company?.description || 'Pedí online y coordiná la entrega directamente con el negocio.'}</p>
           {whatsapp && (
