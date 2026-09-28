@@ -4,10 +4,10 @@
 import { useEffect, useRef, useState } from 'react'
 import { useNavigate, Link, useSearchParams } from 'react-router-dom'
 import { API_URL } from '@/app/config'
-import BrandLogo from '@/components/BrandLogo'
 import Icon from '@/components/Icon'
 import { BUSINESS_CATEGORIES, PASSWORD_MIN, apiFieldErrors, normalizePhone, normalizeRegistration, validateRegistration } from '../registration'
 import { CodeInput, Divider, IconField, PasswordField, SocialButtons } from '../components/AuthUi'
+import AuthShell from '../components/AuthShell'
 import useCountdown from '../useCountdown'
 import { forgetSignup, recallSignupToken, rememberSignup, startSession } from '../authSession'
 import { legalUrl } from '@/modules/landing/legal/documents'
@@ -277,14 +277,7 @@ export default function RegisterBusinessPage() {
   const alert = error && <div className="fx-alert fx-alert--error" role="alert" style={{ marginBottom: 16 }}><Icon name="alert" size={16} /><span>{error}</span></div>
 
   return (
-    <div className="fx fx-auth fx-signin">
-      <header className="fx-auth__top">
-        <Link to="/"><BrandLogo size={28} textSize={18} textColor="var(--fx-ink)" /></Link>
-        <Link to="/login" className="fx-btn fx-btn--ghost fx-btn--sm">Ya tengo cuenta</Link>
-      </header>
-
-      <main className="fx-auth__main">
-        <div className="fx-auth__panel">
+    <AuthShell variant="register" topAction={<Link to="/login" className="fx-btn fx-btn--ghost fx-btn--sm">Ya tengo cuenta</Link>}>
           {step === 'loading' && (
             <div className="fx-auth__head"><span className="fx-spinner" /> <p className="fx-hint">Retomando tu registro…</p></div>
           )}
@@ -320,7 +313,7 @@ export default function RegisterBusinessPage() {
               <form onSubmit={submitForm} noValidate aria-busy={loading}>
                 <IconField id="fullName" label="Tu nombre" icon="user" error={errors.fullName}>
                   {(aria) => <input {...aria} id="fullName" name="fullName" className={cls('fullName')} value={form.fullName}
-                    onChange={handleChange} autoComplete="name" maxLength={80} placeholder="Eduardo Moreno" />}
+                    onChange={handleChange} autoComplete="name" maxLength={80} placeholder="Nombres" />}
                 </IconField>
                 <BusinessFields form={form} errors={errors} onChange={handleChange} onPhoneBlur={onPhoneBlur} />
                 <IconField id="email" label="Correo electrónico" icon="mail" error={errors.email}>
@@ -350,8 +343,6 @@ export default function RegisterBusinessPage() {
           <p className="fx-auth__foot">
             ¿Ya tenés cuenta? <Link to="/login" className="fx-auth__link">Iniciá sesión</Link>
           </p>
-        </div>
-      </main>
-    </div>
+    </AuthShell>
   )
 }

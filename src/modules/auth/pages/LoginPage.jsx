@@ -2,9 +2,9 @@
 import { useEffect, useState } from 'react'
 import { useNavigate, Link, useSearchParams } from 'react-router-dom'
 import { API_URL } from '@/app/config'
-import BrandLogo from '@/components/BrandLogo'
 import Icon from '@/components/Icon'
 import { Divider, IconField, PasswordField, SocialButtons } from '../components/AuthUi'
+import AuthShell from '../components/AuthShell'
 import { rememberSignup, safeReturnTo, startSession } from '../authSession'
 import '../auth.css'
 
@@ -101,19 +101,14 @@ export default function LoginPage() {
   }
 
   return (
-    <div className="fx fx-auth fx-signin">
-      <header className="fx-auth__top">
-        <Link to="/"><BrandLogo size={28} textSize={18} textColor="var(--fx-ink)" /></Link>
-        <Link to="/" className="fx-btn fx-btn--ghost fx-btn--sm">
-          <Icon name="arrowLeft" size={15} /> Volver al inicio
-        </Link>
-      </header>
-
-      <main className="fx-auth__main">
-        <div className="fx-auth__panel">
+    <AuthShell variant="login" topAction={(
+      <Link to="/" className="fx-btn fx-btn--ghost fx-btn--sm">
+        <Icon name="arrowLeft" size={15} /> Volver al inicio
+      </Link>
+    )}>
           <div className="fx-auth__head">
-            <h1 className="fx-h1">Inicia sesión</h1>
-            <p className="fx-hint">Accedé al panel para administrar tu tienda.</p>
+            <h1 className="fx-h1">Iniciar sesión</h1>
+            <p className="fx-hint">Ingresá tus datos para acceder al panel de tu tienda.</p>
           </div>
 
           {notice && !error && (
@@ -159,8 +154,6 @@ export default function LoginPage() {
           <p className="fx-auth__foot">
             ¿No tenés cuenta? <Link to="/register-business" className="fx-auth__link">Crear tu tienda</Link>
           </p>
-        </div>
-      </main>
-    </div>
+    </AuthShell>
   )
 }
