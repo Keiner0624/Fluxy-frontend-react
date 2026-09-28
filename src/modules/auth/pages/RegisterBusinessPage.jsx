@@ -1,5 +1,5 @@
 // src/modules/auth/pages/RegisterBusinessPage.jsx
-// Registro verificado: datos → código por correo (y SMS al celular) → tienda creada.
+// Registro verificado: datos → código por correo (y por SMS al celular solo si el backend tiene SMS) → tienda creada.
 // Quien llega con Google o Apple completa primero los datos del negocio.
 import { useEffect, useRef, useState } from 'react'
 import { useNavigate, Link, useSearchParams } from 'react-router-dom'
@@ -64,7 +64,7 @@ function BusinessFields({ form, errors, onChange, onPhoneBlur }) {
         )}
       </IconField>
       <IconField id="whatsapp" label="Celular (WhatsApp)" icon="phone" prefix="+51" error={errors.whatsapp}
-        hint="Donde recibís consultas y pedidos. Puede que te enviemos un código por SMS.">
+        hint="Donde recibís consultas y pedidos.">
         {(aria) => <input {...aria} id="whatsapp" name="whatsapp" type="tel" inputMode="tel" autoComplete="tel-national"
           className={cls('whatsapp')} value={form.whatsapp} onChange={onChange} onBlur={onPhoneBlur} maxLength={18} placeholder="999 888 777" />}
       </IconField>

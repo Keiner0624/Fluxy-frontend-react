@@ -346,7 +346,7 @@ export default function SecurityPage() {
             ) : <div className="fx-skeleton" style={{ height: 22 }} />}
           </Section>
 
-          <Section id="celular" icon="phone" title="Celular" text="Lo verificamos con un código por SMS."
+          <Section id="celular" icon="phone" title="Celular" text={s?.phoneVerificationAvailable === false ? 'Tu número de contacto.' : 'Lo verificamos con un código por SMS.'}
             action={s?.phoneVerificationAvailable && <button type="button" className="fx-btn fx-btn--secondary fx-btn--sm" onClick={() => setModal('phone-change')}>{s.phone ? 'Cambiar' : 'Agregar'}</button>}>
             {s ? (
               <div className="fx-row fx-row--between" style={{ flexWrap: 'wrap', gap: 10 }}>
